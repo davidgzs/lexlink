@@ -14,7 +14,7 @@ export default function LandingPage() {
             <h1 className="text-2xl font-headline">Lex Connect</h1>
           </div>
           <nav>
-            <Link href="/dashboard">
+            <Link href="/login">
               <Button variant="secondary">Access Portal</Button>
             </Link>
           </nav>
@@ -30,7 +30,7 @@ export default function LandingPage() {
             <p className="text-lg md:text-xl text-foreground mb-8 max-w-3xl mx-auto">
               LEX-Link connects law firms with their clients in real-time. Manage appointments, track case progress, and communicate securely, all in one place.
             </p>
-            <Link href="/dashboard">
+            <Link href="/login">
               <Button size="lg" className="font-body">
                 Get Started <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
