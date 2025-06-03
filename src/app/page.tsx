@@ -12,7 +12,7 @@ export default function LandingPage() {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Briefcase className="h-8 w-8" />
-            <h1 className="text-2xl font-headline">Lex Connect</h1>
+            <h1 className="text-2xl font-headline">LexLINK</h1>
           </div>
           <nav>
             <Link href="/login">
@@ -29,7 +29,7 @@ export default function LandingPage() {
               Revolucionando la Comunicación Legal con Clientes
             </h2>
             <p className="text-lg md:text-xl text-foreground mb-8 max-w-3xl mx-auto">
-              LEX-Link conecta despachos de abogados con sus clientes en tiempo real. Gestiona citas, sigue el progreso de casos y comunícate de forma segura, todo en un solo lugar.
+              LexLINK conecta despachos de abogados con sus clientes en tiempo real. Gestiona citas, sigue el progreso de casos y comunícate de forma segura, todo en un solo lugar.
             </p>
             <Link href="/login">
               <Button size="lg" className="font-body">
@@ -69,7 +69,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="bg-primary text-primary-foreground py-8 text-center">
-        <p className="font-body">&copy; {new Date().getFullYear()} Lex Connect. Todos los derechos reservados.</p>
+        <p className="font-body">&copy; {new Date().getFullYear()} LexLINK. Todos los derechos reservados.</p>
       </footer>
     </div>
   );

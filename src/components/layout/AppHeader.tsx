@@ -39,7 +39,7 @@ export default function AppHeader({ user, sidebarNavItems }: AppHeaderProps) {
       
       <div className="flex items-center gap-2 sm:hidden">
         <Briefcase className="h-6 w-6 text-primary" />
-        <span className="font-headline text-xl text-primary">Lex Connect</span>
+        <span className="font-headline text-xl text-primary">LexLINK</span>
       </div>
 
       <div className="relative ml-auto flex flex-1 md:grow-0 items-center gap-2">

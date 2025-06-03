@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Lex Connect',
+  title: 'LexLINK',
   description: 'Connecting attorneys and clients seamlessly.',
 };
 

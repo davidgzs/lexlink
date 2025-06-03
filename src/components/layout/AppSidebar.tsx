@@ -73,7 +73,7 @@ export default function AppSidebar({ className, isMobile = false }: AppSidebarPr
       <div className="flex h-16 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-foreground">
           <Briefcase className="h-6 w-6 text-primary" />
-          <span className="font-headline text-xl">Lex Connect</span>
+          <span className="font-headline text-xl">LexLINK</span>
         </Link>
       </div>
       <div className="flex-1">
