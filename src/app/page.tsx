@@ -33,7 +33,7 @@ export default function LandingPage() {
             </p>
             <Link href="/login">
               <Button size="lg" className="font-body">
-                Comenzar <ArrowRight className="ml-2 h-5 w-5" />
+                Ver DEMO <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </div>
