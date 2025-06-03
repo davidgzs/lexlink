@@ -6,6 +6,15 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function LandingPage() {
+  const features = [
+    { title: "Intercambio de Mensajes Seguro", description: "Comunícate con confianza con mensajería cifrada de extremo a extremo.", image: "/images/mensajeria-segura.png", hint: "communication security" },
+    { title: "Portal de Autoservicio", description: "Clientes acceden a actualizaciones de casos y documentos 24/7, reduciendo llamadas.", image: "https://placehold.co/600x400.png", hint: "computer monitor" },
+    { title: "Programación de Citas", description: "Reserva fácilmente consultas presenciales, por video o escritas.", image: "https://placehold.co/600x400.png", hint: "calendar schedule" },
+    { title: "Notificaciones Push", description: "Mantente informado con actualizaciones automáticas sobre el progreso del caso.", image: "https://placehold.co/600x400.png", hint: "mobile notification" },
+    { title: "Firma Electrónica", description: "Firma documentos digitalmente, agilizando procesos de forma segura.", image: "https://placehold.co/600x400.png", hint: "digital signature" },
+    { title: "Seguimiento Transparente de Casos", description: "Sigue tu caso en cada fase: Administrativa, Judicial, Recurso y Cierre.", image: "https://placehold.co/600x400.png", hint: "progress chart" },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary text-primary-foreground p-4 shadow-md">
@@ -45,14 +54,7 @@ export default function LandingPage() {
               Características Clave
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                { title: "Mensajería Segura", description: "Comunícate con confianza con mensajería cifrada de extremo a extremo.", image: "/images/mensajeria-segura.png", hint: "communication security" },
-                { title: "Portal de Autoservicio", description: "Clientes acceden a actualizaciones de casos y documentos 24/7, reduciendo llamadas.", image: "https://placehold.co/600x400.png", hint: "computer monitor" },
-                { title: "Programación de Citas", description: "Reserva fácilmente consultas presenciales, por video o escritas.", image: "https://placehold.co/600x400.png", hint: "calendar schedule" },
-                { title: "Notificaciones Push", description: "Mantente informado con actualizaciones automáticas sobre el progreso del caso.", image: "https://placehold.co/600x400.png", hint: "mobile notification" },
-                { title: "Firma Electrónica", description: "Firma documentos digitalmente, agilizando procesos de forma segura.", image: "https://placehold.co/600x400.png", hint: "digital signature" },
-                { title: "Seguimiento Transparente de Casos", description: "Sigue tu caso en cada fase: Administrativa, Judicial, Recurso y Cierre.", image: "https://placehold.co/600x400.png", hint: "progress chart" },
-              ].map((feature) => (
+              {features.map((feature) => (
                 <Card key={feature.title} className="shadow-lg hover:shadow-xl transition-shadow">
                   <CardHeader>
                     <Image src={feature.image} alt={feature.title} width={600} height={400} className="rounded-t-lg" data-ai-hint={feature.hint}/>
