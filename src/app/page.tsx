@@ -11,7 +11,7 @@ export default function LandingPage() {
     { title: "Portal de Autoservicio 365 abierto y disponible 24x7", description: "Clientes acceden a actualizaciones de casos y documentos 24/7, reduciendo llamadas.", image: "/images/portal-autoservicio.png", hint: "computer monitor" },
     { title: "Programación automática de las Citas (diversos tipos)", description: "Reserva fácilmente consultas presenciales, por video o escritas.", image: "/images/programacion-citas.png", hint: "calendar schedule" },
     { title: "Notificaciones Push", description: "Mantente informado con actualizaciones automáticas sobre el progreso del caso.", image: "/images/notificaciones-push.png", hint: "mobile notification" },
-    { title: "Firma Electrónica", description: "Firma documentos digitalmente, agilizando procesos de forma segura.", image: "/images/firma-electronica.png", hint: "digital signature" },
+    { title: "Firma Electrónica aplicada a todo contrato", description: "Firma documentos digitalmente, agilizando procesos de forma segura.", image: "/images/firma-electronica.png", hint: "digital signature" },
     { title: "Seguimiento Transparente de los Casos y Expedientes", description: "Sigue tu caso en cada fase: Administrativa, Judicial, Recurso y Cierre.", image: "/images/seguimiento-casos.png", hint: "progress chart" },
   ];
 
