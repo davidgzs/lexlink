@@ -11,9 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Bell, Menu, Briefcase, Settings, LogOut } from 'lucide-react';
+import { Bell, Menu, Scale, Settings, LogOut } from 'lucide-react';
 import type { UserProfile } from '@/types';
-import NotificationDropdown from '@/components/notifications/NotificationDropdown'; // Will create this next
+import NotificationDropdown from '@/components/notifications/NotificationDropdown'; 
 
 interface AppHeaderProps {
   user: UserProfile;
@@ -38,7 +38,7 @@ export default function AppHeader({ user, sidebarNavItems }: AppHeaderProps) {
       </Sheet>
       
       <div className="flex items-center gap-2 sm:hidden">
-        <Briefcase className="h-6 w-6 text-primary" />
+        <Scale className="h-6 w-6 text-primary" />
         <span className="font-headline text-xl text-primary">LexLINK</span>
       </div>
 
@@ -52,7 +52,7 @@ export default function AppHeader({ user, sidebarNavItems }: AppHeaderProps) {
               className="overflow-hidden rounded-full"
             >
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatarUrl || "https://placehold.co/32x32.png"} alt={user.name} data-ai-hint="person avatar" />
+                <AvatarImage src={user.avatarUrl || "https://placehold.co/32x32.png"} alt={user.name} data-ai-hint="person avatar"/>
                 <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
             </Button>

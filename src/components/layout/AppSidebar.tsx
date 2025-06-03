@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Briefcase, LayoutDashboard, MessagesSquare, CalendarClock, FileArchive, PenSquare, LogOut } from 'lucide-react';
+import { Scale, LayoutDashboard, MessagesSquare, CalendarClock, FileArchive, PenSquare, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -72,7 +72,7 @@ export default function AppSidebar({ className, isMobile = false }: AppSidebarPr
     <div className={cn("flex h-full max-h-screen flex-col gap-2", className)}>
       <div className="flex h-16 items-center border-b border-sidebar-border px-4 lg:h-[60px] lg:px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-sidebar-foreground">
-          <Briefcase className="h-6 w-6 text-primary" />
+          <Scale className="h-6 w-6 text-primary" />
           <span className="font-headline text-xl">LexLINK</span>
         </Link>
       </div>

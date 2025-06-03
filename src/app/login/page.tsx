@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Fingerprint, Loader2 } from "lucide-react";
+import { Scale, Fingerprint, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type LoginStep = 'credentials' | 'fingerprint' | 'verifying' | 'error';
@@ -54,7 +54,7 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
       <div className="flex items-center gap-2 mb-8">
-        <Briefcase className="h-10 w-10 text-primary" />
+        <Scale className="h-10 w-10 text-primary" />
         <h1 className="text-4xl font-headline text-primary">LexLINK</h1>
       </div>
       <Card className="w-full max-w-md shadow-xl">

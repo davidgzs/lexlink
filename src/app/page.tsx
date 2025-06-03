@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Briefcase } from "lucide-react";
+import { ArrowRight, Scale } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -11,7 +11,7 @@ export default function LandingPage() {
       <header className="bg-primary text-primary-foreground p-4 shadow-md">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Briefcase className="h-8 w-8" />
+            <Scale className="h-8 w-8" />
             <h1 className="text-2xl font-headline">LexLINK</h1>
           </div>
           <nav>
@@ -55,7 +55,7 @@ export default function LandingPage() {
               ].map((feature) => (
                 <Card key={feature.title} className="shadow-lg hover:shadow-xl transition-shadow">
                   <CardHeader>
-                    <Image src={feature.image} alt={feature.title} width={600} height={400} className="rounded-t-lg" data-ai-hint={feature.hint} />
+                    <Image src={feature.image} alt={feature.title} width={600} height={400} className="rounded-t-lg" data-ai-hint={feature.hint}/>
                     <CardTitle className="font-headline mt-4">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
