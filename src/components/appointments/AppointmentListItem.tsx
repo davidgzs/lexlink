@@ -1,3 +1,4 @@
+
 import type { Appointment } from "@/types";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,19 @@ const statusColors: Record<Appointment["status"], string> = {
     Cancelled: "bg-red-500",
 };
 
+const appointmentStatusTranslations: Record<Appointment["status"], string> = {
+  Scheduled: "Programada",
+  Completed: "Completada",
+  Cancelled: "Cancelada",
+};
+
+const appointmentTypeTranslations: Record<Appointment["type"], string> = {
+  "In-Person": "Presencial",
+  "Video Conference": "Videoconferencia",
+  "Written Consultation": "Consulta Escrita",
+};
+
+
 export default function AppointmentListItem({ appointment, onEdit, onCancel }: AppointmentListItemProps) {
   const Icon = appointmentIcons[appointment.type];
   const badgeColor = statusColors[appointment.status];
@@ -42,8 +56,8 @@ export default function AppointmentListItem({ appointment, onEdit, onCancel }: A
   const handleCancelConfirmation = () => {
     onCancel(appointment.id);
     toast({
-      title: "Appointment Cancelled",
-      description: `Appointment "${appointment.title}" has been cancelled.`,
+      title: "Cita Cancelada",
+      description: `La cita "${appointment.title}" ha sido cancelada.`,
     });
   };
 
@@ -54,46 +68,46 @@ export default function AppointmentListItem({ appointment, onEdit, onCancel }: A
           <CardTitle className="font-headline text-lg">{appointment.title}</CardTitle>
           <Badge className={`${badgeColor} text-white whitespace-nowrap`}>
             <Clock className="mr-1 h-3 w-3" />
-            {appointment.status}
+            {appointmentStatusTranslations[appointment.status]}
           </Badge>
         </div>
         <CardDescription className="font-body text-sm flex items-center gap-2">
           <Icon className="h-4 w-4 text-muted-foreground" />
-          <span>{appointment.type}</span>
+          <span>{appointmentTypeTranslations[appointment.type]}</span>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <p className="font-body text-sm">
-          Date: {new Date(appointment.date).toLocaleDateString()} at {appointment.time}
+          Fecha: {new Date(appointment.date).toLocaleDateString('es-ES')} a las {appointment.time}
         </p>
         <p className="font-body text-sm text-muted-foreground">
-          Participants: {appointment.participants.join(", ")}
+          Participantes: {appointment.participants.join(", ")}
         </p>
         {appointment.caseId && (
-            <p className="font-body text-xs text-muted-foreground">Case: {appointment.caseId}</p>
+            <p className="font-body text-xs text-muted-foreground">Caso: {appointment.caseId}</p>
         )}
       </CardContent>
       {appointment.status === "Scheduled" && (
         <CardFooter className="flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={() => onEdit(appointment)} className="font-body">
-            <Edit className="mr-2 h-4 w-4" /> Reschedule
+            <Edit className="mr-2 h-4 w-4" /> Reprogramar
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm" className="font-body">
-                <Trash2 className="mr-2 h-4 w-4" /> Cancel
+                <Trash2 className="mr-2 h-4 w-4" /> Cancelar
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle className="font-headline">Are you sure?</AlertDialogTitle>
+                <AlertDialogTitle className="font-headline">¿Estás seguro/a?</AlertDialogTitle>
                 <AlertDialogDescription className="font-body">
-                  This action cannot be undone. This will permanently cancel your appointment: "{appointment.title}".
+                  Esta acción no se puede deshacer. Esto cancelará permanentemente tu cita: "{appointment.title}".
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="font-body">Keep Appointment</AlertDialogCancel>
-                <AlertDialogAction onClick={handleCancelConfirmation} className="font-body">Confirm Cancellation</AlertDialogAction>
+                <AlertDialogCancel className="font-body">Mantener Cita</AlertDialogCancel>
+                <AlertDialogAction onClick={handleCancelConfirmation} className="font-body">Confirmar Cancelación</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

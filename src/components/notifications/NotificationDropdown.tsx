@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -50,22 +51,22 @@ export default function NotificationDropdown() {
               {unreadCount}
             </Badge>
           )}
-          <span className="sr-only">Toggle notifications</span>
+          <span className="sr-only">Alternar notificaciones</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 md:w-96 font-body">
         <DropdownMenuLabel className="flex justify-between items-center">
-          <span>Notifications</span>
+          <span>Notificaciones</span>
           {unreadCount > 0 && (
             <Button variant="link" size="sm" onClick={handleMarkAllAsRead} className="p-0 h-auto text-xs">
-              Mark all as read
+              Marcar todas como leídas
             </Button>
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <ScrollArea className="h-[300px]">
           {notifications.length === 0 ? (
-            <DropdownMenuItem disabled>No new notifications</DropdownMenuItem>
+            <DropdownMenuItem disabled>No hay notificaciones nuevas</DropdownMenuItem>
           ) : (
             notifications.map((notification) => (
               <DropdownMenuItem key={notification.id} className={`flex items-start gap-2 ${notification.read ? 'opacity-70' : 'font-medium'}`}>
@@ -77,11 +78,11 @@ export default function NotificationDropdown() {
                     <p className="text-sm leading-tight hover:underline">{notification.title}</p>
                   </Link>
                   <p className="text-xs text-muted-foreground">{notification.description}</p>
-                  <p className="text-xs text-muted-foreground/70">{new Date(notification.timestamp).toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground/70">{new Date(notification.timestamp).toLocaleString('es-ES')}</p>
                 </div>
                 {!notification.read && (
                    <Button variant="ghost" size="sm" onClick={() => handleMarkAsRead(notification.id)} className="p-1 h-auto text-xs">
-                    Mark read
+                    Marcar leída
                   </Button>
                 )}
               </DropdownMenuItem>

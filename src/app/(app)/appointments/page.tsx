@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -51,7 +52,7 @@ export default function AppointmentsPage() {
   return (
     <div className="container mx-auto py-2">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-headline font-semibold text-primary">Appointments</h1>
+        <h1 className="text-3xl font-headline font-semibold text-primary">Citas</h1>
         <ScheduleAppointmentDialog
           appointmentToEdit={selectedAppointment}
           onAppointmentScheduled={handleAppointmentScheduled}
@@ -60,12 +61,12 @@ export default function AppointmentsPage() {
 
       <Tabs defaultValue="list" className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:w-1/2">
-          <TabsTrigger value="list" className="font-body">List View</TabsTrigger>
-          <TabsTrigger value="calendar" className="font-body">Calendar View</TabsTrigger>
+          <TabsTrigger value="list" className="font-body">Vista de Lista</TabsTrigger>
+          <TabsTrigger value="calendar" className="font-body">Vista de Calendario</TabsTrigger>
         </TabsList>
         <TabsContent value="list">
           <section className="mb-8">
-            <h2 className="text-2xl font-headline mb-4 text-foreground">Upcoming Appointments</h2>
+            <h2 className="text-2xl font-headline mb-4 text-foreground">Próximas Citas</h2>
             {upcomingAppointments.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {upcomingAppointments.map((app) => (
@@ -73,11 +74,11 @@ export default function AppointmentsPage() {
                 ))}
               </div>
             ) : (
-              <p className="font-body text-muted-foreground">No upcoming appointments.</p>
+              <p className="font-body text-muted-foreground">No hay próximas citas.</p>
             )}
           </section>
           <section>
-            <h2 className="text-2xl font-headline mb-4 text-foreground">Past Appointments</h2>
+            <h2 className="text-2xl font-headline mb-4 text-foreground">Citas Anteriores</h2>
             {pastAppointments.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {pastAppointments.map((app) => (
@@ -85,7 +86,7 @@ export default function AppointmentsPage() {
                 ))}
               </div>
             ) : (
-              <p className="font-body text-muted-foreground">No past appointments.</p>
+              <p className="font-body text-muted-foreground">No hay citas anteriores.</p>
             )}
           </section>
         </TabsContent>
@@ -100,12 +101,13 @@ export default function AppointmentsPage() {
                             className="rounded-md border"
                             modifiers={{ scheduled: appointments.filter(a => a.status === "Scheduled").map(a => new Date(a.date)) }}
                             modifiersClassNames={{ scheduled: 'bg-primary/20 rounded-full' }}
+                            locale={{code: 'es'}}
                         />
                     </CardContent>
                 </Card>
                 <div className="mt-6 md:mt-0">
                     <h3 className="text-xl font-headline mb-4 text-foreground">
-                        Appointments for {selectedDate ? selectedDate.toLocaleDateString() : 'selected date'}
+                        Citas para {selectedDate ? selectedDate.toLocaleDateString('es-ES') : 'fecha seleccionada'}
                     </h3>
                     {appointmentsForSelectedDate.length > 0 ? (
                         <div className="space-y-4">
@@ -114,7 +116,7 @@ export default function AppointmentsPage() {
                         ))}
                         </div>
                     ) : (
-                        <p className="font-body text-muted-foreground">No appointments for this date.</p>
+                        <p className="font-body text-muted-foreground">No hay citas para esta fecha.</p>
                     )}
                 </div>
             </div>

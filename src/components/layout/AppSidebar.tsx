@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -14,11 +15,11 @@ import {
 
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/messages', label: 'Secure Messaging', icon: MessagesSquare },
-  { href: '/appointments', label: 'Appointments', icon: CalendarClock },
-  { href: '/documents', label: 'Documents & E-Sign', icon: FileArchive },
-  // { href: '/e-signature', label: 'E-Signature', icon: PenSquare }, // Combined with Documents
+  { href: '/dashboard', label: 'Panel de Control', icon: LayoutDashboard },
+  { href: '/messages', label: 'Mensajería Segura', icon: MessagesSquare },
+  { href: '/appointments', label: 'Citas', icon: CalendarClock },
+  { href: '/documents', label: 'Documentos y Firma', icon: FileArchive },
+  // { href: '/e-signature', label: 'Firma Electrónica', icon: PenSquare }, // Combined with Documents
 ];
 
 interface AppSidebarProps {
@@ -86,7 +87,7 @@ export default function AppSidebar({ className, isMobile = false }: AppSidebarPr
         <Link href="/">
           <Button variant="ghost" className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
             <LogOut className="mr-2 h-5 w-5" />
-            Logout
+            Cerrar Sesión
           </Button>
         </Link>
       </div>

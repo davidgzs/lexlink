@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -8,7 +9,7 @@ import ChatMessage from '@/components/messages/ChatMessage';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Paperclip, Smile } from 'lucide-react';
+import { Send, Paperclip, Smile, MessagesSquare } from 'lucide-react'; // Added MessagesSquare
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -62,7 +63,7 @@ export default function MessagesPage() {
     <div className="h-[calc(100vh-theme(spacing.24))] flex flex-col md:flex-row gap-4 overflow-hidden">
       <Card className="md:w-1/3 lg:w-1/4 flex flex-col">
         <CardHeader>
-          <CardTitle className="font-headline text-xl">Conversations</CardTitle>
+          <CardTitle className="font-headline text-xl">Conversaciones</CardTitle>
         </CardHeader>
         <CardContent className="p-0 flex-grow overflow-hidden">
           <ScrollArea className="h-full p-2">
@@ -89,7 +90,7 @@ export default function MessagesPage() {
                 </Avatar>
                 <div>
                     <h2 className="font-headline text-lg">{selectedConversation.clientName} & {selectedConversation.attorneyName}</h2>
-                    <p className="text-xs text-muted-foreground font-body">Online</p> {/* Placeholder status */}
+                    <p className="text-xs text-muted-foreground font-body">En línea</p> {/* Placeholder status */}
                 </div>
               </div>
             </CardHeader>
@@ -104,23 +105,23 @@ export default function MessagesPage() {
               <Button variant="ghost" size="icon" type="button"><Paperclip className="h-5 w-5 text-muted-foreground" /></Button>
               <Input
                 type="text"
-                placeholder="Type a message..."
+                placeholder="Escribe un mensaje..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 className="flex-1 font-body"
-                aria-label="New message"
+                aria-label="Nuevo mensaje"
               />
               <Button type="submit" size="icon" disabled={!newMessage.trim()}>
                 <Send className="h-5 w-5" />
-                <span className="sr-only">Send</span>
+                <span className="sr-only">Enviar</span>
               </Button>
             </form>
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
             <MessagesSquare className="h-24 w-24 text-muted-foreground/50 mb-4" />
-            <h2 className="font-headline text-2xl text-muted-foreground">Select a conversation</h2>
-            <p className="font-body text-muted-foreground">Choose a conversation from the list to start chatting.</p>
+            <h2 className="font-headline text-2xl text-muted-foreground">Selecciona una conversación</h2>
+            <p className="font-body text-muted-foreground">Elige una conversación de la lista para comenzar a chatear.</p>
           </div>
         )}
       </Card>

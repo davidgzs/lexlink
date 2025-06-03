@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -27,6 +28,7 @@ import type { Appointment, AppointmentType, Case } from "@/types";
 import { mockCases, mockUserProfile } from "@/lib/mockData";
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 
 interface ScheduleAppointmentDialogProps {
@@ -40,6 +42,12 @@ const timeSlots = [
   "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
   "04:00 PM", "04:30 PM",
 ];
+
+const appointmentTypeDisplay: Record<AppointmentType, string> = {
+  "In-Person": "Presencial",
+  "Video Conference": "Videoconferencia",
+  "Written Consultation": "Consulta Escrita",
+};
 
 export default function ScheduleAppointmentDialog({
   appointmentToEdit,
@@ -62,10 +70,9 @@ export default function ScheduleAppointmentDialog({
       setDate(new Date(appointmentToEdit.date));
       setTime(appointmentToEdit.time);
       setCaseId(appointmentToEdit.caseId);
-      setNotes(''); // Notes usually not part of edit, but can be added
-      setOpen(true); // Open dialog if editing
+      setNotes(''); 
+      setOpen(true); 
     } else {
-      // Reset form for new appointment
       setTitle('');
       setType(undefined);
       setDate(undefined);
@@ -80,8 +87,8 @@ export default function ScheduleAppointmentDialog({
     e.preventDefault();
     if (!title || !type || !date || !time) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields (Title, Type, Date, Time).",
+        title: "Información Faltante",
+        description: "Por favor, completa todos los campos obligatorios (Título, Tipo, Fecha, Hora).",
         variant: "destructive",
       });
       return;
@@ -93,14 +100,14 @@ export default function ScheduleAppointmentDialog({
       type,
       date: format(date, "yyyy-MM-dd"),
       time,
-      participants: [mockUserProfile.name, caseId ? mockCases.find(c=>c.id === caseId)?.attorneyAssigned || 'Attorney' : 'Attorney'],
+      participants: [mockUserProfile.name, caseId ? mockCases.find(c=>c.id === caseId)?.attorneyAssigned || 'Abogado/a' : 'Abogado/a'],
       status: "Scheduled",
       caseId,
     };
     onAppointmentScheduled(newAppointment);
     toast({
-      title: `Appointment ${appointmentToEdit ? 'Updated' : 'Scheduled'}`,
-      description: `"${title}" on ${format(date, "PPP")} at ${time}.`,
+      title: `Cita ${appointmentToEdit ? 'Actualizada' : 'Programada'}`,
+      description: `"${title}" el ${format(date, "PPP", { locale: es })} a las ${time}.`,
     });
     setOpen(false);
   };
@@ -110,37 +117,37 @@ export default function ScheduleAppointmentDialog({
       <DialogTrigger asChild>
         {triggerButton ? triggerButton : 
           <Button>
-            <PlusCircle className="mr-2 h-4 w-4" /> Schedule New Appointment
+            <PlusCircle className="mr-2 h-4 w-4" /> Programar Nueva Cita
           </Button>
         }
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px] font-body">
         <DialogHeader>
-          <DialogTitle className="font-headline">{appointmentToEdit ? "Edit Appointment" : "Schedule New Appointment"}</DialogTitle>
+          <DialogTitle className="font-headline">{appointmentToEdit ? "Editar Cita" : "Programar Nueva Cita"}</DialogTitle>
           <DialogDescription>
-            Fill in the details to {appointmentToEdit ? "update your" : "schedule a new"} appointment.
+            Completa los detalles para {appointmentToEdit ? "actualizar tu" : "programar una nueva"} cita.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="title" className="text-right">Title</Label>
+            <Label htmlFor="title" className="text-right">Título</Label>
             <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" required />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="type" className="text-right">Type</Label>
+            <Label htmlFor="type" className="text-right">Tipo</Label>
             <Select value={type} onValueChange={(value) => setType(value as AppointmentType)} required>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select appointment type" />
+                <SelectValue placeholder="Selecciona tipo de cita" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="In-Person">In-Person</SelectItem>
-                <SelectItem value="Video Conference">Video Conference</SelectItem>
-                <SelectItem value="Written Consultation">Written Consultation</SelectItem>
+                <SelectItem value="In-Person">{appointmentTypeDisplay["In-Person"]}</SelectItem>
+                <SelectItem value="Video Conference">{appointmentTypeDisplay["Video Conference"]}</SelectItem>
+                <SelectItem value="Written Consultation">{appointmentTypeDisplay["Written Consultation"]}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="date" className="text-right">Date</Label>
+            <Label htmlFor="date" className="text-right">Fecha</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -148,7 +155,7 @@ export default function ScheduleAppointmentDialog({
                   className={`col-span-3 justify-start text-left font-normal ${!date && "text-muted-foreground"}`}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  {date ? format(date, "PPP", { locale: es }) : <span>Elige una fecha</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -157,16 +164,17 @@ export default function ScheduleAppointmentDialog({
                   selected={date}
                   onSelect={setDate}
                   initialFocus
-                  disabled={(d) => d < new Date(new Date().setDate(new Date().getDate() -1))} // Disable past dates
+                  disabled={(d) => d < new Date(new Date().setDate(new Date().getDate() -1))} 
+                  locale={es}
                 />
               </PopoverContent>
             </Popover>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="time" className="text-right">Time</Label>
+            <Label htmlFor="time" className="text-right">Hora</Label>
             <Select value={time} onValueChange={setTime} required>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a time slot" />
+                <SelectValue placeholder="Selecciona un horario" />
               </SelectTrigger>
               <SelectContent>
                 {timeSlots.map(slot => <SelectItem key={slot} value={slot}>{slot}</SelectItem>)}
@@ -174,10 +182,10 @@ export default function ScheduleAppointmentDialog({
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="caseId" className="text-right">Case (Optional)</Label>
+            <Label htmlFor="caseId" className="text-right">Caso (Opcional)</Label>
             <Select value={caseId} onValueChange={setCaseId}>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Link to a case" />
+                <SelectValue placeholder="Vincular a un caso" />
               </SelectTrigger>
               <SelectContent>
                 {mockCases.map(c => <SelectItem key={c.id} value={c.id}>{c.caseNumber} - {c.clientName}</SelectItem>)}
@@ -185,12 +193,12 @@ export default function ScheduleAppointmentDialog({
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="notes" className="text-right">Notes (Optional)</Label>
-            <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="col-span-3" placeholder="Any specific details or topics for the appointment..." />
+            <Label htmlFor="notes" className="text-right">Notas (Opcionales)</Label>
+            <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="col-span-3" placeholder="Detalles específicos o temas para la cita..." />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit">{appointmentToEdit ? "Save Changes" : "Schedule Appointment"}</Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button type="submit">{appointmentToEdit ? "Guardar Cambios" : "Programar Cita"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

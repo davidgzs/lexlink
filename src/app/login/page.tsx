@@ -30,7 +30,7 @@ export default function LoginPage() {
     if (email === 'user@example.com' && password === 'password123') {
       setLoginStep('fingerprint');
     } else {
-      setErrorMessage('Invalid email or password.');
+      setErrorMessage('Correo electrónico o contraseña incorrectos.');
       setLoginStep('error');
     }
   };
@@ -59,27 +59,27 @@ export default function LoginPage() {
       </div>
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline text-center">Secure Portal Login</CardTitle>
+          <CardTitle className="text-2xl font-headline text-center">Acceso Seguro al Portal</CardTitle>
           {loginStep === 'credentials' && (
             <CardDescription className="text-center font-body">
-              Enter your credentials to access your account.
+              Introduce tus credenciales para acceder a tu cuenta.
             </CardDescription>
           )}
           {loginStep === 'fingerprint' && (
             <CardDescription className="text-center font-body">
-              Verify your identity using your fingerprint.
+              Verifica tu identidad usando tu huella dactilar.
             </CardDescription>
           )}
            {loginStep === 'verifying' && (
             <CardDescription className="text-center font-body">
-              Please wait...
+              Por favor espera...
             </CardDescription>
           )}
         </CardHeader>
         <CardContent>
           {loginStep === 'error' && (
             <Alert variant="destructive" className="mb-4">
-              <AlertTitle className="font-headline">Login Failed</AlertTitle>
+              <AlertTitle className="font-headline">Fallo de Inicio de Sesión</AlertTitle>
               <AlertDescription className="font-body">{errorMessage}</AlertDescription>
             </Alert>
           )}
@@ -87,11 +87,11 @@ export default function LoginPage() {
           {loginStep === 'credentials' && (
             <form onSubmit={handleCredentialSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="font-body">Email</Label>
+                <Label htmlFor="email" className="font-body">Correo Electrónico</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder="nombre@ejemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -99,7 +99,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="font-body">Password</Label>
+                <Label htmlFor="password" className="font-body">Contraseña</Label>
                 <Input
                   id="password"
                   type="password"
@@ -111,7 +111,7 @@ export default function LoginPage() {
                 />
               </div>
               <Button type="submit" className="w-full font-body">
-                Login
+                Iniciar Sesión
               </Button>
             </form>
           )}
@@ -119,19 +119,19 @@ export default function LoginPage() {
           {loginStep === 'fingerprint' && (
             <div className="flex flex-col items-center space-y-6">
               <p className="text-center text-muted-foreground font-body">
-                Tap the fingerprint icon to verify with your smartphone.
+                Toca el icono de huella dactilar para verificar con tu smartphone.
               </p>
               <Button
                 variant="outline"
                 size="icon"
                 className="h-24 w-24 rounded-full border-4 border-primary hover:bg-primary/10"
                 onClick={handleFingerprintVerify}
-                aria-label="Verify with fingerprint"
+                aria-label="Verificar con huella dactilar"
               >
                 <Fingerprint className="h-12 w-12 text-primary" />
               </Button>
               <Button variant="link" onClick={handleTryAgain} className="font-body">
-                Use password instead
+                Usar contraseña en su lugar
               </Button>
             </div>
           )}
@@ -139,21 +139,21 @@ export default function LoginPage() {
           {loginStep === 'verifying' && (
             <div className="flex flex-col items-center justify-center space-y-4 py-8">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
-              <p className="font-body text-muted-foreground">Verifying your identity...</p>
+              <p className="font-body text-muted-foreground">Verificando tu identidad...</p>
             </div>
           )}
         </CardContent>
         {loginStep === 'error' && (
             <CardFooter className="flex-col gap-2">
                  <Button onClick={handleTryAgain} className="w-full font-body">
-                    Try Again
+                    Intentar de Nuevo
                 </Button>
             </CardFooter>
         )}
       </Card>
       <p className="mt-8 text-center text-xs text-muted-foreground font-body">
-        This is a UI demonstration. For actual fingerprint authentication, WebAuthn and backend integration would be required.
-        <br /> For this demo, use email: <code className="bg-muted p-1 rounded-sm">user@example.com</code> and password: <code className="bg-muted p-1 rounded-sm">password123</code>.
+        Esto es una demostración de UI. Para autenticación real con huella dactilar, se requeriría WebAuthn e integración con backend.
+        <br /> Para esta demo, usa el correo: <code className="bg-muted p-1 rounded-sm">user@example.com</code> y la contraseña: <code className="bg-muted p-1 rounded-sm">password123</code>.
       </p>
     </div>
   );

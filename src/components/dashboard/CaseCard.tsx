@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { Case } from "@/types";
@@ -23,6 +24,12 @@ const statusColors: Record<Case["status"], string> = {
     Closed: "bg-green-500",
 };
 
+const caseStatusTranslations: Record<Case["status"], string> = {
+  Administrative: "Administrativo",
+  Judicial: "Judicial",
+  Appeal: "Apelación",
+  Closed: "Cerrado",
+};
 
 export default function CaseCard({ caseItem }: CaseCardProps) {
   const Icon = statusIcons[caseItem.status];
@@ -35,22 +42,22 @@ export default function CaseCard({ caseItem }: CaseCardProps) {
           <CardTitle className="font-headline text-xl mb-1">{caseItem.caseNumber}</CardTitle>
           <Badge className={`${badgeColor} text-white whitespace-nowrap`}>
             <Icon className="mr-1 h-3 w-3" />
-            {caseItem.status}
+            {caseStatusTranslations[caseItem.status]}
           </Badge>
         </div>
-        <CardDescription className="font-body text-sm">Client: {caseItem.clientName}</CardDescription>
+        <CardDescription className="font-body text-sm">Cliente: {caseItem.clientName}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         <p className="font-body text-sm text-muted-foreground mb-2 line-clamp-3">{caseItem.description}</p>
-        <p className="font-body text-xs text-muted-foreground">Last Update: {new Date(caseItem.lastUpdate).toLocaleDateString()}</p>
+        <p className="font-body text-xs text-muted-foreground">Última Actualización: {new Date(caseItem.lastUpdate).toLocaleDateString('es-ES')}</p>
         {caseItem.attorneyAssigned && (
-          <p className="font-body text-xs text-muted-foreground">Attorney: {caseItem.attorneyAssigned}</p>
+          <p className="font-body text-xs text-muted-foreground">Abogado/a: {caseItem.attorneyAssigned}</p>
         )}
       </CardContent>
       <CardFooter>
         <Link href={`/documents?caseId=${caseItem.id}`} className="w-full">
           <Button variant="outline" className="w-full font-body">
-            View Details & Documents <ArrowRight className="ml-2 h-4 w-4" />
+            Ver Detalles y Documentos <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>
       </CardFooter>

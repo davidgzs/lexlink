@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,7 @@ export default function AppHeader({ user, sidebarNavItems }: AppHeaderProps) {
         <SheetTrigger asChild>
           <Button size="icon" variant="outline" className="sm:hidden">
             <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
+            <span className="sr-only">Alternar Menú</span>
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs pt-12 bg-sidebar text-sidebar-foreground">
@@ -57,17 +58,17 @@ export default function AppHeader({ user, sidebarNavItems }: AppHeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="font-body">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
-              Settings
+              Configuración
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <Link href="/">
               <DropdownMenuItem>
                 <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                Cerrar Sesión
               </DropdownMenuItem>
             </Link>
           </DropdownMenuContent>

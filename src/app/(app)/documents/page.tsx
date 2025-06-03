@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -44,13 +45,13 @@ export default function DocumentsPage() {
   return (
     <div className="container mx-auto py-2">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-3xl font-headline font-semibold text-primary">Documents & E-Signature</h1>
+        <h1 className="text-3xl font-headline font-semibold text-primary">Documentos y Firma Electrónica</h1>
         <div className="flex gap-2 w-full md:w-auto">
           <div className="relative w-full md:w-auto">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search documents..."
+              placeholder="Buscar documentos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8 sm:w-[300px] font-body"
@@ -58,10 +59,10 @@ export default function DocumentsPage() {
           </div>
           <Select value={selectedCaseId} onValueChange={setSelectedCaseId}>
             <SelectTrigger className="w-full md:w-[180px] font-body">
-              <SelectValue placeholder="Filter by Case" />
+              <SelectValue placeholder="Filtrar por Caso" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Cases</SelectItem>
+              <SelectItem value="all">Todos los Casos</SelectItem>
               {mockCases.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.caseNumber}</SelectItem>
               ))}
@@ -72,10 +73,10 @@ export default function DocumentsPage() {
 
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-4">
-          <TabsTrigger value="all" className="font-body">All Documents ({filteredDocuments.length})</TabsTrigger>
-          <TabsTrigger value="awaiting" className="font-body">Awaiting Signature ({awaitingSignatureDocs.length})</TabsTrigger>
-          <TabsTrigger value="signed" className="font-body">Signed ({signedDocs.length})</TabsTrigger>
-          <TabsTrigger value="other" className="font-body">Other ({otherDocs.length})</TabsTrigger>
+          <TabsTrigger value="all" className="font-body">Todos ({filteredDocuments.length})</TabsTrigger>
+          <TabsTrigger value="awaiting" className="font-body">Pendientes de Firma ({awaitingSignatureDocs.length})</TabsTrigger>
+          <TabsTrigger value="signed" className="font-body">Firmados ({signedDocs.length})</TabsTrigger>
+          <TabsTrigger value="other" className="font-body">Otros ({otherDocs.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
@@ -86,7 +87,7 @@ export default function DocumentsPage() {
               ))}
             </div>
           ) : (
-            <p className="font-body text-muted-foreground text-center py-8">No documents found matching your criteria.</p>
+            <p className="font-body text-muted-foreground text-center py-8">No se encontraron documentos que coincidan con tus criterios.</p>
           )}
         </TabsContent>
          <TabsContent value="awaiting">
@@ -97,7 +98,7 @@ export default function DocumentsPage() {
               ))}
             </div>
           ) : (
-            <p className="font-body text-muted-foreground text-center py-8">No documents awaiting signature.</p>
+            <p className="font-body text-muted-foreground text-center py-8">No hay documentos pendientes de firma.</p>
           )}
         </TabsContent>
          <TabsContent value="signed">
@@ -108,7 +109,7 @@ export default function DocumentsPage() {
               ))}
             </div>
           ) : (
-            <p className="font-body text-muted-foreground text-center py-8">No signed documents found.</p>
+            <p className="font-body text-muted-foreground text-center py-8">No se encontraron documentos firmados.</p>
           )}
         </TabsContent>
          <TabsContent value="other">
@@ -119,7 +120,7 @@ export default function DocumentsPage() {
               ))}
             </div>
           ) : (
-            <p className="font-body text-muted-foreground text-center py-8">No other documents found.</p>
+            <p className="font-body text-muted-foreground text-center py-8">No se encontraron otros documentos.</p>
           )}
         </TabsContent>
       </Tabs>
