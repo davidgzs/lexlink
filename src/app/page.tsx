@@ -29,7 +29,7 @@ export default function LandingPage() {
               Revolucionando la Comunicación de los despachos de abogados con sus clientes y sus asuntos legales ("sus casos")
             </h2>
             <p className="text-lg md:text-xl text-foreground mb-8 max-w-3xl mx-auto">
-              LexLINK conecta a los despachos de abogados con sus clientes en tiempo real de manera moderna y eficiente. Gestiona las citas, el progreso de las casos y expedientes. Comunicandose todo de forma segura, todo en un solo lugar.
+              LexLINK conecta a los despachos de abogados con sus clientes en tiempo real de manera moderna y eficiente. Gestiona las citas, el progreso de sus casos y los expedientes. Comunicandose todo entre ellos de forma segura, todo en un solo lugar.
             </p>
             <Link href="/login">
               <Button size="lg" className="font-body">
