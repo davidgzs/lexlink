@@ -26,7 +26,7 @@ export default function LandingPage() {
         <section className="py-16 md:py-24 bg-background">
           <div className="container mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-headline font-bold mb-6 text-primary">
-              Revolucionando la Comunicación de los asuntos legales (casos) de los despachos de abagados con sus clientes
+              Revolucionando la Comunicación de los despachos de abogados con sus clientes y sus asuntos legales ("sus casos")
             </h2>
             <p className="text-lg md:text-xl text-foreground mb-8 max-w-3xl mx-auto">
               LexLINK conecta despachos de abogados con sus clientes en tiempo real. Gestiona citas, sigue el progreso de casos y comunícate de forma segura, todo en un solo lugar.
