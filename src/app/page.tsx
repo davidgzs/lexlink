@@ -9,7 +9,7 @@ export default function LandingPage() {
   const features = [
     { title: "Intercambio Seguro de Mensajes abogado-cliente", description: "Comunícate con confianza con mensajería cifrada de extremo a extremo.", image: "/images/mensajeria-segura.png", hint: "communication security" },
     { title: "Portal de Autoservicio 365 abierto y disponible 24x7", description: "Clientes acceden a actualizaciones de casos y documentos 24/7, reduciendo llamadas.", image: "https://placehold.co/600x400.png", hint: "computer monitor" },
-    { title: "Programación automática de Citas (diversos tipos)", description: "Reserva fácilmente consultas presenciales, por video o escritas.", image: "https://placehold.co/600x400.png", hint: "calendar schedule" },
+    { title: "Programación automática de las Citas (diversos tipos)", description: "Reserva fácilmente consultas presenciales, por video o escritas.", image: "https://placehold.co/600x400.png", hint: "calendar schedule" },
     { title: "Notificaciones Push", description: "Mantente informado con actualizaciones automáticas sobre el progreso del caso.", image: "https://placehold.co/600x400.png", hint: "mobile notification" },
     { title: "Firma Electrónica", description: "Firma documentos digitalmente, agilizando procesos de forma segura.", image: "https://placehold.co/600x400.png", hint: "digital signature" },
     { title: "Seguimiento Transparente de los Casos y Expedientes", description: "Sigue tu caso en cada fase: Administrativa, Judicial, Recurso y Cierre.", image: "https://placehold.co/600x400.png", hint: "progress chart" },
