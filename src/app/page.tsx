@@ -12,7 +12,7 @@ export default function LandingPage() {
     { title: "Programación de Citas", description: "Reserva fácilmente consultas presenciales, por video o escritas.", image: "https://placehold.co/600x400.png", hint: "calendar schedule" },
     { title: "Notificaciones Push", description: "Mantente informado con actualizaciones automáticas sobre el progreso del caso.", image: "https://placehold.co/600x400.png", hint: "mobile notification" },
     { title: "Firma Electrónica", description: "Firma documentos digitalmente, agilizando procesos de forma segura.", image: "https://placehold.co/600x400.png", hint: "digital signature" },
-    { title: "Seguimiento Transparente de Casos", description: "Sigue tu caso en cada fase: Administrativa, Judicial, Recurso y Cierre.", image: "https://placehold.co/600x400.png", hint: "progress chart" },
+    { title: "Seguimiento Transparente de Caso y Expedientes", description: "Sigue tu caso en cada fase: Administrativa, Judicial, Recurso y Cierre.", image: "https://placehold.co/600x400.png", hint: "progress chart" },
   ];
 
   return (
