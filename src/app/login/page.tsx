@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Scale, Fingerprint, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { UserAppRole } from '@/types'; 
+import type { UserAppRole, UserProfile } from '@/types'; 
+import { mockSystemUsers } from '@/lib/mockData';
 
 type LoginStep = 'credentials' | 'fingerprint' | 'verifying' | 'error';
 
@@ -41,14 +42,13 @@ export default function LoginPage() {
     setLoginStep('verifying');
     setErrorMessage('');
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
 
-    const isClient = email === 'user@example.com' && password === 'password123' && selectedRole === 'Cliente';
-    const isAttorney = email === 'abogado@example.com' && password === 'password123' && selectedRole === 'Abogado';
-    const isManager = email === 'gerente@example.com' && password === 'password123' && selectedRole === 'Gerente';
-    const isAdmin = email === 'admin@example.com' && password === 'password123' && selectedRole === 'Administrador';
+    const foundUser = mockSystemUsers.find(
+      (user) => user.email === email && user.password === password && user.role === selectedRole
+    );
 
-    if (isClient || isAttorney || isManager || isAdmin) {
+    if (foundUser) {
       setLoginStep('fingerprint');
     } else {
       setErrorMessage('Correo electrónico, contraseña o rol incorrectos.');
@@ -59,28 +59,23 @@ export default function LoginPage() {
   const handleFingerprintVerify = async () => {
     setLoginStep('verifying');
     setErrorMessage('');
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate verification
 
-    if (selectedRole && email) {
-      localStorage.setItem('loggedInUserRole', selectedRole);
-      
-      let userName = email.split('@')[0].replace(/\./g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()); // Basic name
-      if (email === 'user@example.com' && selectedRole === 'Cliente') {
-        userName = 'Juan Pérez';
-      } else if (email === 'abogado@example.com' && selectedRole === 'Abogado') {
-        userName = 'Juana García'; // Asignamos un abogado específico para las pruebas
-      } else if (email === 'gerente@example.com' && selectedRole === 'Gerente') {
-        userName = 'Gerente User';
-      } else if (email === 'admin@example.com' && selectedRole === 'Administrador') {
-        userName = 'Admin User';
-      }
+    const foundUser = mockSystemUsers.find(
+      (user) => user.email === email && user.password === password && user.role === selectedRole
+    );
 
-      localStorage.setItem('loggedInUserName', userName);
-      localStorage.setItem('loggedInUserEmail', email);
-      localStorage.setItem('loggedInUserAvatar', `https://placehold.co/100x100.png?text=${userName.substring(0,1) || 'U'}`);
+    if (foundUser) {
+      localStorage.setItem('loggedInUserRole', foundUser.role as UserAppRole);
+      localStorage.setItem('loggedInUserName', foundUser.name);
+      localStorage.setItem('loggedInUserEmail', foundUser.email);
+      localStorage.setItem('loggedInUserAvatar', foundUser.avatarUrl || `https://placehold.co/100x100.png?text=${foundUser.name.substring(0,1) || 'U'}`);
+      router.push('/dashboard'); 
+    } else {
+      // Should not happen if credential check passed, but as a safeguard
+      setErrorMessage('Error inesperado durante la verificación.');
+      setLoginStep('error');
     }
-    
-    router.push('/dashboard'); 
   };
 
   const handleTryAgain = () => {
@@ -129,7 +124,7 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="nombre@ejemplo.com"
+                  placeholder="nombre.apellido@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -202,13 +197,17 @@ export default function LoginPage() {
             </CardFooter>
         )}
       </Card>
-      <p className="mt-8 text-center text-xs text-muted-foreground font-body">
+      <p className="mt-8 text-center text-xs text-muted-foreground font-body max-w-xl">
         Esto es una demostración. La persistencia del rol es simulada con localStorage.
-        <br />Cliente: <code className="bg-muted p-1 rounded-sm">user@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Cliente</code> (Verá datos de Juan Pérez).
-        <br />Abogado: <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Abogado</code> (Verá datos de Juana García).
-        <br />Gerente: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Gerente</code> (Verá todos los datos).
-        <br />Admin: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Administrador</code> (Verá todos los datos).
+        <br />Contraseña para todos los usuarios: <code className="bg-muted p-1 rounded-sm">password123</code>
+        <br />Ejemplos de acceso (usa el rol correspondiente en el desplegable):
+        <br />- Cliente Juan Pérez: <code className="bg-muted p-1 rounded-sm">juan.perez@example.com</code>
+        <br />- Abogada Juana García: <code className="bg-muted p-1 rounded-sm">juana.garcia@example.com</code>
+        <br />- Gerente: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code>
+        <br />- Administrador: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>
+        <br />Puedes encontrar otros emails de clientes/abogados en <code className="bg-muted p-1 rounded-sm">src/lib/mockData.ts</code> (variable <code className="bg-muted p-1 rounded-sm">mockSystemUsers</code>).
       </p>
     </div>
   );
 }
+

@@ -65,13 +65,14 @@ export interface Notification {
   link?: string;
 }
 
-export type UserAppRole = "Cliente" | "Abogado" | "Gerente" | "Administrador"; // Updated roles
+export type UserAppRole = "Cliente" | "Abogado" | "Gerente" | "Administrador";
 
 export interface UserProfile {
   id: string;
   name: string;
-  email: string;
-  role: UserAppRole | "Client" | "Attorney"; // Allow existing mock roles, but new selection uses UserAppRole
+  email: string; // This will store the "login" email
+  role: UserAppRole | "Client" | "Attorney"; 
   avatarUrl?: string;
+  password?: string; // For simulation
 }
 
