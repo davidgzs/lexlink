@@ -7,30 +7,46 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Scale, Fingerprint, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Scale, Fingerprint, Loader2, UserCheck } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type LoginStep = 'credentials' | 'fingerprint' | 'verifying' | 'error';
+type UserRole = "Cliente" | "Abogado" | "AdminDespacho";
+
+const availableRoles: UserRole[] = ["Cliente", "Abogado", "AdminDespacho"];
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [selectedRole, setSelectedRole] = useState<UserRole | undefined>(undefined);
   const [loginStep, setLoginStep] = useState<LoginStep>('credentials');
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleCredentialSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!selectedRole) {
+      setErrorMessage('Por favor, selecciona un rol.');
+      setLoginStep('error');
+      return;
+    }
     setLoginStep('verifying');
     setErrorMessage('');
 
     // Mock credential check
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    if (email === 'user@example.com' && password === 'password123') {
+    // Simulate checking email, password, and role
+    if (email === 'user@example.com' && password === 'password123' && selectedRole === 'Cliente') {
       setLoginStep('fingerprint');
-    } else {
-      setErrorMessage('Correo electrónico o contraseña incorrectos.');
+    } else if (email === 'abogado@example.com' && password === 'password123' && selectedRole === 'Abogado') {
+      setLoginStep('fingerprint');
+    } else if (email === 'admin@example.com' && password === 'password123' && selectedRole === 'AdminDespacho') {
+      setLoginStep('fingerprint');
+    }
+    else {
+      setErrorMessage('Correo electrónico, contraseña o rol incorrectos.');
       setLoginStep('error');
     }
   };
@@ -42,7 +58,7 @@ export default function LoginPage() {
     await new Promise(resolve => setTimeout(resolve, 1500));
     // In a real app, you'd use WebAuthn here.
     // For this mock, we'll assume success.
-    router.push('/dashboard');
+    router.push('/dashboard'); // Later, this could route based on selectedRole
   };
 
   const handleTryAgain = () => {
@@ -62,7 +78,7 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-headline text-center">Acceso Seguro al Portal</CardTitle>
           {loginStep === 'credentials' && (
             <CardDescription className="text-center font-body">
-              Introduce tus credenciales para acceder a tu cuenta.
+              Introduce tus credenciales y selecciona tu rol para acceder.
             </CardDescription>
           )}
           {loginStep === 'fingerprint' && (
@@ -110,6 +126,19 @@ export default function LoginPage() {
                   className="font-body"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="role" className="font-body">Rol</Label>
+                <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as UserRole)} required>
+                  <SelectTrigger id="role" className="font-body">
+                    <SelectValue placeholder="Selecciona tu rol" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableRoles.map(role => (
+                      <SelectItem key={role} value={role}>{role === 'AdminDespacho' ? 'Admin. del Despacho': role}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Button type="submit" className="w-full font-body">
                 Iniciar Sesión
               </Button>
@@ -131,7 +160,7 @@ export default function LoginPage() {
                 <Fingerprint className="h-12 w-12 text-primary" />
               </Button>
               <Button variant="link" onClick={handleTryAgain} className="font-body">
-                Usar contraseña en su lugar
+                Usar credenciales en su lugar
               </Button>
             </div>
           )}
@@ -152,8 +181,10 @@ export default function LoginPage() {
         )}
       </Card>
       <p className="mt-8 text-center text-xs text-muted-foreground font-body">
-        Esto es una demostración de UI. Para autenticación real con huella dactilar, se requeriría WebAuthn e integración con backend.
-        <br /> Para esta demo, usa el correo: <code className="bg-muted p-1 rounded-sm">user@example.com</code> y la contraseña: <code className="bg-muted p-1 rounded-sm">password123</code>.
+        Esto es una demostración. Para la autenticación real se requeriría WebAuthn e integración con backend.
+        <br />Prueba con: correo <code className="bg-muted p-1 rounded-sm">user@example.com</code>, contraseña <code className="bg-muted p-1 rounded-sm">password123</code> y rol <code className="bg-muted p-1 rounded-sm">Cliente</code>.
+        <br />O: <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>, <code className="bg-muted p-1 rounded-sm">password123</code>, rol <code className="bg-muted p-1 rounded-sm">Abogado</code>.
+        <br />O: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>, <code className="bg-muted p-1 rounded-sm">password123</code>, rol <code className="bg-muted p-1 rounded-sm">Admin. del Despacho</code>.
       </p>
     </div>
   );

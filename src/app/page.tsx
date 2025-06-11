@@ -25,7 +25,7 @@ export default function LandingPage() {
           </div>
           <nav>
             <Link href="/login">
-              <Button variant="secondary">Acceder a Demo</Button>
+              <Button variant="secondary">Acceder a Panel</Button>
             </Link>
           </nav>
         </div>

@@ -1,3 +1,4 @@
+
 export type CaseStatus = "Administrative" | "Judicial" | "Appeal" | "Closed";
 
 export interface Case {
@@ -64,10 +65,12 @@ export interface Notification {
   link?: string;
 }
 
+export type UserAppRole = "Cliente" | "Abogado" | "AdminDespacho"; // Renamed to avoid conflict
+
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
-  role: "Client" | "Attorney";
+  role: UserAppRole | "Client" | "Attorney"; // Allow existing mock roles, but new selection uses UserAppRole
   avatarUrl?: string;
 }
