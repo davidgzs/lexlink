@@ -32,7 +32,7 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-grow">
-        <section className="py-16 md:py-24 bg-background">
+        <section className="pt-16 md:pt-24 pb-8 md:pb-12 bg-background">
           <div className="container mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-headline font-bold mb-6 text-primary">
               Revolucionando la Comunicación de los despachos de abogados con sus clientes en sus asuntos legales ("sus casos")
@@ -48,7 +48,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-16 md:py-24">
+        <section className="pt-8 md:pt-12 pb-16 md:pb-24">
           <div className="container mx-auto">
             <h3 className="text-3xl font-headline font-semibold text-center mb-12 text-primary">
               Características Clave
