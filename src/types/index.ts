@@ -70,9 +70,7 @@ export type UserAppRole = "Cliente" | "Abogado" | "Gerente" | "Administrador";
 export interface UserProfile {
   id: string;
   name: string;
-  email: string; // This will store the "login" email
+  email: string; 
   role: UserAppRole | "Client" | "Attorney"; 
   avatarUrl?: string;
-  password?: string; // For simulation
 }
-

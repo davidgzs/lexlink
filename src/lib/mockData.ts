@@ -1,18 +1,12 @@
 
 import type { Case, Appointment, Message, Document, Notification, Conversation, UserProfile } from '@/types';
 
-// Helper to generate simple emails from names
-const generateEmailFromName = (name: string): string => {
-  return name.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '') + '@example.com';
-};
-
 export const mockUserProfile: UserProfile = {
-  id: 'fallbackUser',
-  name: 'Usuario Genérico', 
-  email: 'generic.user@example.com',
+  id: 'fallbackUser', // Changed from user123 to reflect its fallback nature
+  name: 'Juan Pérez', 
+  email: 'juan.perez@example.com', // Retained from "españolizar"
   role: 'Cliente',
   avatarUrl: 'https://placehold.co/100x100.png',
-  password: 'password123',
 };
 
 export const mockCases: Case[] = [
@@ -21,54 +15,6 @@ export const mockCases: Case[] = [
   { id: 'C003', caseNumber: 'LEX-2023-003', clientName: 'Carlos Fernández', status: 'Appeal', lastUpdate: '2023-11-15', description: 'Recurso sobre una sentencia anterior relativa a obligaciones contractuales.', attorneyAssigned: 'Juana García' },
   { id: 'C004', caseNumber: 'LEX-2023-004', clientName: 'Diana Jiménez', status: 'Closed', lastUpdate: '2023-09-30', description: 'Reclamación de propiedad intelectual resuelta con éxito.', attorneyAssigned: 'Miguel Torres' },
 ];
-
-// Create mockSystemUsers based on cases and predefined admin/manager roles
-const clientNames = [...new Set(mockCases.map(c => c.clientName))];
-const attorneyNames = [...new Set(mockCases.map(c => c.attorneyAssigned).filter(Boolean) as string[])];
-
-const clientUsers: UserProfile[] = clientNames.map((name, index) => ({
-  id: `client${index + 1}`,
-  name: name,
-  email: generateEmailFromName(name),
-  role: 'Cliente',
-  avatarUrl: `https://placehold.co/100x100.png?text=${name.substring(0,1)}`,
-  password: 'password123',
-}));
-
-const attorneyUsers: UserProfile[] = attorneyNames.map((name, index) => ({
-  id: `attorney${index + 1}`,
-  name: name,
-  email: generateEmailFromName(name),
-  role: 'Abogado',
-  avatarUrl: `https://placehold.co/100x100.png?text=${name.substring(0,1)}`,
-  password: 'password123',
-}));
-
-const managerUser: UserProfile = {
-  id: 'manager01',
-  name: 'Gerente User',
-  email: 'gerente@example.com',
-  role: 'Gerente',
-  avatarUrl: 'https://placehold.co/100x100.png?text=G',
-  password: 'password123',
-};
-
-const adminUser: UserProfile = {
-  id: 'admin01',
-  name: 'Admin User',
-  email: 'admin@example.com',
-  role: 'Administrador',
-  avatarUrl: 'https://placehold.co/100x100.png?text=A',
-  password: 'password123',
-};
-
-export const mockSystemUsers: UserProfile[] = [
-  ...clientUsers,
-  ...attorneyUsers,
-  managerUser,
-  adminUser,
-];
-
 
 export const mockAppointments: Appointment[] = [
   { id: 'A001', title: 'Consulta Inicial', type: 'Video Conference', date: '2023-11-20', time: '10:00 AM', participants: ['Juan Pérez', 'Juana García'], status: 'Scheduled', caseId: 'C001' },
@@ -106,4 +52,3 @@ export const mockNotifications: Notification[] = [
   { id: 'N003', title: 'Documento Firmado', description: 'Escrito de Apelación_Final.pdf ha sido firmado correctamente.', timestamp: '2023-10-20T14:00:00Z', read: true, link: '/documents?docId=D003' },
   { id: 'N004', title: 'Actualización Estado del Caso', description: 'El estado del caso LEX-2023-003 cambió a "Apelación".', timestamp: '2023-11-15T08:00:00Z', read: true, link: '/dashboard' },
 ];
-

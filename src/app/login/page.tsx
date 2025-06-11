@@ -10,8 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Scale, Fingerprint, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { UserAppRole, UserProfile } from '@/types'; 
-import { mockSystemUsers } from '@/lib/mockData';
+import type { UserAppRole } from '@/types'; 
 
 type LoginStep = 'credentials' | 'fingerprint' | 'verifying' | 'error';
 
@@ -44,11 +43,36 @@ export default function LoginPage() {
 
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
 
-    const foundUser = mockSystemUsers.find(
-      (user) => user.email === email && user.password === password && user.role === selectedRole
-    );
+    let loginSuccess = false;
+    let userNameToStore = 'Usuario Desconocido';
+    let emailToStore = email; // Default to entered email
+    let avatarToStore = `https://placehold.co/100x100.png?text=${email.substring(0,1).toUpperCase() || 'U'}`;
 
-    if (foundUser) {
+    if (password === 'password123') { // Central password for simulation
+      if (selectedRole === 'Cliente' && email.toLowerCase() === 'user@example.com') {
+        loginSuccess = true;
+        userNameToStore = 'Juan Pérez';
+        avatarToStore = `https://placehold.co/100x100.png?text=JP`;
+      } else if (selectedRole === 'Abogado' && email.toLowerCase() === 'abogado@example.com') {
+        loginSuccess = true;
+        userNameToStore = 'Juana García';
+        avatarToStore = `https://placehold.co/100x100.png?text=JG`;
+      } else if (selectedRole === 'Gerente' && email.toLowerCase() === 'gerente@example.com') {
+        loginSuccess = true;
+        userNameToStore = 'Gerente User';
+        avatarToStore = `https://placehold.co/100x100.png?text=G`;
+      } else if (selectedRole === 'Administrador' && email.toLowerCase() === 'admin@example.com') {
+        loginSuccess = true;
+        userNameToStore = 'Admin User';
+        avatarToStore = `https://placehold.co/100x100.png?text=A`;
+      }
+    }
+
+    if (loginSuccess) {
+      localStorage.setItem('loggedInUserRole', selectedRole);
+      localStorage.setItem('loggedInUserName', userNameToStore);
+      localStorage.setItem('loggedInUserEmail', emailToStore);
+      localStorage.setItem('loggedInUserAvatar', avatarToStore);
       setLoginStep('fingerprint');
     } else {
       setErrorMessage('Correo electrónico, contraseña o rol incorrectos.');
@@ -60,22 +84,8 @@ export default function LoginPage() {
     setLoginStep('verifying');
     setErrorMessage('');
     await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate verification
-
-    const foundUser = mockSystemUsers.find(
-      (user) => user.email === email && user.password === password && user.role === selectedRole
-    );
-
-    if (foundUser) {
-      localStorage.setItem('loggedInUserRole', foundUser.role as UserAppRole);
-      localStorage.setItem('loggedInUserName', foundUser.name);
-      localStorage.setItem('loggedInUserEmail', foundUser.email);
-      localStorage.setItem('loggedInUserAvatar', foundUser.avatarUrl || `https://placehold.co/100x100.png?text=${foundUser.name.substring(0,1) || 'U'}`);
-      router.push('/dashboard'); 
-    } else {
-      // Should not happen if credential check passed, but as a safeguard
-      setErrorMessage('Error inesperado durante la verificación.');
-      setLoginStep('error');
-    }
+    // User details already stored in localStorage by handleCredentialSubmit
+    router.push('/dashboard'); 
   };
 
   const handleTryAgain = () => {
@@ -124,7 +134,7 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="nombre.apellido@example.com"
+                  placeholder="tu.email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -201,13 +211,11 @@ export default function LoginPage() {
         Esto es una demostración. La persistencia del rol es simulada con localStorage.
         <br />Contraseña para todos los usuarios: <code className="bg-muted p-1 rounded-sm">password123</code>
         <br />Ejemplos de acceso (usa el rol correspondiente en el desplegable):
-        <br />- Cliente Juan Pérez: <code className="bg-muted p-1 rounded-sm">juan.perez@example.com</code>
-        <br />- Abogada Juana García: <code className="bg-muted p-1 rounded-sm">juana.garcia@example.com</code>
+        <br />- Cliente (Juan Pérez): <code className="bg-muted p-1 rounded-sm">user@example.com</code>
+        <br />- Abogado (Juana García): <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>
         <br />- Gerente: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code>
         <br />- Administrador: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>
-        <br />Puedes encontrar otros emails de clientes/abogados en <code className="bg-muted p-1 rounded-sm">src/lib/mockData.ts</code> (variable <code className="bg-muted p-1 rounded-sm">mockSystemUsers</code>).
       </p>
     </div>
   );
 }
-
