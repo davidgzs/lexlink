@@ -1,5 +1,5 @@
 
-export type CaseStatus = "Administrative" | "Judicial" | "Appeal" | "Closed";
+export type CaseStatus = "Administrative" | "Judicial" | "Closed";
 
 export interface Case {
   id: string;

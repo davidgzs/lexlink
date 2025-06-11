@@ -1,34 +1,34 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { Case } from "@/types";
+import type { Case, CaseStatus } from "@/types"; // Import CaseStatus
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowRight, FileText, Gavel, Repeat, CheckCircle2 } from "lucide-react";
+import { ArrowRight, FileText, Gavel, CheckCircle2 } from "lucide-react"; // Removed Repeat
 
 interface CaseCardProps {
   caseItem: Case;
 }
 
-const statusIcons: Record<Case["status"], React.ElementType> = {
+const statusIcons: Record<CaseStatus, React.ElementType> = { // Use CaseStatus type
   Administrative: FileText,
   Judicial: Gavel,
-  Appeal: Repeat,
   Closed: CheckCircle2,
+  // "Appeal" was removed
 };
 
-const statusColors: Record<Case["status"], string> = {
+const statusColors: Record<CaseStatus, string> = { // Use CaseStatus type
     Administrative: "bg-blue-500",
     Judicial: "bg-orange-500",
-    Appeal: "bg-purple-500",
     Closed: "bg-green-500",
+    // "Appeal" was removed
 };
 
-const caseStatusTranslations: Record<Case["status"], string> = {
+const caseStatusTranslations: Record<CaseStatus, string> = { // Use CaseStatus type
   Administrative: "Administrativo",
   Judicial: "Judicial",
-  Appeal: "Apelación",
   Closed: "Cerrado",
+  // "Appeal" was removed
 };
 
 export default function CaseCard({ caseItem }: CaseCardProps) {

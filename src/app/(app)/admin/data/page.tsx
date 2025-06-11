@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { mockCases } from '@/lib/mockData';
-import type { Case } from '@/types';
+import type { Case, CaseStatus } from '@/types'; // Changed Case["status"] to CaseStatus
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -28,19 +28,19 @@ import { Edit, Trash2, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from '@/components/ui/badge';
 
-// Mapeo de estados de caso a traducciones y colores (similar a CaseCard)
-const caseTypeTranslations: Record<Case["status"], string> = {
+// Mapeo de tipos de caso a traducciones y colores
+const caseTypeTranslations: Record<CaseStatus, string> = { // Changed Case["status"] to CaseStatus
   Administrative: "Administrativo",
   Judicial: "Judicial",
-  Appeal: "Apelación",
   Closed: "Cerrado",
+  // "Appeal" was removed
 };
 
-const typeColors: Record<Case["status"], string> = {
+const typeColors: Record<CaseStatus, string> = { // Changed Case["status"] to CaseStatus
     Administrative: "bg-blue-500",
     Judicial: "bg-orange-500",
-    Appeal: "bg-purple-500",
     Closed: "bg-green-500",
+    // "Appeal" was removed
 };
 
 export default function AdminDataPage() {

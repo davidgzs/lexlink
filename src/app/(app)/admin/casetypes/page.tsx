@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Type, FileText, Gavel, Repeat } from "lucide-react";
+import { Edit, Trash2, Type, FileText, Gavel } from "lucide-react"; // Removed Repeat
 
 interface CaseTypeDefinition {
   id: string;
@@ -35,13 +35,6 @@ const caseTypeDefinitions: CaseTypeDefinition[] = [
     description: "Expedientes relacionados con trámites y procedimientos ante organismos de la administración pública.",
     icon: FileText,
     badgeColor: "bg-blue-500",
-  },
-  {
-    id: "appeal",
-    name: "Apelación",
-    description: "Expedientes que consisten en la revisión de sentencias o resoluciones judiciales previas por un tribunal superior.",
-    icon: Repeat,
-    badgeColor: "bg-purple-500",
   },
   // Podríamos añadir 'Cerrado' aquí si se considera un tipo gestionable, pero por ahora nos centramos en los activos.
 ];
