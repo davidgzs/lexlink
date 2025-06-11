@@ -8,7 +8,8 @@ import UpcomingAppointmentCard from '@/components/dashboard/UpcomingAppointmentC
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PlusCircle, Loader2 } from 'lucide-react';
-import type { UserAppRole, Case, Appointment as AppointmentType } from '@/types';
+import type { UserAppRole, Case, Appointment as AppointmentType, CaseState } from '@/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DashboardPage() {
   const [currentUserRole, setCurrentUserRole] = useState<UserAppRole | null>(null);
@@ -16,6 +17,7 @@ export default function DashboardPage() {
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [filteredAppointments, setFilteredAppointments] = useState<AppointmentType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCaseStateFilter, setSelectedCaseStateFilter] = useState<CaseState | 'Todos'>('Abierto');
 
   useEffect(() => {
     const role = localStorage.getItem('loggedInUserRole') as UserAppRole | null;
@@ -28,47 +30,52 @@ export default function DashboardPage() {
     if (currentUserRole && currentUserName) {
       setLoading(true);
 
-        let relevantCases: Case[];
-        if (currentUserRole === 'Cliente') {
-          relevantCases = mockCases.filter(
-            (c) => c.clientName === currentUserName && c.state !== 'Cerrado'
-          );
-        } else if (currentUserRole === 'Abogado') {
-          relevantCases = mockCases.filter(
-            (c) => c.attorneyAssigned === currentUserName && c.state !== 'Cerrado'
-          );
-        } else { // Gerente, Administrador
-          relevantCases = mockCases.filter((c) => c.state !== 'Cerrado');
-        }
-        setFilteredCases(relevantCases);
+      let userRelevantCases: Case[];
+      if (currentUserRole === 'Cliente') {
+        userRelevantCases = mockCases.filter(c => c.clientName === currentUserName);
+      } else if (currentUserRole === 'Abogado') {
+        userRelevantCases = mockCases.filter(c => c.attorneyAssigned === currentUserName);
+      } else { // Gerente, Administrador
+        userRelevantCases = [...mockCases];
+      }
 
-        let relevantAppointments: AppointmentType[];
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); 
+      let stateFilteredCases: Case[];
+      if (selectedCaseStateFilter === 'Abierto') {
+        stateFilteredCases = userRelevantCases.filter(c => c.state === 'Abierto');
+      } else if (selectedCaseStateFilter === 'Cerrado') {
+        stateFilteredCases = userRelevantCases.filter(c => c.state === 'Cerrado');
+      } else { // 'Todos'
+        stateFilteredCases = userRelevantCases;
+      }
+      setFilteredCases(stateFilteredCases);
 
-        if (currentUserRole === 'Cliente' || currentUserRole === 'Abogado') {
-          relevantAppointments = mockAppointments.filter(
-            (a) =>
-              a.participants.includes(currentUserName) &&
-              new Date(a.date) >= today &&
-              a.status === 'Scheduled'
-          );
-        } else { // Gerente, Administrador
-          relevantAppointments = mockAppointments.filter(
-            (a) => new Date(a.date) >= today && a.status === 'Scheduled'
-          );
-        }
-        relevantAppointments.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        setFilteredAppointments(relevantAppointments.slice(0, 3));
+      // Appointments logic remains the same
+      let relevantAppointments: AppointmentType[];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); 
 
-        setLoading(false);
-    } else if (!localStorage.getItem('loggedInUserRole')) {
+      if (currentUserRole === 'Cliente' || currentUserRole === 'Abogado') {
+        relevantAppointments = mockAppointments.filter(
+          (a) =>
+            a.participants.includes(currentUserName) &&
+            new Date(a.date) >= today &&
+            a.status === 'Scheduled'
+        );
+      } else { // Gerente, Administrador
+        relevantAppointments = mockAppointments.filter(
+          (a) => new Date(a.date) >= today && a.status === 'Scheduled'
+        );
+      }
+      relevantAppointments.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      setFilteredAppointments(relevantAppointments.slice(0, 3));
+
+      setLoading(false);
+    } else if (!localStorage.getItem('loggedInUserRole')) { // If no user is logged in
       setLoading(false);
       setFilteredCases([]);
       setFilteredAppointments([]);
     }
-
-  }, [currentUserRole, currentUserName]);
+  }, [currentUserRole, currentUserName, selectedCaseStateFilter]);
 
   if (loading) {
     return (
@@ -91,16 +98,29 @@ export default function DashboardPage() {
       </div>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-headline mb-4 text-foreground">Expedientes Activos</h2>
-        {filteredCases.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCases.map((caseItem) => (
-              <CaseCard key={caseItem.id} caseItem={caseItem} />
-            ))}
-          </div>
-        ) : (
-          <p className="font-body text-muted-foreground">No hay casos activos que coincidan con tu perfil.</p>
-        )}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-headline text-foreground">Expedientes</h2>
+        </div>
+        <Tabs value={selectedCaseStateFilter} onValueChange={(value) => setSelectedCaseStateFilter(value as CaseState | 'Todos')} className="w-full mb-6">
+          <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
+            <TabsTrigger value="Abierto" className="font-body">Abiertos</TabsTrigger>
+            <TabsTrigger value="Cerrado" className="font-body">Cerrados</TabsTrigger>
+            <TabsTrigger value="Todos" className="font-body">Todos</TabsTrigger>
+          </TabsList>
+          <TabsContent value={selectedCaseStateFilter} className="mt-4">
+            {filteredCases.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredCases.map((caseItem) => (
+                  <CaseCard key={caseItem.id} caseItem={caseItem} />
+                ))}
+              </div>
+            ) : (
+              <p className="font-body text-muted-foreground text-center py-6">
+                No hay expedientes que coincidan con los filtros seleccionados y tu perfil.
+              </p>
+            )}
+          </TabsContent>
+        </Tabs>
       </section>
 
       <section>
