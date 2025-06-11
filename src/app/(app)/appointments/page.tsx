@@ -9,6 +9,7 @@ import ScheduleAppointmentDialog from '@/components/appointments/ScheduleAppoint
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from '@/components/ui/card';
+import { es } from 'date-fns/locale'; // Importar el locale 'es'
 
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
@@ -101,7 +102,7 @@ export default function AppointmentsPage() {
                             className="rounded-md border"
                             modifiers={{ scheduled: appointments.filter(a => a.status === "Scheduled").map(a => new Date(a.date)) }}
                             modifiersClassNames={{ scheduled: 'bg-primary/20 rounded-full' }}
-                            locale={{code: 'es'}}
+                            locale={es} // Corregido: usar el objeto de locale importado
                         />
                     </CardContent>
                 </Card>
