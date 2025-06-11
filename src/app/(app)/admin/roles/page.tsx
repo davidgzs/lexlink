@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, User, Briefcase, UserCog, Shield } from "lucide-react";
+import { Edit, Trash2, User, Briefcase, UserCog, Shield, Users } from "lucide-react"; // Added Users here
 import type { UserAppRole } from "@/types";
 
 interface RoleDefinition {
