@@ -8,19 +8,20 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Scale, Fingerprint, Loader2, UserCheck } from "lucide-react";
+import { Scale, Fingerprint, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import type { UserAppRole } from '@/types'; // Import UserAppRole
 
 type LoginStep = 'credentials' | 'fingerprint' | 'verifying' | 'error';
-type UserRole = "Cliente" | "Abogado" | "AdminDespacho";
 
-const availableRoles: UserRole[] = ["Cliente", "Abogado", "AdminDespacho"];
+// Use UserAppRole for consistency with types.ts
+const availableRoles: UserAppRole[] = ["Cliente", "Abogado", "Gerente", "Administrador"];
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState<UserRole | undefined>(undefined);
+  const [selectedRole, setSelectedRole] = useState<UserAppRole | undefined>(undefined);
   const [loginStep, setLoginStep] = useState<LoginStep>('credentials');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -42,7 +43,9 @@ export default function LoginPage() {
       setLoginStep('fingerprint');
     } else if (email === 'abogado@example.com' && password === 'password123' && selectedRole === 'Abogado') {
       setLoginStep('fingerprint');
-    } else if (email === 'admin@example.com' && password === 'password123' && selectedRole === 'AdminDespacho') {
+    } else if (email === 'gerente@example.com' && password === 'password123' && selectedRole === 'Gerente') {
+      setLoginStep('fingerprint');
+    } else if (email === 'admin@example.com' && password === 'password123' && selectedRole === 'Administrador') {
       setLoginStep('fingerprint');
     }
     else {
@@ -58,12 +61,12 @@ export default function LoginPage() {
     await new Promise(resolve => setTimeout(resolve, 1500));
     // In a real app, you'd use WebAuthn here.
     // For this mock, we'll assume success.
-    router.push('/dashboard'); // Later, this could route based on selectedRole
+    router.push('/dashboard'); 
   };
 
   const handleTryAgain = () => {
     setLoginStep('credentials');
-    setPassword(''); // Clear password for security
+    setPassword(''); 
     setErrorMessage('');
   }
 
@@ -128,13 +131,13 @@ export default function LoginPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role" className="font-body">Rol</Label>
-                <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as UserRole)} required>
+                <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as UserAppRole)} required>
                   <SelectTrigger id="role" className="font-body">
                     <SelectValue placeholder="Selecciona tu rol" />
                   </SelectTrigger>
                   <SelectContent>
                     {availableRoles.map(role => (
-                      <SelectItem key={role} value={role}>{role === 'AdminDespacho' ? 'Admin. del Despacho': role}</SelectItem>
+                      <SelectItem key={role} value={role}>{role}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -184,8 +187,10 @@ export default function LoginPage() {
         Esto es una demostración. Para la autenticación real se requeriría WebAuthn e integración con backend.
         <br />Prueba con: correo <code className="bg-muted p-1 rounded-sm">user@example.com</code>, contraseña <code className="bg-muted p-1 rounded-sm">password123</code> y rol <code className="bg-muted p-1 rounded-sm">Cliente</code>.
         <br />O: <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>, <code className="bg-muted p-1 rounded-sm">password123</code>, rol <code className="bg-muted p-1 rounded-sm">Abogado</code>.
-        <br />O: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>, <code className="bg-muted p-1 rounded-sm">password123</code>, rol <code className="bg-muted p-1 rounded-sm">Admin. del Despacho</code>.
+        <br />O: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code>, <code className="bg-muted p-1 rounded-sm">password123</code>, rol <code className="bg-muted p-1 rounded-sm">Gerente</code>.
+        <br />O: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>, <code className="bg-muted p-1 rounded-sm">password123</code>, rol <code className="bg-muted p-1 rounded-sm">Administrador</code>.
       </p>
     </div>
   );
 }
+

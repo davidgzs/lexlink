@@ -65,7 +65,7 @@ export interface Notification {
   link?: string;
 }
 
-export type UserAppRole = "Cliente" | "Abogado" | "AdminDespacho"; // Renamed to avoid conflict
+export type UserAppRole = "Cliente" | "Abogado" | "Gerente" | "Administrador"; // Updated roles
 
 export interface UserProfile {
   id: string;
@@ -74,3 +74,4 @@ export interface UserProfile {
   role: UserAppRole | "Client" | "Attorney"; // Allow existing mock roles, but new selection uses UserAppRole
   avatarUrl?: string;
 }
+
