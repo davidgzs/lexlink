@@ -35,6 +35,12 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
   const Icon = statusIcons[document.status];
   const badgeColor = statusColors[document.status];
 
+  const formattedUploadedDate = new Date(document.uploadedDate).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+
   return (
     <Card className="shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
       <CardHeader>
@@ -52,7 +58,7 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
       </CardHeader>
 
       <CardContent className="flex-grow">
-        <p className="font-body text-xs text-muted-foreground">Subido: {new Date(document.uploadedDate).toLocaleDateString('es-ES')}</p>
+        <p className="font-body text-xs text-muted-foreground">Subido: {formattedUploadedDate}</p>
         {document.status === "Awaiting Signature" && (
           <Button
             size="sm"
