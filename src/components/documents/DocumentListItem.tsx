@@ -53,7 +53,7 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
       <CardContent>
         <p className="font-body text-xs text-muted-foreground">Subido: {new Date(document.uploadedDate).toLocaleDateString('es-ES')}</p>
       </CardContent>
-      <CardFooter className="flex justify-end gap-2">
+      <CardFooter className="flex justify-end flex-wrap gap-2">
         <Button variant="outline" size="sm" className="font-body" onClick={() => alert('Ver documento: ' + document.name)}>
           <Eye className="mr-2 h-4 w-4" /> Ver
         </Button>
@@ -69,3 +69,4 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
     </Card>
   );
 }
+
