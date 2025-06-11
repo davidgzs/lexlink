@@ -18,7 +18,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Obtener el rol y nombre del usuario desde localStorage
     const role = localStorage.getItem('loggedInUserRole') as UserAppRole | null;
     const name = localStorage.getItem('loggedInUserName');
     setCurrentUserRole(role);
@@ -26,31 +25,26 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    // Filtrar datos mock basados en el usuario actual
     if (currentUserRole && currentUserName) {
       setLoading(true);
 
-      // Simular una pequeña demora como si fuera una carga real
-      // setTimeout(() => {
-        // Filtrar Casos
         let relevantCases: Case[];
         if (currentUserRole === 'Cliente') {
           relevantCases = mockCases.filter(
-            (c) => c.clientName === currentUserName && c.status !== 'Closed'
+            (c) => c.clientName === currentUserName && c.state !== 'Cerrado'
           );
         } else if (currentUserRole === 'Abogado') {
           relevantCases = mockCases.filter(
-            (c) => c.attorneyAssigned === currentUserName && c.status !== 'Closed'
+            (c) => c.attorneyAssigned === currentUserName && c.state !== 'Cerrado'
           );
         } else { // Gerente, Administrador
-          relevantCases = mockCases.filter((c) => c.status !== 'Closed');
+          relevantCases = mockCases.filter((c) => c.state !== 'Cerrado');
         }
         setFilteredCases(relevantCases);
 
-        // Filtrar Citas
         let relevantAppointments: AppointmentType[];
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Normalizar para comparar solo fechas
+        today.setHours(0, 0, 0, 0); 
 
         if (currentUserRole === 'Cliente' || currentUserRole === 'Abogado') {
           relevantAppointments = mockAppointments.filter(
@@ -64,21 +58,15 @@ export default function DashboardPage() {
             (a) => new Date(a.date) >= today && a.status === 'Scheduled'
           );
         }
-        // Ordenar y limitar citas
         relevantAppointments.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         setFilteredAppointments(relevantAppointments.slice(0, 3));
 
         setLoading(false);
-      // }, 300); // Demora simulada opcional
     } else if (!localStorage.getItem('loggedInUserRole')) {
-      // Si no hay usuario en localStorage (ej. no se ha iniciado sesión)
       setLoading(false);
       setFilteredCases([]);
       setFilteredAppointments([]);
     }
-    // Si currentUserRole o currentUserName aún son null pero hay algo en localStorage,
-    // el primer useEffect los establecerá y este useEffect se volverá a ejecutar.
-    // Si no hay nada en localStorage, establecemos loading a false para evitar un spinner infinito.
 
   }, [currentUserRole, currentUserName]);
 
@@ -103,7 +91,7 @@ export default function DashboardPage() {
       </div>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-headline mb-4 text-foreground">Expedientes Casos Activos</h2>
+        <h2 className="text-2xl font-headline mb-4 text-foreground">Expedientes Activos</h2>
         {filteredCases.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCases.map((caseItem) => (

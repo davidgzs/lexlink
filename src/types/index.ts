@@ -1,11 +1,13 @@
 
-export type CaseStatus = "Administrative" | "Judicial" | "Closed";
+export type CaseStatus = "Administrative" | "Judicial"; // Represents the TYPE of case
+export type CaseState = "Abierto" | "Cerrado"; // Represents if the case is Open or Closed
 
 export interface Case {
   id: string;
   caseNumber: string;
   clientName: string;
-  status: CaseStatus;
+  status: CaseStatus; // This field stores "Administrative" or "Judicial"
+  state: CaseState;   // This new field stores "Abierto" or "Cerrado"
   lastUpdate: string;
   description: string;
   attorneyAssigned?: string;
@@ -70,8 +72,7 @@ export type UserAppRole = "Cliente" | "Abogado" | "Gerente" | "Administrador";
 export interface UserProfile {
   id: string;
   name: string;
-  email: string; 
-  role: UserAppRole; 
+  email: string;
+  role: UserAppRole;
   avatarUrl?: string;
 }
-

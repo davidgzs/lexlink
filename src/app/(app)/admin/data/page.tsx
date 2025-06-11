@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { mockCases } from '@/lib/mockData';
-import type { Case, CaseStatus } from '@/types'; // Changed Case["status"] to CaseStatus
+import type { Case, CaseStatus } from '@/types';
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -28,19 +28,15 @@ import { Edit, Trash2, ShieldAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from '@/components/ui/badge';
 
-// Mapeo de tipos de caso a traducciones y colores
-const caseTypeTranslations: Record<CaseStatus, string> = { // Changed Case["status"] to CaseStatus
+// Mapeo de tipos de caso a traducciones y colores para la columna "Tipo"
+const caseTypeTranslations: Record<CaseStatus, string> = {
   Administrative: "Administrativo",
   Judicial: "Judicial",
-  Closed: "Cerrado",
-  // "Appeal" was removed
 };
 
-const typeColors: Record<CaseStatus, string> = { // Changed Case["status"] to CaseStatus
+const typeColors: Record<CaseStatus, string> = {
     Administrative: "bg-blue-500",
     Judicial: "bg-orange-500",
-    Closed: "bg-green-500",
-    // "Appeal" was removed
 };
 
 export default function AdminDataPage() {
@@ -49,7 +45,6 @@ export default function AdminDataPage() {
   const { toast } = useToast();
 
   const handleEditCase = (caseItem: Case) => {
-    // Simulación: en una app real, abriría un formulario de edición
     alert(`Simulación: Editar caso "${caseItem.caseNumber}". En una aplicación real, esto abriría un formulario de edición.`);
   };
 
@@ -59,7 +54,6 @@ export default function AdminDataPage() {
 
   const confirmDeleteCase = () => {
     if (!caseToDelete) return;
-    // Simulación: en una app real, llamaría a una API para eliminar
     setCases(prevCases => prevCases.filter(c => c.id !== caseToDelete.id));
     toast({
       title: "Caso Eliminado (Simulación)",
@@ -91,6 +85,7 @@ export default function AdminDataPage() {
               <TableHead className="font-body">Nº Expediente</TableHead>
               <TableHead className="font-body">Cliente</TableHead>
               <TableHead className="font-body">Tipo</TableHead>
+              <TableHead className="font-body">Estado</TableHead>
               <TableHead className="font-body">Abogado/a</TableHead>
               <TableHead className="text-right font-body">Acciones</TableHead>
             </TableRow>
@@ -104,6 +99,13 @@ export default function AdminDataPage() {
                   <Badge className={`${typeColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
                     {caseTypeTranslations[caseItem.status]}
                   </Badge>
+                </TableCell>
+                <TableCell className="text-center">
+                  {caseItem.state === 'Abierto' ? (
+                    <div className="flex items-center justify-center w-7 h-7 bg-green-500 rounded-full text-white font-semibold text-base mx-auto" title="Abierto">A</div>
+                  ) : (
+                    <div className="flex items-center justify-center w-7 h-7 bg-red-500 rounded-full text-white font-semibold text-base mx-auto" title="Cerrado">C</div>
+                  )}
                 </TableCell>
                 <TableCell className="font-body">{caseItem.attorneyAssigned || 'N/A'}</TableCell>
                 <TableCell className="text-right space-x-2">

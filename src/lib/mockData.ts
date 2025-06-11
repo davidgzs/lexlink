@@ -1,19 +1,19 @@
 
-import type { Case, Appointment, Message, Document, Notification, Conversation, UserProfile } from '@/types';
+import type { Case, Appointment, Message, Document, Notification, Conversation, UserProfile, CaseState, CaseStatus } from '@/types';
 
 export const mockUserProfile: UserProfile = {
-  id: 'fallbackUser', // Changed from user123 to reflect its fallback nature
-  name: 'Juan Pérez', 
-  email: 'juan.perez@example.com', // Retained from "españolizar"
+  id: 'fallbackUser',
+  name: 'Juan Pérez',
+  email: 'juan.perez@example.com',
   role: 'Cliente',
   avatarUrl: 'https://placehold.co/100x100.png',
 };
 
 export const mockCases: Case[] = [
-  { id: 'C001', caseNumber: 'LEX-2024-001', clientName: 'Juan Pérez', status: 'Judicial', lastUpdate: '2024-10-26', description: 'Litigio civil sobre disputa de propiedad.', attorneyAssigned: 'Juana García' },
-  { id: 'C002', caseNumber: 'LEX-2024-002', clientName: 'Roberto "Beto" Sanz', status: 'Administrative', lastUpdate: '2024-11-05', description: 'Constitución y registro de empresa.', attorneyAssigned: 'Miguel Torres' },
-  { id: 'C003', caseNumber: 'LEX-2024-003', clientName: 'Carlos Fernández', status: 'Administrative', lastUpdate: '2024-11-15', description: 'Recurso sobre una sentencia anterior relativa a obligaciones contractuales.', attorneyAssigned: 'Juana García' },
-  { id: 'C004', caseNumber: 'LEX-2024-004', clientName: 'Diana Jiménez', status: 'Judicial', lastUpdate: '2024-09-30', description: 'Reclamación de propiedad intelectual resuelta con éxito.', attorneyAssigned: 'Miguel Torres' },
+  { id: 'C001', caseNumber: 'LEX-2024-001', clientName: 'Juan Pérez', status: 'Judicial' as CaseStatus, state: 'Abierto' as CaseState, lastUpdate: '2024-10-26', description: 'Litigio civil sobre disputa de propiedad.', attorneyAssigned: 'Juana García' },
+  { id: 'C002', caseNumber: 'LEX-2024-002', clientName: 'Roberto "Beto" Sanz', status: 'Administrative' as CaseStatus, state: 'Abierto' as CaseState, lastUpdate: '2024-11-05', description: 'Constitución y registro de empresa.', attorneyAssigned: 'Miguel Torres' },
+  { id: 'C003', caseNumber: 'LEX-2024-003', clientName: 'Carlos Fernández', status: 'Administrative' as CaseStatus, state: 'Abierto' as CaseState, lastUpdate: '2024-11-15', description: 'Recurso sobre una sentencia anterior relativa a obligaciones contractuales.', attorneyAssigned: 'Juana García' },
+  { id: 'C004', caseNumber: 'LEX-2024-004', clientName: 'Diana Jiménez', status: 'Judicial' as CaseStatus, state: 'Cerrado' as CaseState, lastUpdate: '2024-09-30', description: 'Reclamación de propiedad intelectual resuelta con éxito.', attorneyAssigned: 'Miguel Torres' },
 ];
 
 export const mockAppointments: Appointment[] = [
@@ -32,7 +32,7 @@ export const mockMessages: Message[] = [
   { id: 'M002', conversationId: 'CONV001', senderId: 'client_juan_perez', senderName: 'Juan Pérez', content: 'Gracias, Juana. Lo revisaré hoy.', timestamp: '2024-11-15T09:15:00Z' },
   { id: 'M003', conversationId: 'CONV001', senderId: 'attorney_juana_garcia', senderName: 'Juana García', content: 'Genial. Además, un recordatorio sobre nuestra videollamada el día 20.', timestamp: '2024-11-15T09:16:00Z' },
   { id: 'M004', conversationId: 'CONV001', senderId: 'client_juan_perez', senderName: 'Juan Pérez', content: 'Sí, enviaré los documentos al final del día.', timestamp: '2024-11-15T10:30:00Z'},
-  
+
   { id: 'M005', conversationId: 'CONV002', senderId: 'client_roberto_beto_sanz', senderName: 'Roberto "Beto" Sanz', content: 'Hola Miguel, tengo una pregunta rápida sobre el proceso de registro.', timestamp: '2024-11-14T14:30:00Z' },
   { id: 'M006', conversationId: 'CONV002', senderId: 'attorney_miguel_torres', senderName: 'Miguel Torres', content: 'Claro Roberto, ¿cuál es?', timestamp: '2024-11-14T14:32:00Z' },
   { id: 'M007', conversationId: 'CONV002', senderId: 'client_roberto_beto_sanz', senderName: 'Roberto "Beto" Sanz', content: '¿Podemos reprogramar nuestra reunión?', timestamp: '2024-11-14T15:00:00Z' },
@@ -52,5 +52,3 @@ export const mockNotifications: Notification[] = [
   { id: 'N003', title: 'Documento Firmado', description: 'Escrito de Apelación_Final.pdf ha sido firmado correctamente.', timestamp: '2024-10-20T14:00:00Z', read: true, link: '/documents?docId=D003' },
   { id: 'N004', title: 'Actualización Estado del Caso', description: 'El estado del caso LEX-2024-003 cambió a "Apelación".', timestamp: '2024-11-15T08:00:00Z', read: true, link: '/dashboard' },
 ];
-
-
