@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,11 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Scale, Fingerprint, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { UserAppRole } from '@/types'; // Import UserAppRole
+import type { UserAppRole, UserProfile } from '@/types'; 
 
 type LoginStep = 'credentials' | 'fingerprint' | 'verifying' | 'error';
 
-// Use UserAppRole for consistency with types.ts
 const availableRoles: UserAppRole[] = ["Cliente", "Abogado", "Gerente", "Administrador"];
 
 export default function LoginPage() {
@@ -24,6 +23,14 @@ export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<UserAppRole | undefined>(undefined);
   const [loginStep, setLoginStep] = useState<LoginStep>('credentials');
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Clear any existing "logged in user" on page load to ensure a fresh login
+  useEffect(() => {
+    localStorage.removeItem('loggedInUserRole');
+    localStorage.removeItem('loggedInUserName');
+    localStorage.removeItem('loggedInUserEmail');
+    localStorage.removeItem('loggedInUserAvatar');
+  }, []);
 
   const handleCredentialSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -35,20 +42,16 @@ export default function LoginPage() {
     setLoginStep('verifying');
     setErrorMessage('');
 
-    // Mock credential check
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Simulate checking email, password, and role
-    if (email === 'user@example.com' && password === 'password123' && selectedRole === 'Cliente') {
+    if (
+      (email === 'user@example.com' && password === 'password123' && selectedRole === 'Cliente') ||
+      (email === 'abogado@example.com' && password === 'password123' && selectedRole === 'Abogado') ||
+      (email === 'gerente@example.com' && password === 'password123' && selectedRole === 'Gerente') ||
+      (email === 'admin@example.com' && password === 'password123' && selectedRole === 'Administrador')
+    ) {
       setLoginStep('fingerprint');
-    } else if (email === 'abogado@example.com' && password === 'password123' && selectedRole === 'Abogado') {
-      setLoginStep('fingerprint');
-    } else if (email === 'gerente@example.com' && password === 'password123' && selectedRole === 'Gerente') {
-      setLoginStep('fingerprint');
-    } else if (email === 'admin@example.com' && password === 'password123' && selectedRole === 'Administrador') {
-      setLoginStep('fingerprint');
-    }
-    else {
+    } else {
       setErrorMessage('Correo electrónico, contraseña o rol incorrectos.');
       setLoginStep('error');
     }
@@ -57,10 +60,16 @@ export default function LoginPage() {
   const handleFingerprintVerify = async () => {
     setLoginStep('verifying');
     setErrorMessage('');
-    // Mock fingerprint scan
     await new Promise(resolve => setTimeout(resolve, 1500));
-    // In a real app, you'd use WebAuthn here.
-    // For this mock, we'll assume success.
+
+    if (selectedRole && email) {
+      localStorage.setItem('loggedInUserRole', selectedRole);
+      const userName = email.split('@')[0].replace(/\./g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()); // Basic name from email
+      localStorage.setItem('loggedInUserName', userName || 'Usuario');
+      localStorage.setItem('loggedInUserEmail', email);
+      localStorage.setItem('loggedInUserAvatar', `https://placehold.co/100x100.png?text=${userName.substring(0,1) || 'U'}`);
+    }
+    
     router.push('/dashboard'); 
   };
 
@@ -86,7 +95,7 @@ export default function LoginPage() {
           )}
           {loginStep === 'fingerprint' && (
             <CardDescription className="text-center font-body">
-              Verifica tu identidad usando tu huella dactilar.
+              Verifica tu identidad usando tu huella dactilar (simulado).
             </CardDescription>
           )}
            {loginStep === 'verifying' && (
@@ -151,14 +160,14 @@ export default function LoginPage() {
           {loginStep === 'fingerprint' && (
             <div className="flex flex-col items-center space-y-6">
               <p className="text-center text-muted-foreground font-body">
-                Toca el icono de huella dactilar para verificar con tu smartphone.
+                Toca el icono de huella dactilar para verificar (simulado).
               </p>
               <Button
                 variant="outline"
                 size="icon"
                 className="h-24 w-24 rounded-full border-4 border-primary hover:bg-primary/10"
                 onClick={handleFingerprintVerify}
-                aria-label="Verificar con huella dactilar"
+                aria-label="Verificar con huella dactilar (simulado)"
               >
                 <Fingerprint className="h-12 w-12 text-primary" />
               </Button>
@@ -184,13 +193,12 @@ export default function LoginPage() {
         )}
       </Card>
       <p className="mt-8 text-center text-xs text-muted-foreground font-body">
-        Esto es una demostración. Para la autenticación real se requeriría WebAuthn e integración con backend.
-        <br />Prueba con: correo <code className="bg-muted p-1 rounded-sm">user@example.com</code>, contraseña <code className="bg-muted p-1 rounded-sm">password123</code> y rol <code className="bg-muted p-1 rounded-sm">Cliente</code>.
-        <br />O: <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>, <code className="bg-muted p-1 rounded-sm">password123</code>, rol <code className="bg-muted p-1 rounded-sm">Abogado</code>.
-        <br />O: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code>, <code className="bg-muted p-1 rounded-sm">password123</code>, rol <code className="bg-muted p-1 rounded-sm">Gerente</code>.
-        <br />O: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>, <code className="bg-muted p-1 rounded-sm">password123</code>, rol <code className="bg-muted p-1 rounded-sm">Administrador</code>.
+        Esto es una demostración. La persistencia del rol es simulada con localStorage.
+        <br />Prueba con: <code className="bg-muted p-1 rounded-sm">user@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Cliente</code>.
+        <br />O: <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Abogado</code>.
+        <br />O: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Gerente</code>.
+        <br />O: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Administrador</code>.
       </p>
     </div>
   );
 }
-
