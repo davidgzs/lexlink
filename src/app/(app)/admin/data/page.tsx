@@ -29,14 +29,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from '@/components/ui/badge';
 
 // Mapeo de estados de caso a traducciones y colores (similar a CaseCard)
-const caseStatusTranslations: Record<Case["status"], string> = {
+const caseTypeTranslations: Record<Case["status"], string> = {
   Administrative: "Administrativo",
   Judicial: "Judicial",
   Appeal: "Apelación",
   Closed: "Cerrado",
 };
 
-const statusColors: Record<Case["status"], string> = {
+const typeColors: Record<Case["status"], string> = {
     Administrative: "bg-blue-500",
     Judicial: "bg-orange-500",
     Appeal: "bg-purple-500",
@@ -90,7 +90,7 @@ export default function AdminDataPage() {
             <TableRow>
               <TableHead className="font-body">Nº Expediente</TableHead>
               <TableHead className="font-body">Cliente</TableHead>
-              <TableHead className="font-body">Estado</TableHead>
+              <TableHead className="font-body">Tipo</TableHead>
               <TableHead className="font-body">Abogado/a</TableHead>
               <TableHead className="text-right font-body">Acciones</TableHead>
             </TableRow>
@@ -101,8 +101,8 @@ export default function AdminDataPage() {
                 <TableCell className="font-medium font-body">{caseItem.caseNumber}</TableCell>
                 <TableCell className="font-body">{caseItem.clientName}</TableCell>
                 <TableCell>
-                  <Badge className={`${statusColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
-                    {caseStatusTranslations[caseItem.status]}
+                  <Badge className={`${typeColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
+                    {caseTypeTranslations[caseItem.status]}
                   </Badge>
                 </TableCell>
                 <TableCell className="font-body">{caseItem.attorneyAssigned || 'N/A'}</TableCell>
