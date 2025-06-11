@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Scale, LayoutDashboard, MessagesSquare, CalendarClock, FileArchive, LogOut, Database } from 'lucide-react';
+import { Scale, LayoutDashboard, MessagesSquare, CalendarClock, FileArchive, LogOut, Database, Users, Briefcase, Type } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,68 +12,61 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import type { UserProfile } from '@/types';
 
 
-const baseNavItems = [
+interface NavSubItem {
+  href: string;
+  label: string;
+  icon?: React.ElementType; // Opcional para submenús
+}
+interface NavItem {
+  href?: string; // Opcional si es solo un trigger de acordeón
+  label: string;
+  icon: React.ElementType;
+  subItems?: NavSubItem[];
+  adminOnly?: boolean;
+}
+
+const navConfig: NavItem[] = [
   { href: '/dashboard', label: 'Panel de Control', icon: LayoutDashboard },
   { href: '/messages', label: 'Mensajería Segura', icon: MessagesSquare },
   { href: '/appointments', label: 'Citas', icon: CalendarClock },
   { href: '/documents', label: 'Documentos y Firma', icon: FileArchive },
+  { 
+    label: 'Gestión de Datos', 
+    icon: Database,
+    adminOnly: true,
+    subItems: [
+      { href: '/admin/data', label: 'Expedientes', icon: Briefcase },
+      { href: '/admin/roles', label: 'Roles', icon: Users },
+      { href: '/admin/users', label: 'Usuarios', icon: Users },
+      { href: '/admin/casetypes', label: 'Tipos de Expedientes', icon: Type },
+    ]
+  },
 ];
 
-const adminNavItems = [
-  { href: '/admin/data', label: 'Gestión de Datos', icon: Database },
-];
 
 interface AppSidebarProps {
   className?: string;
-  isMobile?: boolean;
+  isMobile?: boolean; // No se usa directamente, pero se mantiene por si se reutiliza la estructura
   userRole?: UserProfile['role'];
 }
 
-export default function AppSidebar({ className, isMobile = false, userRole }: AppSidebarProps) {
+export default function AppSidebar({ className, userRole }: AppSidebarProps) {
   const pathname = usePathname();
 
-  const navItems = userRole === 'Administrador' ? [...baseNavItems, ...adminNavItems] : baseNavItems;
+  const getFilteredNavItems = (role?: UserProfile['role']) => {
+    return navConfig.filter(item => !item.adminOnly || (item.adminOnly && role === 'Administrador'));
+  };
 
-  const NavLink = ({ href, label, icon: Icon }: typeof baseNavItems[0]) => (
-    <Link
-      href={href}
-      className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-        pathname === href ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground",
-        isMobile ? "text-lg" : "text-base"
-      )}
-    >
-      <Icon className="h-5 w-5" />
-      {!isMobile && label}
-      {isMobile && <span className="font-medium">{label}</span>}
-    </Link>
-  );
-
-  const NavLinkCollapsed = ({ href, label, icon: Icon }: typeof baseNavItems[0]) => (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link
-            href={href}
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground md:h-9 md:w-9",
-               pathname === href ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground"
-            )}
-          >
-            <Icon className="h-5 w-5" />
-            <span className="sr-only">{label}</span>
-          </Link>
-        </TooltipTrigger>
-        <TooltipContent side="right" className="font-body bg-popover text-popover-foreground">
-          {label}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-
+  const currentNavItems = getFilteredNavItems(userRole);
 
   return (
     <div className={cn("flex h-full max-h-screen flex-col gap-2", className)}>
@@ -85,9 +78,56 @@ export default function AppSidebar({ className, isMobile = false, userRole }: Ap
       </div>
       <div className="flex-1">
         <nav className="grid items-start px-2 text-sm font-medium lg:px-4 gap-1">
-          {navItems.map((item) => (
-            <NavLink key={item.href} {...item} />
-          ))}
+          <Accordion type="multiple" className="w-full">
+            {currentNavItems.map((item) => (
+              item.subItems ? (
+                <AccordionItem value={item.label} key={item.label} className="border-none">
+                  <AccordionTrigger 
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground hover:no-underline",
+                       // Lógica para resaltar si alguna subruta está activa
+                       item.subItems.some(sub => pathname === sub.href) ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span className="text-base">{item.label}</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-0 pl-4">
+                    <nav className="grid gap-1">
+                      {item.subItems.map((subItem) => (
+                        <Link
+                          key={subItem.href}
+                          href={subItem.href}
+                          className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            pathname === subItem.href ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground/80",
+                            "text-sm"
+                          )}
+                        >
+                          {subItem.icon && <subItem.icon className="h-4 w-4" />}
+                          {!subItem.icon && <span className="w-4 h-4 block"></span>} {/* Espaciador si no hay icono */}
+                          {subItem.label}
+                        </Link>
+                      ))}
+                    </nav>
+                  </AccordionContent>
+                </AccordionItem>
+              ) : item.href ? (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    pathname === item.href ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground",
+                    "text-base"
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
+                </Link>
+              ) : null
+            ))}
+          </Accordion>
         </nav>
       </div>
       <div className="mt-auto p-4 border-t border-sidebar-border">
@@ -108,23 +148,58 @@ interface AppSidebarNavItemsProps {
 
 export function AppSidebarNavItems({ userRole }: AppSidebarNavItemsProps) {
     const pathname = usePathname();
-    const navItems = userRole === 'Administrador' ? [...baseNavItems, ...adminNavItems] : baseNavItems;
+    const getFilteredNavItems = (role?: UserProfile['role']) => {
+      return navConfig.filter(item => !item.adminOnly || (item.adminOnly && role === 'Administrador'));
+    };
+    const currentNavItems = getFilteredNavItems(userRole);
+
     return (
-         <>
-            {navItems.map((item) => (
-            <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                    "flex items-center gap-4 px-2.5 py-2 rounded-lg transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                    pathname === item.href ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground",
-                    "text-lg"
-                )}
-            >
-                <item.icon className="h-5 w-5" />
-                {item.label}
-            </Link>
+         <Accordion type="multiple" className="w-full">
+            {currentNavItems.map((item) => (
+               item.subItems ? (
+                <AccordionItem value={item.label} key={item.label} className="border-none">
+                  <AccordionTrigger 
+                     className={cn(
+                      "flex items-center gap-4 px-2.5 py-2 rounded-lg transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground hover:no-underline text-lg",
+                       item.subItems.some(sub => pathname === sub.href) ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.label}
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-0 pl-6">
+                     <nav className="grid gap-1">
+                      {item.subItems.map((subItem) => (
+                        <Link
+                          key={subItem.href}
+                          href={subItem.href}
+                          className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-lg",
+                            pathname === subItem.href ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground/80"
+                          )}
+                        >
+                          {subItem.icon && <subItem.icon className="h-4 w-4" />}
+                           {!subItem.icon && <span className="w-4 h-4 block"></span>}
+                          {subItem.label}
+                        </Link>
+                      ))}
+                    </nav>
+                  </AccordionContent>
+                </AccordionItem>
+              ) : item.href ? (
+                <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                        "flex items-center gap-4 px-2.5 py-2 rounded-lg transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-lg",
+                        pathname === item.href ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground"
+                    )}
+                >
+                    <item.icon className="h-5 w-5" />
+                    {item.label}
+                </Link>
+              ) : null
             ))}
-        </>
+        </Accordion>
     );
 }

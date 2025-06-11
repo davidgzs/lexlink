@@ -71,6 +71,7 @@ export interface UserProfile {
   id: string;
   name: string;
   email: string; 
-  role: UserAppRole | "Client" | "Attorney"; 
+  role: UserAppRole; 
   avatarUrl?: string;
 }
+
