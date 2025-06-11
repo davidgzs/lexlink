@@ -25,7 +25,7 @@ export default function DashboardPage() {
       </div>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-headline mb-4 text-foreground">Casos Activos</h2>
+        <h2 className="text-2xl font-headline mb-4 text-foreground">Expedientes Casos Activos</h2>
         {activeCases.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {activeCases.map((caseItem) => (
