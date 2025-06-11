@@ -42,7 +42,7 @@ export default function LandingPage() {
             </p>
             <Link href="/login">
               <Button size="lg" className="font-body">
-                Ver DEMO <ArrowRight className="ml-2 h-5 w-5" />
+                Acceder a Panel <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </div>
