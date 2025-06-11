@@ -40,11 +40,11 @@ export default function LandingPage() {
             <p className="text-lg md:text-xl text-foreground mb-8 max-w-3xl mx-auto">
               LexLINK conecta a los despachos de abogados con sus clientes en tiempo real de manera moderna y eficiente. Gestiona las citas, el progreso de sus casos y los expedientes. Comunicandose todo entre ellos de forma segura, todo en un solo lugar.
             </p>
-            <Link href="/login">
-              <Button size="lg" className="font-body">
-                Acceder a Panel <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+            <Button size="lg" className="font-body" asChild>
+              <Link href="https://sedejudicial.justicia.es/-/lexnet" target="_blank" rel="noopener noreferrer">
+                Visitar LexNET <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
           </div>
         </section>
 
