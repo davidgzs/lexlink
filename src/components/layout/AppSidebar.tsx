@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Scale, LayoutDashboard, MessagesSquare, CalendarClock, FileArchive, PenSquare, LogOut } from 'lucide-react';
+import { Scale, LayoutDashboard, MessagesSquare, CalendarClock, FileArchive, LogOut, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,25 +12,32 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { UserProfile } from '@/types';
 
 
-const navItems = [
+const baseNavItems = [
   { href: '/dashboard', label: 'Panel de Control', icon: LayoutDashboard },
   { href: '/messages', label: 'Mensajería Segura', icon: MessagesSquare },
   { href: '/appointments', label: 'Citas', icon: CalendarClock },
   { href: '/documents', label: 'Documentos y Firma', icon: FileArchive },
-  // { href: '/e-signature', label: 'Firma Electrónica', icon: PenSquare }, // Combined with Documents
+];
+
+const adminNavItems = [
+  { href: '/admin/data', label: 'Gestión de Datos', icon: Database },
 ];
 
 interface AppSidebarProps {
   className?: string;
   isMobile?: boolean;
+  userRole?: UserProfile['role'];
 }
 
-export default function AppSidebar({ className, isMobile = false }: AppSidebarProps) {
+export default function AppSidebar({ className, isMobile = false, userRole }: AppSidebarProps) {
   const pathname = usePathname();
 
-  const NavLink = ({ href, label, icon: Icon }: typeof navItems[0]) => (
+  const navItems = userRole === 'Administrador' ? [...baseNavItems, ...adminNavItems] : baseNavItems;
+
+  const NavLink = ({ href, label, icon: Icon }: typeof baseNavItems[0]) => (
     <Link
       href={href}
       className={cn(
@@ -45,7 +52,7 @@ export default function AppSidebar({ className, isMobile = false }: AppSidebarPr
     </Link>
   );
 
-  const NavLinkCollapsed = ({ href, label, icon: Icon }: typeof navItems[0]) => (
+  const NavLinkCollapsed = ({ href, label, icon: Icon }: typeof baseNavItems[0]) => (
     <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -95,8 +102,13 @@ export default function AppSidebar({ className, isMobile = false }: AppSidebarPr
   );
 }
 
-export function AppSidebarNavItems() {
+interface AppSidebarNavItemsProps {
+  userRole?: UserProfile['role'];
+}
+
+export function AppSidebarNavItems({ userRole }: AppSidebarNavItemsProps) {
     const pathname = usePathname();
+    const navItems = userRole === 'Administrador' ? [...baseNavItems, ...adminNavItems] : baseNavItems;
     return (
          <>
             {navItems.map((item) => (

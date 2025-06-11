@@ -1,3 +1,4 @@
+
 import AppHeader from '@/components/layout/AppHeader';
 import AppSidebar, { AppSidebarNavItems } from '@/components/layout/AppSidebar';
 import { mockUserProfile } from '@/lib/mockData';
@@ -13,10 +14,10 @@ export default function AppLayout({
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-sidebar md:block">
-        <AppSidebar />
+        <AppSidebar userRole={user.role} />
       </div>
       <div className="flex flex-col">
-        <AppHeader user={user} sidebarNavItems={<AppSidebarNavItems />} />
+        <AppHeader user={user} sidebarNavItems={<AppSidebarNavItems userRole={user.role} />} />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
          <ScrollArea className="h-full">
             {children}

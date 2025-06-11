@@ -17,7 +17,7 @@ import NotificationDropdown from '@/components/notifications/NotificationDropdow
 
 interface AppHeaderProps {
   user: UserProfile;
-  sidebarNavItems: React.ReactNode;
+  sidebarNavItems: React.ReactNode; // Will be AppSidebarNavItems with userRole passed
 }
 
 export default function AppHeader({ user, sidebarNavItems }: AppHeaderProps) {
@@ -32,6 +32,7 @@ export default function AppHeader({ user, sidebarNavItems }: AppHeaderProps) {
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs pt-12 bg-sidebar text-sidebar-foreground">
           <nav className="grid gap-6 text-lg font-medium">
+            {/* sidebarNavItems already includes userRole through AppLayout */}
             {sidebarNavItems}
           </nav>
         </SheetContent>
