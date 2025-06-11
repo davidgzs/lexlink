@@ -2,12 +2,13 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { mockCases, mockAppointments } from '@/lib/mockData';
+import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
+import { db } from '@/lib/firebase'; // Importa tu instancia de Firestore
 import CaseCard from '@/components/dashboard/CaseCard';
 import UpcomingAppointmentCard from '@/components/dashboard/UpcomingAppointmentCard';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Loader2 } from 'lucide-react';
 import type { UserAppRole, Case, Appointment as AppointmentType } from '@/types';
 
 export default function DashboardPage() {
@@ -15,6 +16,7 @@ export default function DashboardPage() {
   const [currentUserName, setCurrentUserName] = useState<string | null>(null);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [filteredAppointments, setFilteredAppointments] = useState<AppointmentType[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const role = localStorage.getItem('loggedInUserRole') as UserAppRole | null;
@@ -24,39 +26,97 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (currentUserRole && currentUserName) {
-      // Filter Cases
-      const allActiveCases = mockCases.filter(c => c.status !== 'Closed');
-      if (currentUserRole === 'Cliente') {
-        setFilteredCases(allActiveCases.filter(c => c.clientName === currentUserName));
-      } else if (currentUserRole === 'Abogado') {
-        setFilteredCases(allActiveCases.filter(c => c.attorneyAssigned === currentUserName));
-      } else { // Gerente, Administrador
-        setFilteredCases(allActiveCases);
+    async function fetchData() {
+      if (!currentUserRole || !currentUserName) {
+         // Si no hay rol o nombre de usuario, esperar o manejar según la lógica de tu app.
+         // Por ahora, si no hay usuario, no cargaremos nada o limpiaremos.
+        if (!currentUserRole && !currentUserName && localStorage.getItem('loggedInUserRole')) {
+          // Esto puede suceder brevemente al inicio si el localStorage tarda en leerse y setearse.
+          // No hacemos nada hasta que currentUserRole y currentUserName estén listos.
+        } else {
+          setFilteredCases([]);
+          setFilteredAppointments([]);
+          setLoading(false);
+        }
+        return;
       }
 
-      // Filter Appointments
-      const allUpcomingAppointments = mockAppointments
-        .filter(a => new Date(a.date) >= new Date() && a.status === 'Scheduled')
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .slice(0, 3);
+      setLoading(true);
 
-      if (currentUserRole === 'Cliente' || currentUserRole === 'Abogado') {
-        setFilteredAppointments(allUpcomingAppointments.filter(a => a.participants.includes(currentUserName)));
-      } else { // Gerente, Administrador
-        setFilteredAppointments(allUpcomingAppointments);
+      // Fetch Cases
+      try {
+        const casesCollectionRef = collection(db, "cases");
+        let casesQuery;
+
+        if (currentUserRole === 'Cliente') {
+          casesQuery = query(casesCollectionRef, where("clientName", "==", currentUserName), where("status", "!=", "Closed"));
+        } else if (currentUserRole === 'Abogado') {
+          casesQuery = query(casesCollectionRef, where("attorneyAssigned", "==", currentUserName), where("status", "!=", "Closed"));
+        } else { // Gerente, Administrador
+          casesQuery = query(casesCollectionRef, where("status", "!=", "Closed"));
+        }
+        
+        const caseSnapshot = await getDocs(casesQuery);
+        const fetchedCases: Case[] = [];
+        caseSnapshot.forEach((doc) => {
+          fetchedCases.push({ id: doc.id, ...doc.data() } as Case);
+        });
+        setFilteredCases(fetchedCases);
+      } catch (error) {
+        console.error("Error fetching cases:", error);
+        setFilteredCases([]); // Limpiar en caso de error
       }
-    } else {
-      // Default to all if no user info (or clear them)
-      setFilteredCases(mockCases.filter(c => c.status !== 'Closed'));
-      setFilteredAppointments(
-        mockAppointments
-        .filter(a => new Date(a.date) >= new Date() && a.status === 'Scheduled')
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-        .slice(0, 3)
-      );
+
+      // Fetch Appointments
+      try {
+        const appointmentsCollectionRef = collection(db, "appointments");
+        let appointmentsQuery;
+        const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+
+        if (currentUserRole === 'Cliente' || currentUserRole === 'Abogado') {
+          appointmentsQuery = query(
+            appointmentsCollectionRef,
+            where("participants", "array-contains", currentUserName),
+            where("date", ">=", today),
+            where("status", "==", "Scheduled"),
+            orderBy("date", "asc"),
+            limit(3)
+          );
+        } else { // Gerente, Administrador
+          appointmentsQuery = query(
+            appointmentsCollectionRef,
+            where("date", ">=", today),
+            where("status", "==", "Scheduled"),
+            orderBy("date", "asc"),
+            limit(3)
+          );
+        }
+        
+        const appointmentSnapshot = await getDocs(appointmentsQuery);
+        const fetchedAppointments: AppointmentType[] = [];
+        appointmentSnapshot.forEach((doc) => {
+          fetchedAppointments.push({ id: doc.id, ...doc.data() } as AppointmentType);
+        });
+        setFilteredAppointments(fetchedAppointments);
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
+        setFilteredAppointments([]); // Limpiar en caso de error
+      }
+      
+      setLoading(false);
     }
+
+    fetchData();
   }, [currentUserRole, currentUserName]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full min-h-[calc(100vh-200px)]">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="ml-4 font-body text-muted-foreground">Cargando datos...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-2">
