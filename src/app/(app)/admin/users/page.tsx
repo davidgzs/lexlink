@@ -23,7 +23,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Edit, Trash2, User, Briefcase, UserCog, Shield, Users as UsersIcon } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Edit, Trash2, User, Briefcase, UserCog, Shield, Users as UsersIcon, Filter } from "lucide-react";
 import type { UserAppRole } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
@@ -32,7 +33,7 @@ interface UserForAdminPage {
   name: string;
   email: string;
   role: UserAppRole;
-  avatarUrl?: string; // Not directly used in table but good for consistency
+  avatarUrl?: string;
 }
 
 const roleDisplayInfo: Record<UserAppRole, { icon: React.ElementType, badgeColor: string, translation: string }> = {
@@ -41,6 +42,8 @@ const roleDisplayInfo: Record<UserAppRole, { icon: React.ElementType, badgeColor
   Gerente: { icon: UserCog, badgeColor: "bg-purple-500", translation: "Gerente" },
   Administrador: { icon: Shield, badgeColor: "bg-red-500", translation: "Administrador" },
 };
+
+const availableRolesForFilter: UserAppRole[] = ["Cliente", "Abogado", "Gerente", "Administrador"];
 
 const initialDemoUsers: UserForAdminPage[] = [
   { id: 'user_juan_perez', name: 'Juan Pérez', email: 'user@example.com', role: 'Cliente', avatarUrl: 'https://placehold.co/100x100.png?text=JP' },
@@ -56,6 +59,7 @@ const initialDemoUsers: UserForAdminPage[] = [
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserForAdminPage[]>(initialDemoUsers);
   const [userToDelete, setUserToDelete] = useState<UserForAdminPage | null>(null);
+  const [selectedRoleFilter, setSelectedRoleFilter] = useState<UserAppRole | 'Todos'>('Todos');
   const { toast } = useToast();
 
   const handleEditUser = (user: UserForAdminPage) => {
@@ -77,16 +81,36 @@ export default function AdminUsersPage() {
     setUserToDelete(null);
   };
 
+  const filteredUsers = selectedRoleFilter === 'Todos'
+    ? users
+    : users.filter(user => user.role === selectedRoleFilter);
+
   return (
     <div className="container mx-auto py-2">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h1 className="text-3xl font-headline font-semibold text-primary flex items-center">
           <UsersIcon className="mr-3 h-8 w-8" />
           Gestión de Usuarios
         </h1>
-        <Button className="font-body" onClick={() => alert('Simulación: Abrir formulario para añadir nuevo usuario.')}>
-          Añadir Nuevo Usuario
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+          <Select value={selectedRoleFilter} onValueChange={(value) => setSelectedRoleFilter(value as UserAppRole | 'Todos')}>
+            <SelectTrigger className="w-full sm:w-[200px] font-body">
+              <div className="flex items-center">
+                <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Filtrar por Rol" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Todos">Todos los Roles</SelectItem>
+              {availableRolesForFilter.map(role => (
+                <SelectItem key={role} value={role}>{roleDisplayInfo[role].translation}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button className="font-body" onClick={() => alert('Simulación: Abrir formulario para añadir nuevo usuario.')}>
+            Añadir Nuevo Usuario
+          </Button>
+        </div>
       </div>
       <p className="font-body text-muted-foreground mb-6">
         Esta sección permite a los administradores gestionar las cuentas de los usuarios del sistema.
@@ -104,7 +128,7 @@ export default function AdminUsersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => {
+            {filteredUsers.map((user) => {
               const RoleIcon = roleDisplayInfo[user.role].icon;
               const roleBadgeColor = roleDisplayInfo[user.role].badgeColor;
               const roleTranslation = roleDisplayInfo[user.role].translation;
@@ -150,8 +174,8 @@ export default function AdminUsersPage() {
           </TableBody>
         </Table>
       </div>
-      {users.length === 0 && (
-        <p className="text-center font-body text-muted-foreground mt-6">No hay usuarios para mostrar.</p>
+      {filteredUsers.length === 0 && (
+        <p className="text-center font-body text-muted-foreground mt-6">No hay usuarios que coincidan con el filtro seleccionado.</p>
       )}
     </div>
   );
