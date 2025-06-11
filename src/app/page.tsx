@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ArrowRight, Scale } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import QuoteCarousel from "@/components/landing/QuoteCarousel"; // Importar el nuevo componente
 
 export default function LandingPage() {
   const features = [
@@ -47,6 +48,9 @@ export default function LandingPage() {
             </Button>
           </div>
         </section>
+
+        {/* Carrusel de Frases Publicitarias */}
+        <QuoteCarousel />
 
         <section className="pt-8 md:pt-12 pb-16 md:pb-24">
           <div className="container mx-auto">
