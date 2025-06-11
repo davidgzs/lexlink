@@ -26,13 +26,13 @@ export default function CaseCard({ caseItem }: CaseCardProps) {
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow flex flex-col h-full">
       <CardHeader>
-        <div className="flex justify-between items-start">
-          <CardTitle className="font-headline text-xl mb-1">{caseItem.caseNumber}</CardTitle>
+        <div className="flex items-center gap-2 mb-1">
           {caseItem.state === 'Abierto' ? (
-            <div className="flex items-center justify-center w-7 h-7 bg-green-500 rounded-full text-white font-semibold text-base" title="Abierto">A</div>
+            <div className="flex items-center justify-center w-7 h-7 bg-green-500 rounded-full text-white font-semibold text-base shrink-0" title="Abierto">A</div>
           ) : (
-            <div className="flex items-center justify-center w-7 h-7 bg-red-500 rounded-full text-white font-semibold text-base" title="Cerrado">C</div>
+            <div className="flex items-center justify-center w-7 h-7 bg-red-500 rounded-full text-white font-semibold text-base shrink-0" title="Cerrado">C</div>
           )}
+          <CardTitle className="font-headline text-xl">{caseItem.caseNumber}</CardTitle>
         </div>
         <CardDescription className="font-body text-sm">Cliente: {caseItem.clientName}</CardDescription>
       </CardHeader>
