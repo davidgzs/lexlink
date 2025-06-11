@@ -36,7 +36,7 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
   const badgeColor = statusColors[document.status];
 
   return (
-    <Card className="shadow-sm hover:shadow-md transition-shadow">
+    <Card className="shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2">
@@ -50,23 +50,28 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
         </div>
         <CardDescription className="font-body text-sm">ID Caso: {document.caseId} | Versión: {document.version}</CardDescription>
       </CardHeader>
-      <CardContent>
+
+      <CardContent className="flex-grow">
         <p className="font-body text-xs text-muted-foreground">Subido: {new Date(document.uploadedDate).toLocaleDateString('es-ES')}</p>
+        {document.status === "Awaiting Signature" && (
+          <Button
+            size="sm"
+            onClick={() => onSign(document)}
+            className="font-body bg-accent hover:bg-accent/90 text-accent-foreground w-full mt-4"
+          >
+            <PenSquare className="mr-2 h-4 w-4" /> Firmar Documento
+          </Button>
+        )}
       </CardContent>
-      <CardFooter className="flex justify-end flex-wrap gap-2">
+
+      <CardFooter className="flex justify-center gap-2">
         <Button variant="outline" size="sm" className="font-body" onClick={() => alert('Ver documento: ' + document.name)}>
           <Eye className="mr-2 h-4 w-4" /> Ver
         </Button>
         <Button variant="outline" size="sm" className="font-body" onClick={() => alert('Descargar documento: ' + document.name)}>
           <Download className="mr-2 h-4 w-4" /> Descargar
         </Button>
-        {document.status === "Awaiting Signature" && (
-          <Button size="sm" onClick={() => onSign(document)} className="font-body bg-accent hover:bg-accent/90 text-accent-foreground">
-            <PenSquare className="mr-2 h-4 w-4" /> Firmar Documento
-          </Button>
-        )}
       </CardFooter>
     </Card>
   );
 }
-
