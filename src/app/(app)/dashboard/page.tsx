@@ -97,7 +97,7 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-headline font-semibold text-primary">Panel de Control</h1>
         <Link href="/appointments#schedule">
           <Button>
-            <PlusCircle className="mr-2 h-4 w-4" /> Agendar Cita
+            <PlusCircle className="mr-2 h-4 w-4" /> Programar Cita
           </Button>
         </Link>
       </div>
