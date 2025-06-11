@@ -106,7 +106,7 @@ export default function ScheduleAppointmentDialog({
     };
     onAppointmentScheduled(newAppointment);
     toast({
-      title: `Cita ${appointmentToEdit ? 'Actualizada' : 'Programada'}`,
+      title: `Cita ${appointmentToEdit ? 'Actualizada' : 'Agendada'}`,
       description: `"${title}" el ${format(date, "PPP", { locale: es })} a las ${time}.`,
     });
     setOpen(false);
@@ -198,7 +198,7 @@ export default function ScheduleAppointmentDialog({
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button type="submit">{appointmentToEdit ? "Guardar Cambios" : "Programar Cita"}</Button>
+            <Button type="submit">{appointmentToEdit ? "Guardar Cambios" : "Agendar Cita"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
