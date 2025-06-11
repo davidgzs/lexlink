@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { mockCases } from '@/lib/mockData';
-import type { Case, CaseStatus } from '@/types';
+import type { Case, CaseStatus, CaseState } from '@/types';
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -82,10 +82,10 @@ export default function AdminDataPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="font-body text-center">Estado</TableHead>
               <TableHead className="font-body">Nº Expediente</TableHead>
               <TableHead className="font-body">Cliente</TableHead>
               <TableHead className="font-body">Tipo</TableHead>
-              <TableHead className="font-body">Estado</TableHead>
               <TableHead className="font-body">Abogado/a</TableHead>
               <TableHead className="text-right font-body">Acciones</TableHead>
             </TableRow>
@@ -93,19 +93,19 @@ export default function AdminDataPage() {
           <TableBody>
             {cases.map((caseItem) => (
               <TableRow key={caseItem.id}>
-                <TableCell className="font-medium font-body">{caseItem.caseNumber}</TableCell>
-                <TableCell className="font-body">{caseItem.clientName}</TableCell>
-                <TableCell>
-                  <Badge className={`${typeColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
-                    {caseTypeTranslations[caseItem.status]}
-                  </Badge>
-                </TableCell>
                 <TableCell className="text-center">
                   {caseItem.state === 'Abierto' ? (
                     <div className="flex items-center justify-center w-7 h-7 bg-green-500 rounded-full text-white font-semibold text-base mx-auto" title="Abierto">A</div>
                   ) : (
                     <div className="flex items-center justify-center w-7 h-7 bg-red-500 rounded-full text-white font-semibold text-base mx-auto" title="Cerrado">C</div>
                   )}
+                </TableCell>
+                <TableCell className="font-medium font-body">{caseItem.caseNumber}</TableCell>
+                <TableCell className="font-body">{caseItem.clientName}</TableCell>
+                <TableCell>
+                  <Badge className={`${typeColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
+                    {caseTypeTranslations[caseItem.status]}
+                  </Badge>
                 </TableCell>
                 <TableCell className="font-body">{caseItem.attorneyAssigned || 'N/A'}</TableCell>
                 <TableCell className="text-right space-x-2">
