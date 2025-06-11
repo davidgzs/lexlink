@@ -12,7 +12,7 @@ export const mockUserProfile: UserProfile = {
 export const mockCases: Case[] = [
   { id: 'C001', caseNumber: 'LEX-2024-001', clientName: 'Juan Pérez', status: 'Judicial', lastUpdate: '2024-10-26', description: 'Litigio civil sobre disputa de propiedad.', attorneyAssigned: 'Juana García' },
   { id: 'C002', caseNumber: 'LEX-2024-002', clientName: 'Roberto "Beto" Sanz', status: 'Administrative', lastUpdate: '2024-11-05', description: 'Constitución y registro de empresa.', attorneyAssigned: 'Miguel Torres' },
-  { id: 'C003', caseNumber: 'LEX-2024-003', clientName: 'Carlos Fernández', status: 'Appeal', lastUpdate: '2024-11-15', description: 'Recurso sobre una sentencia anterior relativa a obligaciones contractuales.', attorneyAssigned: 'Juana García' },
+  { id: 'C003', caseNumber: 'LEX-2024-003', clientName: 'Carlos Fernández', status: 'Administrative', lastUpdate: '2024-11-15', description: 'Recurso sobre una sentencia anterior relativa a obligaciones contractuales.', attorneyAssigned: 'Juana García' },
   { id: 'C004', caseNumber: 'LEX-2024-004', clientName: 'Diana Jiménez', status: 'Judicial', lastUpdate: '2024-09-30', description: 'Reclamación de propiedad intelectual resuelta con éxito.', attorneyAssigned: 'Miguel Torres' },
 ];
 
@@ -52,4 +52,5 @@ export const mockNotifications: Notification[] = [
   { id: 'N003', title: 'Documento Firmado', description: 'Escrito de Apelación_Final.pdf ha sido firmado correctamente.', timestamp: '2024-10-20T14:00:00Z', read: true, link: '/documents?docId=D003' },
   { id: 'N004', title: 'Actualización Estado del Caso', description: 'El estado del caso LEX-2024-003 cambió a "Apelación".', timestamp: '2024-11-15T08:00:00Z', read: true, link: '/dashboard' },
 ];
+
 
