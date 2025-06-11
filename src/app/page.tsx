@@ -55,7 +55,7 @@ export default function LandingPage() {
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {features.map((feature) => (
-                <Card key={feature.title} className="shadow-lg hover:shadow-xl transition-shadow">
+                <Card key={feature.title} className="shadow-lg hover:scale-105 hover:shadow-2xl hover:border-primary transition-all duration-300 ease-in-out">
                   <CardHeader>
                     <Image src={feature.image} alt={feature.title} width={600} height={400} className="rounded-t-lg" data-ai-hint={feature.hint}/>
                     <CardTitle className="font-headline mt-4">{feature.title}</CardTitle>
