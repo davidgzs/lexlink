@@ -2,8 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
-import { db } from '@/lib/firebase'; // Importa tu instancia de Firestore
+import { mockCases, mockAppointments } from '@/lib/mockData'; // Usar datos mock
 import CaseCard from '@/components/dashboard/CaseCard';
 import UpcomingAppointmentCard from '@/components/dashboard/UpcomingAppointmentCard';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Obtener el rol y nombre del usuario desde localStorage
     const role = localStorage.getItem('loggedInUserRole') as UserAppRole | null;
     const name = localStorage.getItem('loggedInUserName');
     setCurrentUserRole(role);
@@ -26,87 +26,60 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    async function fetchData() {
-      if (!currentUserRole || !currentUserName) {
-         // Si no hay rol o nombre de usuario, esperar o manejar según la lógica de tu app.
-         // Por ahora, si no hay usuario, no cargaremos nada o limpiaremos.
-        if (!currentUserRole && !currentUserName && localStorage.getItem('loggedInUserRole')) {
-          // Esto puede suceder brevemente al inicio si el localStorage tarda en leerse y setearse.
-          // No hacemos nada hasta que currentUserRole y currentUserName estén listos.
-        } else {
-          setFilteredCases([]);
-          setFilteredAppointments([]);
-          setLoading(false);
-        }
-        return;
-      }
-
+    // Filtrar datos mock basados en el usuario actual
+    if (currentUserRole && currentUserName) {
       setLoading(true);
 
-      // Fetch Cases
-      try {
-        const casesCollectionRef = collection(db, "cases");
-        let casesQuery;
-
+      // Simular una pequeña demora como si fuera una carga real
+      // setTimeout(() => {
+        // Filtrar Casos
+        let relevantCases: Case[];
         if (currentUserRole === 'Cliente') {
-          casesQuery = query(casesCollectionRef, where("clientName", "==", currentUserName), where("status", "!=", "Closed"));
+          relevantCases = mockCases.filter(
+            (c) => c.clientName === currentUserName && c.status !== 'Closed'
+          );
         } else if (currentUserRole === 'Abogado') {
-          casesQuery = query(casesCollectionRef, where("attorneyAssigned", "==", currentUserName), where("status", "!=", "Closed"));
+          relevantCases = mockCases.filter(
+            (c) => c.attorneyAssigned === currentUserName && c.status !== 'Closed'
+          );
         } else { // Gerente, Administrador
-          casesQuery = query(casesCollectionRef, where("status", "!=", "Closed"));
+          relevantCases = mockCases.filter((c) => c.status !== 'Closed');
         }
-        
-        const caseSnapshot = await getDocs(casesQuery);
-        const fetchedCases: Case[] = [];
-        caseSnapshot.forEach((doc) => {
-          fetchedCases.push({ id: doc.id, ...doc.data() } as Case);
-        });
-        setFilteredCases(fetchedCases);
-      } catch (error) {
-        console.error("Error fetching cases:", error);
-        setFilteredCases([]); // Limpiar en caso de error
-      }
+        setFilteredCases(relevantCases);
 
-      // Fetch Appointments
-      try {
-        const appointmentsCollectionRef = collection(db, "appointments");
-        let appointmentsQuery;
-        const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        // Filtrar Citas
+        let relevantAppointments: AppointmentType[];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalizar para comparar solo fechas
 
         if (currentUserRole === 'Cliente' || currentUserRole === 'Abogado') {
-          appointmentsQuery = query(
-            appointmentsCollectionRef,
-            where("participants", "array-contains", currentUserName),
-            where("date", ">=", today),
-            where("status", "==", "Scheduled"),
-            orderBy("date", "asc"),
-            limit(3)
+          relevantAppointments = mockAppointments.filter(
+            (a) =>
+              a.participants.includes(currentUserName) &&
+              new Date(a.date) >= today &&
+              a.status === 'Scheduled'
           );
         } else { // Gerente, Administrador
-          appointmentsQuery = query(
-            appointmentsCollectionRef,
-            where("date", ">=", today),
-            where("status", "==", "Scheduled"),
-            orderBy("date", "asc"),
-            limit(3)
+          relevantAppointments = mockAppointments.filter(
+            (a) => new Date(a.date) >= today && a.status === 'Scheduled'
           );
         }
-        
-        const appointmentSnapshot = await getDocs(appointmentsQuery);
-        const fetchedAppointments: AppointmentType[] = [];
-        appointmentSnapshot.forEach((doc) => {
-          fetchedAppointments.push({ id: doc.id, ...doc.data() } as AppointmentType);
-        });
-        setFilteredAppointments(fetchedAppointments);
-      } catch (error) {
-        console.error("Error fetching appointments:", error);
-        setFilteredAppointments([]); // Limpiar en caso de error
-      }
-      
-      setLoading(false);
-    }
+        // Ordenar y limitar citas
+        relevantAppointments.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        setFilteredAppointments(relevantAppointments.slice(0, 3));
 
-    fetchData();
+        setLoading(false);
+      // }, 300); // Demora simulada opcional
+    } else if (!localStorage.getItem('loggedInUserRole')) {
+      // Si no hay usuario en localStorage (ej. no se ha iniciado sesión)
+      setLoading(false);
+      setFilteredCases([]);
+      setFilteredAppointments([]);
+    }
+    // Si currentUserRole o currentUserName aún son null pero hay algo en localStorage,
+    // el primer useEffect los establecerá y este useEffect se volverá a ejecutar.
+    // Si no hay nada en localStorage, establecemos loading a false para evitar un spinner infinito.
+
   }, [currentUserRole, currentUserName]);
 
   if (loading) {
