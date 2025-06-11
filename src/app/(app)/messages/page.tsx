@@ -2,36 +2,62 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { mockConversations, mockMessages, mockUserProfile } from '@/lib/mockData';
-import type { Conversation, Message } from '@/types';
+import { mockConversations, mockMessages } from '@/lib/mockData';
+import type { Conversation, Message, UserAppRole } from '@/types';
 import ConversationItem from '@/components/messages/ConversationItem';
 import ChatMessage from '@/components/messages/ChatMessage';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Paperclip, Smile, MessagesSquare } from 'lucide-react'; // Added MessagesSquare
+import { Send, Paperclip, Smile, MessagesSquare } from 'lucide-react'; 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function MessagesPage() {
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
+  const [allConversations, setAllConversations] = useState<Conversation[]>(mockConversations);
+  const [filteredConversations, setFilteredConversations] = useState<Conversation[]>([]);
+  
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
-  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
+  const [currentUserRole, setCurrentUserRole] = useState<UserAppRole | null>(null);
+  const [currentUserName, setCurrentUserName] = useState<string | null>(null);
 
   useEffect(() => {
-    if (selectedConversationId) {
-      // Simulate fetching messages for the selected conversation
-      const convMessages = mockMessages.filter(m => m.conversationId === selectedConversationId)
-        .map(m => ({ ...m, isOwnMessage: m.senderId === `client_${mockUserProfile.name.toLowerCase().replace(' ','_')}`})); // Adjust senderId check logic as needed
+    const role = localStorage.getItem('loggedInUserRole') as UserAppRole | null;
+    const name = localStorage.getItem('loggedInUserName');
+    setCurrentUserRole(role);
+    setCurrentUserName(name);
+  }, []);
+
+  useEffect(() => {
+    if (currentUserRole && currentUserName) {
+      if (currentUserRole === 'Cliente') {
+        setFilteredConversations(allConversations.filter(c => c.clientName === currentUserName));
+      } else if (currentUserRole === 'Abogado') {
+        setFilteredConversations(allConversations.filter(c => c.attorneyName === currentUserName));
+      } else { // Gerente, Administrador
+        setFilteredConversations(allConversations);
+      }
+    } else {
+      setFilteredConversations(allConversations);
+    }
+  }, [currentUserRole, currentUserName, allConversations]);
+
+  const selectedConversation = filteredConversations.find(c => c.id === selectedConversationId);
+
+  useEffect(() => {
+    if (selectedConversationId && currentUserName) {
+      const convMessages = mockMessages
+        .filter(m => m.conversationId === selectedConversationId)
+        .map(m => ({ ...m, isOwnMessage: m.senderName === currentUserName }));
       setMessages(convMessages);
     } else {
       setMessages([]);
     }
-  }, [selectedConversationId]);
+  }, [selectedConversationId, currentUserName]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -39,13 +65,24 @@ export default function MessagesPage() {
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedConversationId) return;
+    if (!newMessage.trim() || !selectedConversationId || !currentUserName) return;
+
+    // Construct senderId based on convention in mockData, if possible
+    // For simplicity, we use currentUserName for senderName and a generic or constructed ID.
+    // A more robust system would use user IDs.
+    let senderIdForNewMessage = `user_${currentUserName.toLowerCase().replace(/\s+/g, '_')}`;
+    if(currentUserRole === 'Abogado') {
+      senderIdForNewMessage = `attorney_${currentUserName.toLowerCase().replace(/\s+/g, '_')}`;
+    } else if (currentUserRole === 'Cliente') {
+      senderIdForNewMessage = `client_${currentUserName.toLowerCase().replace(/\s+/g, '_')}`;
+    }
+
 
     const message: Message = {
       id: `M${Date.now()}`,
       conversationId: selectedConversationId,
-      senderId: `client_${mockUserProfile.name.toLowerCase().replace(' ','_')}`, // Adjust as per your user model
-      senderName: mockUserProfile.name,
+      senderId: senderIdForNewMessage, 
+      senderName: currentUserName,
       content: newMessage,
       timestamp: new Date().toISOString(),
       isOwnMessage: true,
@@ -53,8 +90,8 @@ export default function MessagesPage() {
     setMessages(prev => [...prev, message]);
     setNewMessage('');
 
-    // Update conversation preview (mock)
-    setConversations(prevConvs => prevConvs.map(conv => 
+    // Update conversation preview in allConversations, which will reflect in filteredConversations
+    setAllConversations(prevConvs => prevConvs.map(conv => 
       conv.id === selectedConversationId ? { ...conv, lastMessagePreview: newMessage, lastMessageTimestamp: new Date().toISOString() } : conv
     ));
   };
@@ -67,7 +104,7 @@ export default function MessagesPage() {
         </CardHeader>
         <CardContent className="p-0 flex-grow overflow-hidden">
           <ScrollArea className="h-full p-2">
-            {conversations.map(conv => (
+            {filteredConversations.map(conv => (
               <ConversationItem
                 key={conv.id}
                 conversation={conv}
@@ -75,6 +112,9 @@ export default function MessagesPage() {
                 onSelect={() => setSelectedConversationId(conv.id)}
               />
             ))}
+             {filteredConversations.length === 0 && (
+              <p className="p-4 text-center font-body text-muted-foreground">No hay conversaciones que coincidan con tu perfil.</p>
+            )}
           </ScrollArea>
         </CardContent>
       </Card>
@@ -90,7 +130,7 @@ export default function MessagesPage() {
                 </Avatar>
                 <div>
                     <h2 className="font-headline text-lg">{selectedConversation.clientName} & {selectedConversation.attorneyName}</h2>
-                    <p className="text-xs text-muted-foreground font-body">En línea</p> {/* Placeholder status */}
+                    <p className="text-xs text-muted-foreground font-body">En línea</p> 
                 </div>
               </div>
             </CardHeader>

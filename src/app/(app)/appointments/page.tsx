@@ -3,21 +3,45 @@
 
 import { useState, useEffect } from 'react';
 import { mockAppointments } from '@/lib/mockData';
-import type { Appointment } from '@/types';
+import type { Appointment, UserAppRole } from '@/types';
 import AppointmentListItem from '@/components/appointments/AppointmentListItem';
 import ScheduleAppointmentDialog from '@/components/appointments/ScheduleAppointmentDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from '@/components/ui/card';
-import { es } from 'date-fns/locale'; // Importar el locale 'es'
+import { es } from 'date-fns/locale'; 
 
 export default function AppointmentsPage() {
-  const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments);
+  const [allAppointments, setAllAppointments] = useState<Appointment[]>(mockAppointments);
+  const [filteredAppointments, setFilteredAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  
+  const [currentUserRole, setCurrentUserRole] = useState<UserAppRole | null>(null);
+  const [currentUserName, setCurrentUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const role = localStorage.getItem('loggedInUserRole') as UserAppRole | null;
+    const name = localStorage.getItem('loggedInUserName');
+    setCurrentUserRole(role);
+    setCurrentUserName(name);
+  }, []);
+
+  useEffect(() => {
+    if (currentUserRole && currentUserName) {
+      if (currentUserRole === 'Cliente' || currentUserRole === 'Abogado') {
+        setFilteredAppointments(allAppointments.filter(a => a.participants.includes(currentUserName)));
+      } else { // Gerente, Administrador
+        setFilteredAppointments(allAppointments);
+      }
+    } else {
+      setFilteredAppointments(allAppointments); // Show all if no user context, or handle as needed
+    }
+  }, [currentUserRole, currentUserName, allAppointments]);
+
 
   const handleAppointmentScheduled = (appointment: Appointment) => {
-    setAppointments(prev => {
+    setAllAppointments(prev => { // Update the source of truth
       const existingIndex = prev.findIndex(a => a.id === appointment.id);
       if (existingIndex > -1) {
         const updated = [...prev];
@@ -26,29 +50,26 @@ export default function AppointmentsPage() {
       }
       return [...prev, appointment];
     });
-    setSelectedAppointment(null); // Close dialog / reset edit state
+    setSelectedAppointment(null); 
   };
 
   const handleEditAppointment = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
-    // The dialog will open via its own state when appointmentToEdit is set
   };
 
   const handleCancelAppointment = (appointmentId: string) => {
-    setAppointments(prev => prev.map(app => app.id === appointmentId ? {...app, status: "Cancelled"} : app));
+    setAllAppointments(prev => prev.map(app => app.id === appointmentId ? {...app, status: "Cancelled"} : app));
   };
 
-  const upcomingAppointments = appointments.filter(a => new Date(a.date) >= new Date() && a.status === 'Scheduled').sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const pastAppointments = appointments.filter(a => new Date(a.date) < new Date() || a.status !== 'Scheduled').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const upcomingAppointments = filteredAppointments.filter(a => new Date(a.date) >= new Date() && a.status === 'Scheduled').sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const pastAppointments = filteredAppointments.filter(a => new Date(a.date) < new Date() || a.status !== 'Scheduled').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   
-  // For calendar view, filter appointments for selectedDate
-  const appointmentsForSelectedDate = appointments.filter(
+  const appointmentsForSelectedDate = filteredAppointments.filter(
     (appointment) =>
       selectedDate &&
       new Date(appointment.date).toDateString() === selectedDate.toDateString() &&
       appointment.status === 'Scheduled'
   );
-
 
   return (
     <div className="container mx-auto py-2">
@@ -75,7 +96,7 @@ export default function AppointmentsPage() {
                 ))}
               </div>
             ) : (
-              <p className="font-body text-muted-foreground">No hay próximas citas.</p>
+              <p className="font-body text-muted-foreground">No hay próximas citas que coincidan con tu perfil.</p>
             )}
           </section>
           <section>
@@ -87,7 +108,7 @@ export default function AppointmentsPage() {
                 ))}
               </div>
             ) : (
-              <p className="font-body text-muted-foreground">No hay citas anteriores.</p>
+              <p className="font-body text-muted-foreground">No hay citas anteriores que coincidan con tu perfil.</p>
             )}
           </section>
         </TabsContent>
@@ -100,9 +121,9 @@ export default function AppointmentsPage() {
                             selected={selectedDate}
                             onSelect={setSelectedDate}
                             className="rounded-md border"
-                            modifiers={{ scheduled: appointments.filter(a => a.status === "Scheduled").map(a => new Date(a.date)) }}
+                            modifiers={{ scheduled: filteredAppointments.filter(a => a.status === "Scheduled").map(a => new Date(a.date)) }}
                             modifiersClassNames={{ scheduled: 'bg-primary/20 rounded-full' }}
-                            locale={es} // Corregido: usar el objeto de locale importado
+                            locale={es}
                         />
                     </CardContent>
                 </Card>
@@ -123,12 +144,11 @@ export default function AppointmentsPage() {
             </div>
         </TabsContent>
       </Tabs>
-       {/* This ensures the dialog opens when selectedAppointment is set for editing */}
       {selectedAppointment && (
         <ScheduleAppointmentDialog
           appointmentToEdit={selectedAppointment}
           onAppointmentScheduled={handleAppointmentScheduled}
-          triggerButton={<span />} // Hidden trigger, dialog controlled by selectedAppointment
+          triggerButton={<span />} 
         />
       )}
     </div>

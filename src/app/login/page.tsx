@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Scale, Fingerprint, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { UserAppRole, UserProfile } from '@/types'; 
+import type { UserAppRole } from '@/types'; 
 
 type LoginStep = 'credentials' | 'fingerprint' | 'verifying' | 'error';
 
@@ -24,7 +24,6 @@ export default function LoginPage() {
   const [loginStep, setLoginStep] = useState<LoginStep>('credentials');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Clear any existing "logged in user" on page load to ensure a fresh login
   useEffect(() => {
     localStorage.removeItem('loggedInUserRole');
     localStorage.removeItem('loggedInUserName');
@@ -44,12 +43,12 @@ export default function LoginPage() {
 
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    if (
-      (email === 'user@example.com' && password === 'password123' && selectedRole === 'Cliente') ||
-      (email === 'abogado@example.com' && password === 'password123' && selectedRole === 'Abogado') ||
-      (email === 'gerente@example.com' && password === 'password123' && selectedRole === 'Gerente') ||
-      (email === 'admin@example.com' && password === 'password123' && selectedRole === 'Administrador')
-    ) {
+    const isClient = email === 'user@example.com' && password === 'password123' && selectedRole === 'Cliente';
+    const isAttorney = email === 'abogado@example.com' && password === 'password123' && selectedRole === 'Abogado';
+    const isManager = email === 'gerente@example.com' && password === 'password123' && selectedRole === 'Gerente';
+    const isAdmin = email === 'admin@example.com' && password === 'password123' && selectedRole === 'Administrador';
+
+    if (isClient || isAttorney || isManager || isAdmin) {
       setLoginStep('fingerprint');
     } else {
       setErrorMessage('Correo electrónico, contraseña o rol incorrectos.');
@@ -64,8 +63,19 @@ export default function LoginPage() {
 
     if (selectedRole && email) {
       localStorage.setItem('loggedInUserRole', selectedRole);
-      const userName = email.split('@')[0].replace(/\./g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()); // Basic name from email
-      localStorage.setItem('loggedInUserName', userName || 'Usuario');
+      
+      let userName = email.split('@')[0].replace(/\./g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()); // Basic name
+      if (email === 'user@example.com' && selectedRole === 'Cliente') {
+        userName = 'Juan Pérez';
+      } else if (email === 'abogado@example.com' && selectedRole === 'Abogado') {
+        userName = 'Juana García'; // Asignamos un abogado específico para las pruebas
+      } else if (email === 'gerente@example.com' && selectedRole === 'Gerente') {
+        userName = 'Gerente User';
+      } else if (email === 'admin@example.com' && selectedRole === 'Administrador') {
+        userName = 'Admin User';
+      }
+
+      localStorage.setItem('loggedInUserName', userName);
       localStorage.setItem('loggedInUserEmail', email);
       localStorage.setItem('loggedInUserAvatar', `https://placehold.co/100x100.png?text=${userName.substring(0,1) || 'U'}`);
     }
@@ -194,10 +204,10 @@ export default function LoginPage() {
       </Card>
       <p className="mt-8 text-center text-xs text-muted-foreground font-body">
         Esto es una demostración. La persistencia del rol es simulada con localStorage.
-        <br />Prueba con: <code className="bg-muted p-1 rounded-sm">user@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Cliente</code>.
-        <br />O: <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Abogado</code>.
-        <br />O: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Gerente</code>.
-        <br />O: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Administrador</code>.
+        <br />Cliente: <code className="bg-muted p-1 rounded-sm">user@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Cliente</code> (Verá datos de Juan Pérez).
+        <br />Abogado: <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Abogado</code> (Verá datos de Juana García).
+        <br />Gerente: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Gerente</code> (Verá todos los datos).
+        <br />Admin: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>, pw: <code className="bg-muted p-1 rounded-sm">password123</code>, rol: <code className="bg-muted p-1 rounded-sm">Administrador</code> (Verá todos los datos).
       </p>
     </div>
   );

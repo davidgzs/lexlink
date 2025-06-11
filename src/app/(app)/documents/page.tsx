@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { mockDocuments, mockCases } from '@/lib/mockData';
-import type { Document } from '@/types';
+import type { Document, UserAppRole, Case } from '@/types';
 import DocumentListItem from '@/components/documents/DocumentListItem';
 import SignDocumentDialog from '@/components/documents/SignDocumentDialog';
 import { Input } from '@/components/ui/input';
@@ -12,34 +12,78 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from 'lucide-react';
 
 export default function DocumentsPage() {
-  const [documents, setDocuments] = useState<Document[]>(mockDocuments);
+  const [allDocuments, setAllDocuments] = useState<Document[]>(mockDocuments);
+  const [filteredUserDocuments, setFilteredUserDocuments] = useState<Document[]>([]);
   const [documentToSign, setDocumentToSign] = useState<Document | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCaseId, setSelectedCaseId] = useState<string>('all');
+  const [selectedCaseId, setSelectedCaseId] = useState<string>('all'); // This filters within the user's documents
+
+  const [currentUserRole, setCurrentUserRole] = useState<UserAppRole | null>(null);
+  const [currentUserName, setCurrentUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const role = localStorage.getItem('loggedInUserRole') as UserAppRole | null;
+    const name = localStorage.getItem('loggedInUserName');
+    setCurrentUserRole(role);
+    setCurrentUserName(name);
+  }, []);
+
+  useEffect(() => {
+    if (currentUserRole && currentUserName) {
+      if (currentUserRole === 'Cliente') {
+        const clientCaseIds = mockCases
+          .filter(c => c.clientName === currentUserName)
+          .map(c => c.id);
+        setFilteredUserDocuments(allDocuments.filter(doc => clientCaseIds.includes(doc.caseId)));
+      } else if (currentUserRole === 'Abogado') {
+        const attorneyCaseIds = mockCases
+          .filter(c => c.attorneyAssigned === currentUserName)
+          .map(c => c.id);
+        setFilteredUserDocuments(allDocuments.filter(doc => attorneyCaseIds.includes(doc.caseId)));
+      } else { // Gerente, Administrador
+        setFilteredUserDocuments(allDocuments);
+      }
+    } else {
+      setFilteredUserDocuments(allDocuments); // Or an empty array, depending on desired behavior
+    }
+  }, [currentUserRole, currentUserName, allDocuments]);
 
   const handleSignDocument = (doc: Document) => {
     setDocumentToSign(doc);
   };
 
   const handleDocumentSigned = (signedDocumentId: string) => {
-    setDocuments(prevDocs => 
-      prevDocs.map(doc => 
+    const updateDocs = (docs: Document[]) => 
+      docs.map(doc => 
         doc.id === signedDocumentId ? { ...doc, status: "Signed" } : doc
-      )
-    );
+      );
+    setAllDocuments(prevDocs => updateDocs(prevDocs));
+    // The filteredUserDocuments will update automatically due to the dependency on allDocuments if it changes
+    // or via its own useEffect if allDocuments is the source of truth for modifications.
+    // For simplicity, we can also directly update it if its state is derived only once.
+    setFilteredUserDocuments(prevDocs => updateDocs(prevDocs));
     setDocumentToSign(null);
   };
 
-  const filteredDocuments = documents
+  // Further filter based on search term and selected case ID (dropdown)
+  const displayDocuments = filteredUserDocuments
     .filter(doc => 
       doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.caseId.toLowerCase().includes(searchTerm.toLowerCase())
+      doc.caseId.toLowerCase().includes(searchTerm.toLowerCase()) // Search might be by case ID string
     )
     .filter(doc => selectedCaseId === 'all' || doc.caseId === selectedCaseId);
 
-  const awaitingSignatureDocs = filteredDocuments.filter(d => d.status === "Awaiting Signature");
-  const signedDocs = filteredDocuments.filter(d => d.status === "Signed");
-  const otherDocs = filteredDocuments.filter(d => d.status !== "Awaiting Signature" && d.status !== "Signed");
+  const awaitingSignatureDocs = displayDocuments.filter(d => d.status === "Awaiting Signature");
+  const signedDocs = displayDocuments.filter(d => d.status === "Signed");
+  const otherDocs = displayDocuments.filter(d => d.status !== "Awaiting Signature" && d.status !== "Signed");
+
+  // Cases for the dropdown should also be filtered by user
+  const userCasesForFilter = mockCases.filter(c => {
+    if (!currentUserRole || !currentUserName || currentUserRole === 'Gerente' || currentUserRole === 'Administrador') return true;
+    if (currentUserRole === 'Cliente') return c.clientName === currentUserName;
+    if (currentUserRole === 'Abogado') return c.attorneyAssigned === currentUserName;
+    return false;
+  });
 
 
   return (
@@ -63,7 +107,7 @@ export default function DocumentsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los Casos</SelectItem>
-              {mockCases.map(c => (
+              {userCasesForFilter.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.caseNumber}</SelectItem>
               ))}
             </SelectContent>
@@ -73,16 +117,16 @@ export default function DocumentsPage() {
 
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-4">
-          <TabsTrigger value="all" className="font-body">Todos ({filteredDocuments.length})</TabsTrigger>
+          <TabsTrigger value="all" className="font-body">Todos ({displayDocuments.length})</TabsTrigger>
           <TabsTrigger value="awaiting" className="font-body">Pendientes de Firma ({awaitingSignatureDocs.length})</TabsTrigger>
           <TabsTrigger value="signed" className="font-body">Firmados ({signedDocs.length})</TabsTrigger>
           <TabsTrigger value="other" className="font-body">Otros ({otherDocs.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
-          {filteredDocuments.length > 0 ? (
+          {displayDocuments.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredDocuments.map((doc) => (
+              {displayDocuments.map((doc) => (
                 <DocumentListItem key={doc.id} document={doc} onSign={handleSignDocument} />
               ))}
             </div>
@@ -124,7 +168,6 @@ export default function DocumentsPage() {
           )}
         </TabsContent>
       </Tabs>
-
 
       <SignDocumentDialog
         documentToSign={documentToSign}
