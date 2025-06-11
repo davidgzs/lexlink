@@ -3,15 +3,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Scale, LayoutDashboard, MessagesSquare, CalendarClock, FileArchive, LogOut, Database, Users, Briefcase, Type } from 'lucide-react';
+import { Scale, LayoutDashboard, MessagesSquare, CalendarClock, FileArchive, LogOut, Database, Users, Briefcase, Type, Activity } from 'lucide-react'; // Added Activity
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   Accordion,
   AccordionContent,
@@ -24,10 +18,10 @@ import type { UserProfile } from '@/types';
 interface NavSubItem {
   href: string;
   label: string;
-  icon?: React.ElementType; // Opcional para submenús
+  icon?: React.ElementType; 
 }
 interface NavItem {
-  href?: string; // Opcional si es solo un trigger de acordeón
+  href?: string; 
   label: string;
   icon: React.ElementType;
   subItems?: NavSubItem[];
@@ -48,6 +42,7 @@ const navConfig: NavItem[] = [
       { href: '/admin/roles', label: 'Roles', icon: Users },
       { href: '/admin/users', label: 'Usuarios', icon: Users },
       { href: '/admin/casetypes', label: 'Tipos de Expedientes', icon: Type },
+      { href: '/admin/states', label: 'Estados', icon: Activity }, // Nueva entrada para Estados
     ]
   },
 ];
@@ -55,7 +50,7 @@ const navConfig: NavItem[] = [
 
 interface AppSidebarProps {
   className?: string;
-  isMobile?: boolean; // No se usa directamente, pero se mantiene por si se reutiliza la estructura
+  isMobile?: boolean; 
   userRole?: UserProfile['role'];
 }
 
@@ -85,8 +80,7 @@ export default function AppSidebar({ className, userRole }: AppSidebarProps) {
                   <AccordionTrigger 
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground hover:no-underline",
-                       // Lógica para resaltar si alguna subruta está activa
-                       item.subItems.some(sub => pathname === sub.href) ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""
+                       item.subItems.some(sub => pathname === sub.href || (pathname.startsWith(sub.href) && sub.href !== '/')) ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""
                     )}
                   >
                     <item.icon className="h-5 w-5" />
@@ -105,7 +99,7 @@ export default function AppSidebar({ className, userRole }: AppSidebarProps) {
                           )}
                         >
                           {subItem.icon && <subItem.icon className="h-4 w-4" />}
-                          {!subItem.icon && <span className="w-4 h-4 block"></span>} {/* Espaciador si no hay icono */}
+                          {!subItem.icon && <span className="w-4 h-4 block"></span>} 
                           {subItem.label}
                         </Link>
                       ))}
@@ -161,7 +155,7 @@ export function AppSidebarNavItems({ userRole }: AppSidebarNavItemsProps) {
                   <AccordionTrigger 
                      className={cn(
                       "flex items-center gap-4 px-2.5 py-2 rounded-lg transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-foreground hover:no-underline text-lg",
-                       item.subItems.some(sub => pathname === sub.href) ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""
+                       item.subItems.some(sub => pathname === sub.href || (pathname.startsWith(sub.href) && sub.href !== '/')) ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""
                     )}
                   >
                     <item.icon className="h-5 w-5" />
@@ -203,3 +197,4 @@ export function AppSidebarNavItems({ userRole }: AppSidebarNavItemsProps) {
         </Accordion>
     );
 }
+
