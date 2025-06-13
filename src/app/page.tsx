@@ -42,7 +42,7 @@ export default function LandingPage() {
               LexLINK conecta a los despachos de abogados con sus clientes en tiempo real de manera moderna y eficiente. Gestiona las citas, el progreso de sus casos y los expedientes. Comunicandose todo entre ellos de forma segura, todo en un solo lugar.
             </p>
             <Button size="lg" className="font-body" asChild>
-              <Link href="https://asesorialegaldigital.com.es" target="_blank" rel="noopener noreferrer">
+              <Link href="https://www.asesorialegaldigital.com.es" target="_blank" rel="noopener noreferrer">
                 Visitar ALD <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
