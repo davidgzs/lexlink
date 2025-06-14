@@ -30,19 +30,20 @@ import { Signature } from "lucide-react";
 interface SignDocumentDialogProps {
   documentToSign: Document | null;
   onClose: () => void;
-  onDocumentSigned: (documentId: string) => void;
+  onDocumentSigned: (documentId: string) => void; // This prop might become unused or repurposed if no actual signing occurs
 }
 
 export default function SignDocumentDialog({ documentToSign, onClose, onDocumentSigned }: SignDocumentDialogProps) {
   const [agreed, setAgreed] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [showDemoSignAlert, setShowDemoSignAlert] = useState(false);
+  const [showDemoInfoAlert, setShowDemoInfoAlert] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (documentToSign) {
       setIsOpen(true);
       setAgreed(false); // Reset agreement on new document
+      setShowDemoInfoAlert(false); // Reset demo alert
     } else {
       setIsOpen(false);
     }
@@ -53,24 +54,20 @@ export default function SignDocumentDialog({ documentToSign, onClose, onDocument
     if (!agreed) {
       toast({
         title: "Se Requiere Aceptación",
-        description: "Debes aceptar los términos antes de firmar.",
+        description: "Debes aceptar los términos antes de continuar.",
         variant: "destructive",
       });
       return;
     }
-    // Mostrar la alerta de demostración antes de proceder
-    setShowDemoSignAlert(true);
+    // Directamente mostrar la alerta informativa de demostración
+    setShowDemoInfoAlert(true);
   };
 
-  const proceedWithSign = () => {
-    if (!documentToSign) return;
-    onDocumentSigned(documentToSign.id);
-    toast({
-      title: "Documento Firmado (Simulación)",
-      description: `El documento "${documentToSign.name}" ha sido marcado como firmado.`,
-    });
-    setShowDemoSignAlert(false); // Cerrar la alerta de demostración
+  // Esta función se llama al pulsar "OK" en la alerta de demostración
+  const handleCloseDemoInfoAlert = () => {
+    setShowDemoInfoAlert(false); // Cerrar la alerta de demostración
     handleDialogClose(); // Cerrar el diálogo principal de firma
+    // No se llama a onDocumentSigned, no se muestra toast de éxito.
   };
 
   const handleDialogClose = () => {
@@ -115,16 +112,16 @@ export default function SignDocumentDialog({ documentToSign, onClose, onDocument
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showDemoSignAlert} onOpenChange={setShowDemoSignAlert}>
+      <AlertDialog open={showDemoInfoAlert} onOpenChange={setShowDemoInfoAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-headline">Advertencia de Demostración</AlertDialogTitle>
+            <AlertDialogTitle className="font-headline">Funcionalidad de Demostración</AlertDialogTitle>
             <AlertDialogDescription className="font-body">
-              Esta funcionalidad de firma electrónica es una simulación. Al pulsar "OK", se marcará el documento como firmado para fines de esta demostración.
+              Esta funcionalidad de firma electrónica es una simulación para demostración. Al pulsar "OK", este diálogo se cerrará y no se realizará ninguna acción de firma real sobre el documento.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={proceedWithSign} className="font-body">
+            <AlertDialogAction onClick={handleCloseDemoInfoAlert} className="font-body">
               OK
             </AlertDialogAction>
           </AlertDialogFooter>
