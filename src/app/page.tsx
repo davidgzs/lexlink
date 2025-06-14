@@ -16,6 +16,8 @@ export default function LandingPage() {
     { title: "Seguimiento Transparente de los Casos y Expedientes", description: "Sigue tu caso en cada fase: Administrativa, Judicial, Recurso y Cierre.", image: "/images/seguimiento-casos.png", hint: "progress chart" },
   ];
 
+  const demoVersion = "1.0";
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-primary text-primary-foreground p-4 shadow-md">
@@ -43,7 +45,7 @@ export default function LandingPage() {
             </p>
             <Button size="lg" className="font-body" asChild>
               <Link href="https://sedejudicial.justicia.es/-/lexnet" target="_blank" rel="noopener noreferrer">
-                Visitar LexNET <ArrowRight className="ml-2 h-5 w-5" />
+                Enlace a LexNET <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
@@ -76,6 +78,7 @@ export default function LandingPage() {
 
       <footer className="bg-primary text-primary-foreground py-8 text-center">
         <p className="font-body">&copy; {new Date().getFullYear()} LexLINK. Todos los derechos reservados.</p>
+        <p className="font-body text-sm mt-1">DEMO versión: {demoVersion}</p>
       </footer>
     </div>
   );

@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Appointment } from "@/types";
+import type { Appointment, AppointmentType } from "@/types";
 import { CalendarClock, Video, Users, FilePenLine } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
@@ -9,17 +9,18 @@ interface UpcomingAppointmentCardProps {
   appointment: Appointment;
 }
 
-const appointmentIcons: Record<Appointment["type"], React.ElementType> = {
-  "In-Person": Users,
-  "Video Conference": Video,
-  "Written Consultation": FilePenLine,
+const appointmentIcons: Record<AppointmentType, React.ElementType> = {
+  "Presencial": Users,
+  "Videoconferencia": Video,
+  "Consulta Escrita": FilePenLine,
 };
 
-const appointmentTypeTranslations: Record<Appointment["type"], string> = {
-  "In-Person": "Presencial",
-  "Video Conference": "Videoconferencia",
-  "Written Consultation": "Consulta Escrita",
-};
+// appointmentTypeTranslations is no longer needed as appointment.type will be Spanish
+// const appointmentTypeTranslations: Record<Appointment["type"], string> = {
+//   "Presencial": "Presencial",
+//   "Videoconferencia": "Videoconferencia",
+//   "Consulta Escrita": "Consulta Escrita",
+// };
 
 
 export default function UpcomingAppointmentCard({ appointment }: UpcomingAppointmentCardProps) {
@@ -36,7 +37,7 @@ export default function UpcomingAppointmentCard({ appointment }: UpcomingAppoint
         <p className="font-body text-sm text-muted-foreground">
           {new Date(appointment.date).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} a las {appointment.time}
         </p>
-        <p className="font-body text-xs text-muted-foreground">Tipo: {appointmentTypeTranslations[appointment.type]}</p>
+        <p className="font-body text-xs text-muted-foreground">Tipo: {appointment.type}</p> {/* Directly use appointment.type */}
         {appointment.caseId && (
           <p className="font-body text-xs text-muted-foreground">Caso: {appointment.caseId}</p>
         )}

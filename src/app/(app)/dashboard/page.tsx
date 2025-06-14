@@ -19,11 +19,21 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [selectedCaseStateFilter, setSelectedCaseStateFilter] = useState<CaseState | 'Todos'>('Abierto');
 
+  const [abiertosCount, setAbiertosCount] = useState(0);
+  const [cerradosCount, setCerradosCount] = useState(0);
+  const [todosCount, setTodosCount] = useState(0);
+
   useEffect(() => {
     const role = localStorage.getItem('loggedInUserRole') as UserAppRole | null;
     const name = localStorage.getItem('loggedInUserName');
     setCurrentUserRole(role);
     setCurrentUserName(name);
+
+    if (role === 'Administrador' || role === 'Gerente') {
+      setSelectedCaseStateFilter('Todos');
+    } else {
+      setSelectedCaseStateFilter('Abierto');
+    }
   }, []);
 
   useEffect(() => {
@@ -39,6 +49,11 @@ export default function DashboardPage() {
         userRelevantCases = [...mockCases];
       }
 
+      // Calculate counts based on userRelevantCases
+      setAbiertosCount(userRelevantCases.filter(c => c.state === 'Abierto').length);
+      setCerradosCount(userRelevantCases.filter(c => c.state === 'Cerrado').length);
+      setTodosCount(userRelevantCases.length);
+
       let stateFilteredCases: Case[];
       if (selectedCaseStateFilter === 'Abierto') {
         stateFilteredCases = userRelevantCases.filter(c => c.state === 'Abierto');
@@ -49,7 +64,6 @@ export default function DashboardPage() {
       }
       setFilteredCases(stateFilteredCases);
 
-      // Appointments logic remains the same
       let relevantAppointments: AppointmentType[];
       const today = new Date();
       today.setHours(0, 0, 0, 0); 
@@ -59,25 +73,28 @@ export default function DashboardPage() {
           (a) =>
             a.participants.includes(currentUserName) &&
             new Date(a.date) >= today &&
-            a.status === 'Scheduled'
+            a.status === 'Programada'
         );
       } else { // Gerente, Administrador
         relevantAppointments = mockAppointments.filter(
-          (a) => new Date(a.date) >= today && a.status === 'Scheduled'
+          (a) => new Date(a.date) >= today && a.status === 'Programada'
         );
       }
       relevantAppointments.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
       setFilteredAppointments(relevantAppointments.slice(0, 3));
 
       setLoading(false);
-    } else if (!localStorage.getItem('loggedInUserRole')) { // If no user is logged in
+    } else if (!localStorage.getItem('loggedInUserRole')) {
       setLoading(false);
       setFilteredCases([]);
       setFilteredAppointments([]);
+      setAbiertosCount(0);
+      setCerradosCount(0);
+      setTodosCount(0);
     }
   }, [currentUserRole, currentUserName, selectedCaseStateFilter]);
 
-  if (loading) {
+  if (loading && !(currentUserRole && currentUserName)) {
     return (
       <div className="flex justify-center items-center h-full min-h-[calc(100vh-200px)]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -102,13 +119,18 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-headline text-foreground">Expedientes</h2>
         </div>
         <Tabs value={selectedCaseStateFilter} onValueChange={(value) => setSelectedCaseStateFilter(value as CaseState | 'Todos')} className="w-full mb-6">
-          <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
-            <TabsTrigger value="Abierto" className="font-body">Abiertos</TabsTrigger>
-            <TabsTrigger value="Cerrado" className="font-body">Cerrados</TabsTrigger>
-            <TabsTrigger value="Todos" className="font-body">Todos</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 md:w-[450px]">
+            <TabsTrigger value="Abierto" className="font-body">Abiertos ({abiertosCount})</TabsTrigger>
+            <TabsTrigger value="Cerrado" className="font-body">Cerrados ({cerradosCount})</TabsTrigger>
+            <TabsTrigger value="Todos" className="font-body">Todos ({todosCount})</TabsTrigger>
           </TabsList>
           <TabsContent value={selectedCaseStateFilter} className="mt-4">
-            {filteredCases.length > 0 ? (
+            {loading && (currentUserRole && currentUserName) ? (
+                <div className="flex justify-center items-center py-10">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="ml-3 font-body text-muted-foreground">Actualizando expedientes...</p>
+                </div>
+            ) : filteredCases.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCases.map((caseItem) => (
                   <CaseCard key={caseItem.id} caseItem={caseItem} />
@@ -125,7 +147,12 @@ export default function DashboardPage() {
 
       <section>
         <h2 className="text-2xl font-headline mb-4 text-foreground">Próximas Citas</h2>
-        {filteredAppointments.length > 0 ? (
+        {loading && (currentUserRole && currentUserName) ? (
+            <div className="flex justify-center items-center py-10">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                 <p className="ml-3 font-body text-muted-foreground">Actualizando citas...</p>
+            </div>
+        ) : filteredAppointments.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAppointments.map((appointment) => (
               <UpcomingAppointmentCard key={appointment.id} appointment={appointment} />

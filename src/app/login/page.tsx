@@ -1,18 +1,19 @@
 
 "use client";
 
-import { useState, type FormEvent, useEffect } from 'react';
+import { useState, type FormEvent, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Scale, Fingerprint, Loader2 } from "lucide-react";
+import { Scale, Fingerprint, Loader2, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { UserAppRole } from '@/types'; 
+import type { UserAppRole } from '@/types';
+import { mockUsers } from '@/lib/mockData';
 
-type LoginStep = 'credentials' | 'fingerprint' | 'verifying' | 'error';
+type LoginStep = 'credentials' | 'fingerprint' | 'otpCodeInput' | 'verifying' | 'error';
 
 const availableRoles: UserAppRole[] = ["Cliente", "Abogado", "Gerente", "Administrador"];
 
@@ -22,14 +23,60 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserAppRole | undefined>(undefined);
   const [loginStep, setLoginStep] = useState<LoginStep>('credentials');
+  const [otpCode, setOtpCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const fingerprintTimeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     localStorage.removeItem('loggedInUserRole');
     localStorage.removeItem('loggedInUserName');
     localStorage.removeItem('loggedInUserEmail');
     localStorage.removeItem('loggedInUserAvatar');
+    localStorage.removeItem('loggedInUserId');
   }, []);
+
+  useEffect(() => {
+    // Clear any existing timeout when the component unmounts or loginStep changes
+    return () => {
+      if (fingerprintTimeoutIdRef.current) {
+        clearTimeout(fingerprintTimeoutIdRef.current);
+        fingerprintTimeoutIdRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loginStep === 'fingerprint') {
+      if (fingerprintTimeoutIdRef.current) { // Clear previous timeout if any
+        clearTimeout(fingerprintTimeoutIdRef.current);
+      }
+      fingerprintTimeoutIdRef.current = setTimeout(() => {
+        setErrorMessage('Tiempo de espera agotado para la verificación biométrica. Por favor, inténtalo con un código de verificación.');
+        setLoginStep('otpCodeInput');
+        fingerprintTimeoutIdRef.current = null; // Clear ref after timeout fires
+      }, 15000); // 15 seconds
+    } else {
+      // If not in fingerprint step, ensure timeout is cleared
+      if (fingerprintTimeoutIdRef.current) {
+        clearTimeout(fingerprintTimeoutIdRef.current);
+        fingerprintTimeoutIdRef.current = null;
+      }
+    }
+  }, [loginStep]);
+
+
+  const proceedToDashboard = (user: typeof mockUsers[0]) => {
+    if (fingerprintTimeoutIdRef.current) {
+      clearTimeout(fingerprintTimeoutIdRef.current);
+      fingerprintTimeoutIdRef.current = null;
+    }
+    localStorage.setItem('loggedInUserRole', user.role);
+    localStorage.setItem('loggedInUserName', user.name);
+    localStorage.setItem('loggedInUserEmail', user.email);
+    localStorage.setItem('loggedInUserAvatar', user.avatarUrl || `https://placehold.co/100x100.png?text=${user.name.substring(0,1).toUpperCase() || 'U'}`);
+    localStorage.setItem('loggedInUserId', user.id);
+    router.push('/dashboard');
+  };
 
   const handleCredentialSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -41,38 +88,13 @@ export default function LoginPage() {
     setLoginStep('verifying');
     setErrorMessage('');
 
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    let loginSuccess = false;
-    let userNameToStore = 'Usuario Desconocido';
-    let emailToStore = email; // Default to entered email
-    let avatarToStore = `https://placehold.co/100x100.png?text=${email.substring(0,1).toUpperCase() || 'U'}`;
+    const userToLogin = mockUsers.find(
+      user => user.email.toLowerCase() === email.toLowerCase() && user.role === selectedRole
+    );
 
-    if (password === 'password123') { // Central password for simulation
-      if (selectedRole === 'Cliente' && email.toLowerCase() === 'user@example.com') {
-        loginSuccess = true;
-        userNameToStore = 'Juan Pérez';
-        avatarToStore = `https://placehold.co/100x100.png?text=JP`;
-      } else if (selectedRole === 'Abogado' && email.toLowerCase() === 'abogado@example.com') {
-        loginSuccess = true;
-        userNameToStore = 'Juana García';
-        avatarToStore = `https://placehold.co/100x100.png?text=JG`;
-      } else if (selectedRole === 'Gerente' && email.toLowerCase() === 'gerente@example.com') {
-        loginSuccess = true;
-        userNameToStore = 'Gerente User';
-        avatarToStore = `https://placehold.co/100x100.png?text=G`;
-      } else if (selectedRole === 'Administrador' && email.toLowerCase() === 'admin@example.com') {
-        loginSuccess = true;
-        userNameToStore = 'Admin User';
-        avatarToStore = `https://placehold.co/100x100.png?text=A`;
-      }
-    }
-
-    if (loginSuccess) {
-      localStorage.setItem('loggedInUserRole', selectedRole);
-      localStorage.setItem('loggedInUserName', userNameToStore);
-      localStorage.setItem('loggedInUserEmail', emailToStore);
-      localStorage.setItem('loggedInUserAvatar', avatarToStore);
+    if (userToLogin && password === 'password123') {
       setLoginStep('fingerprint');
     } else {
       setErrorMessage('Correo electrónico, contraseña o rol incorrectos.');
@@ -80,18 +102,76 @@ export default function LoginPage() {
     }
   };
 
-  const handleFingerprintVerify = async () => {
+  const handleFingerprintAttempt = async () => {
+    if (fingerprintTimeoutIdRef.current) {
+      clearTimeout(fingerprintTimeoutIdRef.current);
+      fingerprintTimeoutIdRef.current = null;
+    }
+
     setLoginStep('verifying');
     setErrorMessage('');
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate verification
-    // User details already stored in localStorage by handleCredentialSubmit
-    router.push('/dashboard'); 
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
+
+    const userToLogin = mockUsers.find(
+      user => user.email.toLowerCase() === email.toLowerCase() && user.role === selectedRole
+    );
+
+    if (!userToLogin) { 
+        setErrorMessage('Error inesperado, usuario no encontrado tras validación inicial.');
+        setLoginStep('error');
+        return;
+    }
+
+    if (Math.random() < 0.7) { 
+      proceedToDashboard(userToLogin);
+    } else { 
+      setErrorMessage('Verificación biométrica fallida. Por favor, inténtalo con un código de verificación.');
+      setLoginStep('otpCodeInput'); 
+    }
+  };
+
+  const handleOtpSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoginStep('verifying');
+    setErrorMessage('');
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const userToLogin = mockUsers.find(
+      user => user.email.toLowerCase() === email.toLowerCase() && user.role === selectedRole
+    );
+    
+    if (!userToLogin) {
+        setErrorMessage('Error inesperado, usuario no encontrado.');
+        setLoginStep('error');
+        return;
+    }
+
+    if (otpCode === '1234') {
+      proceedToDashboard(userToLogin);
+    } else {
+      setErrorMessage('Código de verificación incorrecto.');
+      setLoginStep('otpCodeInput'); 
+    }
   };
 
   const handleTryAgain = () => {
+    if (fingerprintTimeoutIdRef.current) {
+      clearTimeout(fingerprintTimeoutIdRef.current);
+      fingerprintTimeoutIdRef.current = null;
+    }
     setLoginStep('credentials');
-    setPassword(''); 
+    setPassword('');
+    setOtpCode('');
     setErrorMessage('');
+  }
+
+  const switchToOtpInput = () => {
+    if (fingerprintTimeoutIdRef.current) {
+      clearTimeout(fingerprintTimeoutIdRef.current);
+      fingerprintTimeoutIdRef.current = null;
+    }
+    setErrorMessage('');
+    setLoginStep('otpCodeInput');
   }
 
   return (
@@ -102,7 +182,11 @@ export default function LoginPage() {
       </div>
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline text-center">Acceso Seguro al Portal</CardTitle>
+          <CardTitle className="text-2xl font-headline text-center">
+            {loginStep === 'fingerprint' ? "Autenticación Biométrica" :
+             loginStep === 'otpCodeInput' ? "Verificación por Código" :
+             "Acceso Seguro al Portal"}
+          </CardTitle>
           {loginStep === 'credentials' && (
             <CardDescription className="text-center font-body">
               Introduce tus credenciales y selecciona tu rol para acceder.
@@ -110,7 +194,12 @@ export default function LoginPage() {
           )}
           {loginStep === 'fingerprint' && (
             <CardDescription className="text-center font-body">
-              Verifica tu identidad usando tu huella dactilar (simulado).
+              Por favor, utiliza tu huella dactilar para verificar tu identidad. Tienes 15 segundos.
+            </CardDescription>
+          )}
+          {loginStep === 'otpCodeInput' && (
+            <CardDescription className="text-center font-body">
+              Introduce el código de verificación (simulado: 1234).
             </CardDescription>
           )}
            {loginStep === 'verifying' && (
@@ -120,9 +209,10 @@ export default function LoginPage() {
           )}
         </CardHeader>
         <CardContent>
-          {loginStep === 'error' && (
+          {errorMessage && (loginStep === 'otpCodeInput' || loginStep === 'credentials' || loginStep === 'error' || loginStep === 'fingerprint') && (
             <Alert variant="destructive" className="mb-4">
-              <AlertTitle className="font-headline">Fallo de Inicio de Sesión</AlertTitle>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle className="font-headline">Aviso de Autenticación</AlertTitle>
               <AlertDescription className="font-body">{errorMessage}</AlertDescription>
             </Alert>
           )}
@@ -173,33 +263,54 @@ export default function LoginPage() {
           )}
 
           {loginStep === 'fingerprint' && (
-            <div className="flex flex-col items-center space-y-6">
-              <p className="text-center text-muted-foreground font-body">
-                Toca el icono de huella dactilar para verificar (simulado).
-              </p>
+            <div className="space-y-6 text-center">
               <Button
                 variant="outline"
-                size="icon"
-                className="h-24 w-24 rounded-full border-4 border-primary hover:bg-primary/10"
-                onClick={handleFingerprintVerify}
-                aria-label="Verificar con huella dactilar (simulado)"
+                size="lg"
+                className="w-full h-32 flex flex-col items-center justify-center border-dashed border-2 hover:border-primary group"
+                onClick={handleFingerprintAttempt}
               >
-                <Fingerprint className="h-12 w-12 text-primary" />
+                <Fingerprint className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="mt-2 font-body text-muted-foreground group-hover:text-primary">Verificar Huella</span>
               </Button>
-              <Button variant="link" onClick={handleTryAgain} className="font-body">
-                Usar credenciales en su lugar
+              <Button variant="link" onClick={switchToOtpInput} className="font-body w-full">
+                Usar un código de verificación en su lugar
               </Button>
             </div>
+          )}
+
+          {loginStep === 'otpCodeInput' && (
+            <form onSubmit={handleOtpSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="otp" className="font-body">Código de Verificación</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="Introduce el código"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  required
+                  className="font-body text-center tracking-widest"
+                  maxLength={6}
+                />
+              </div>
+              <Button type="submit" className="w-full font-body">
+                Verificar Código
+              </Button>
+              <Button variant="link" onClick={() => {setErrorMessage(''); setLoginStep('fingerprint');}} className="font-body w-full">
+                 Volver a verificación biométrica
+              </Button>
+            </form>
           )}
 
           {loginStep === 'verifying' && (
             <div className="flex flex-col items-center justify-center space-y-4 py-8">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
-              <p className="font-body text-muted-foreground">Verificando tu identidad...</p>
+              <p className="font-body text-muted-foreground">Verificando...</p>
             </div>
           )}
         </CardContent>
-        {loginStep === 'error' && (
+        {loginStep === 'error' && ( 
             <CardFooter className="flex-col gap-2">
                  <Button onClick={handleTryAgain} className="w-full font-body">
                     Intentar de Nuevo
@@ -210,6 +321,8 @@ export default function LoginPage() {
       <p className="mt-8 text-center text-xs text-muted-foreground font-body max-w-xl">
         Esto es una demostración. La persistencia del rol es simulada con localStorage.
         <br />Contraseña para todos los usuarios: <code className="bg-muted p-1 rounded-sm">password123</code>
+        <br />Código OTP simulado: <code className="bg-muted p-1 rounded-sm">1234</code>. 
+        <br />La huella tiene un 70% de probabilidad de éxito si se pulsa antes de 15s; si no, falla por tiempo agotado.
         <br />Ejemplos de acceso (usa el rol correspondiente en el desplegable):
         <br />- Cliente (Juan Pérez): <code className="bg-muted p-1 rounded-sm">user@example.com</code>
         <br />- Abogado (Juana García): <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>
@@ -219,3 +332,6 @@ export default function LoginPage() {
     </div>
   );
 }
+    
+
+    

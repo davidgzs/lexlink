@@ -9,16 +9,17 @@ interface CaseCardProps {
   caseItem: Case;
 }
 
-// Icons and translations for CaseStatus (Type: Judicial/Administrative)
+// Icons for CaseStatus (Type: Judicial/Administrative)
 const caseTypeIcons: Record<CaseStatus, React.ElementType> = {
-  Administrative: FileText,
+  Administrativo: FileText,
   Judicial: Gavel,
 };
 
-const caseTypeTranslations: Record<CaseStatus, string> = {
-  Administrative: "Administrativo",
-  Judicial: "Judicial",
-};
+// caseTypeTranslations is no longer needed as caseItem.status will be Spanish
+// const caseTypeTranslations: Record<CaseStatus, string> = {
+//   Administrativo: "Administrativo",
+//   Judicial: "Judicial",
+// };
 
 export default function CaseCard({ caseItem }: CaseCardProps) {
   const TypeIcon = caseTypeIcons[caseItem.status];
@@ -39,7 +40,7 @@ export default function CaseCard({ caseItem }: CaseCardProps) {
       <CardContent className="flex-grow">
         <div className="flex items-center text-sm text-muted-foreground mb-2">
           <TypeIcon className="mr-1 h-4 w-4" />
-          <span>Tipo: {caseTypeTranslations[caseItem.status]}</span>
+          <span>Tipo: {caseItem.status}</span> {/* Directly use caseItem.status */}
         </div>
         <p className="font-body text-sm text-muted-foreground mb-2 line-clamp-3">{caseItem.description}</p>
         <p className="font-body text-xs text-muted-foreground">Última Actualización: {new Date(caseItem.lastUpdate).toLocaleDateString('es-ES')}</p>
