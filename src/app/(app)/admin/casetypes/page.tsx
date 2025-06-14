@@ -279,7 +279,7 @@ export default function AdminCaseTypesPage() {
                     </div>
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="types">Mostrar Solo Tipos Maestros</SelectItem>
+                    <SelectItem value="types">Mostrar Solo Tipos</SelectItem>
                     <SelectItem value="subtypes">Mostrar Solo Subtipos</SelectItem>
                     <SelectItem value="all">Mostrar Todos</SelectItem>
                 </SelectContent>
@@ -343,7 +343,7 @@ export default function AdminCaseTypesPage() {
       {displayedCaseTypes.length === 0 && (
         <p className="text-center font-body text-muted-foreground mt-6">
             {filterDisplayMode === 'all' ? 'No hay tipos o subtipos de expedientes definidos.' : 
-             filterDisplayMode === 'types' ? 'No hay tipos maestros definidos.' :
+             filterDisplayMode === 'types' ? 'No hay tipos definidos.' :
              'No hay subtipos que coincidan con el filtro actual.'
             }
         </p>
@@ -358,17 +358,17 @@ export default function AdminCaseTypesPage() {
             </DialogTitle>
             <DialogDescription>
               {subtypeDialogMode === 'add' 
-                ? "Selecciona el tipo maestro y completa los detalles del nuevo subtipo." 
+                ? "Selecciona el tipo padre y completa los detalles del nuevo subtipo." 
                 : `Editando el subtipo: ${editingCaseType?.name}`}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {subtypeDialogMode === 'add' && (
               <div className="space-y-2">
-                <Label htmlFor="parentMasterId" className="font-semibold">Tipo Maestro Padre</Label>
+                <Label htmlFor="parentMasterId" className="font-semibold">Tipo Padre</Label>
                 <Select value={formParentMasterId} onValueChange={(value) => setFormParentMasterId(value as 'judicial' | 'administrativo')}>
                   <SelectTrigger id="parentMasterId">
-                    <SelectValue placeholder="Selecciona un tipo maestro" />
+                    <SelectValue placeholder="Selecciona un tipo padre" />
                   </SelectTrigger>
                   <SelectContent>
                     {initialCaseTypes.filter(ct => ct.isMaster).map(master => (
@@ -380,7 +380,7 @@ export default function AdminCaseTypesPage() {
             )}
              {subtypeDialogMode === 'edit' && editingCaseType && (
                  <div className="space-y-1">
-                    <Label className="font-semibold text-sm">Tipo Maestro Padre:</Label>
+                    <Label className="font-semibold text-sm">Tipo Padre:</Label>
                     <p className="text-sm text-muted-foreground p-2 bg-muted rounded-md">
                         {caseTypes.find(ct => ct.id === editingCaseType.parentMasterId)?.name || 'N/A'}
                     </p>
@@ -418,7 +418,7 @@ export default function AdminCaseTypesPage() {
       <Dialog open={isEditMasterDialogOpen} onOpenChange={(isOpen) => { setIsEditMasterDialogOpen(isOpen); if (!isOpen) resetForms(); }}>
         <DialogContent className="sm:max-w-[525px] font-body">
           <DialogHeader>
-            <DialogTitle className="font-headline">Editar Descripción del Tipo Maestro: {editingCaseType?.name}</DialogTitle>
+            <DialogTitle className="font-headline">Editar Descripción del Tipo: {editingCaseType?.name}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
@@ -461,3 +461,4 @@ export default function AdminCaseTypesPage() {
     </div>
   );
 }
+
