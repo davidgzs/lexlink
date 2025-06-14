@@ -49,8 +49,8 @@ const initialDemoUsers: UserForAdminPage[] = [
   { id: 'client_diana_jimenez', name: 'Diana Jiménez', email: 'diana.jimenez@example.net', role: 'Cliente', isActive: true },
   { id: 'manager_user', name: 'Gerente User', email: 'gerente@example.com', role: 'Gerente', avatarUrl: 'https://placehold.co/100x100.png?text=G', isActive: true },
   { id: 'admin_user', name: 'Admin User', email: 'admin@example.com', role: 'Administrador', avatarUrl: 'https://placehold.co/100x100.png?text=A', isActive: true },
-  { id: 'user_inactive_test', name: 'Cliente Inactivo Ejemplo', email: 'inactive.client@example.com', role: 'Cliente', isActive: false },
-  { id: 'attorney_inactive_test', name: 'Abogado Inactivo Ejemplo', email: 'inactive.lawyer@example.com', role: 'Abogado', isActive: false, avatarUrl: 'https://placehold.co/100x100.png?text=IA' },
+  { id: 'user_david_gonzalez', name: 'David González', email: 'david.gonzalez@example.com', role: 'Cliente', isActive: false, avatarUrl: 'https://placehold.co/100x100.png?text=DG' },
+  { id: 'attorney_angela_diaz', name: 'Ángela Díaz', email: 'angela.diaz@example.com', role: 'Abogado', isActive: false, avatarUrl: 'https://placehold.co/100x100.png?text=AD' },
 ];
 
 export default function AdminUsersPage() {
@@ -237,3 +237,5 @@ export default function AdminUsersPage() {
   );
 }
 
+
+    
