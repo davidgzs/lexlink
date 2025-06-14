@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  // DialogTrigger, // No longer needed if controlled by parent
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,15 +25,16 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import type { Appointment, AppointmentType, Case, UserProfile } from "@/types";
-import { CalendarIcon, PlusCircle } from "lucide-react";
+import { CalendarIcon } from "lucide-react"; // Removed PlusCircle
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 
 interface ScheduleAppointmentDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   appointmentToEdit?: Appointment | null;
   onAppointmentScheduled: (appointment: Appointment) => void;
-  triggerButton?: React.ReactNode;
   currentUser: UserProfile | null;
   users: UserProfile[];
   cases: Case[];
@@ -46,14 +47,14 @@ const timeSlots = [
 ];
 
 export default function ScheduleAppointmentDialog({
+  open,
+  onOpenChange,
   appointmentToEdit,
   onAppointmentScheduled,
-  triggerButton,
   currentUser,
   users,
   cases,
 }: ScheduleAppointmentDialogProps) {
-  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [type, setType] = useState<AppointmentType | undefined>(undefined);
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -65,41 +66,41 @@ export default function ScheduleAppointmentDialog({
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>(undefined);
   const [selectedAttorneyId, setSelectedAttorneyId] = useState<string | undefined>(undefined);
 
-  // Effect to open dialog when appointmentToEdit changes (for editing)
   useEffect(() => {
-    if (appointmentToEdit) {
-      setOpen(true);
-    }
-  }, [appointmentToEdit]);
+    if (open && currentUser) {
+      if (appointmentToEdit) { // Populate for editing
+        setTitle(appointmentToEdit.title);
+        setType(appointmentToEdit.type);
+        setDate(new Date(appointmentToEdit.date));
+        setTime(appointmentToEdit.time);
+        setCaseId(appointmentToEdit.caseId);
+        setNotes(''); // Or appointmentToEdit.notes if needed
 
-  // Effect to reset/populate form when dialog opens or appointmentToEdit changes
-  useEffect(() => {
-    if (!open) {
+        const clientParticipant = users.find(u => u.name === appointmentToEdit.participants[0] && u.role === 'Cliente');
+        const attorneyParticipant = users.find(u => appointmentToEdit.participants.length > 1 && u.name === appointmentToEdit.participants[1] && u.role === 'Abogado');
+        
+        setSelectedClientId(clientParticipant?.id);
+        setSelectedAttorneyId(attorneyParticipant?.id);
+      } else { // Populate for a new appointment
         setTitle('');
         setType(undefined);
         setDate(undefined);
         setTime(undefined);
         setCaseId(undefined);
         setNotes('');
-        setSelectedClientId(currentUser?.role === 'Cliente' ? currentUser.id : undefined);
-        setSelectedAttorneyId(currentUser?.role === 'Abogado' ? currentUser.id : undefined);
-    } else if (appointmentToEdit && currentUser) { // Ensure currentUser is available for edit logic
-        setTitle(appointmentToEdit.title);
-        setType(appointmentToEdit.type);
-        setDate(new Date(appointmentToEdit.date));
-        setTime(appointmentToEdit.time);
-        setCaseId(appointmentToEdit.caseId);
-        setNotes('');
-
-        const clientParticipant = users.find(u => u.name === appointmentToEdit.participants[0] && u.role === 'Cliente');
-        const attorneyParticipant = users.find(u => u.name === appointmentToEdit.participants[1] && u.role === 'Abogado');
-        
-        setSelectedClientId(clientParticipant?.id);
-        setSelectedAttorneyId(attorneyParticipant?.id);
-        
-    } else if (open && !appointmentToEdit && currentUser) { // Dialog is open for a new appointment
         setSelectedClientId(currentUser.role === 'Cliente' ? currentUser.id : undefined);
         setSelectedAttorneyId(currentUser.role === 'Abogado' ? currentUser.id : undefined);
+      }
+    } else if (!open) {
+      // Dialog is closing, reset all form fields
+      setTitle('');
+      setType(undefined);
+      setDate(undefined);
+      setTime(undefined);
+      setCaseId(undefined);
+      setNotes('');
+      setSelectedClientId(undefined);
+      setSelectedAttorneyId(undefined);
     }
   }, [appointmentToEdit, open, currentUser, users]);
 
@@ -172,23 +173,17 @@ export default function ScheduleAppointmentDialog({
       status: "Programada",
       caseId,
     };
-    onAppointmentScheduled(newAppointment);
+    onAppointmentScheduled(newAppointment); // Parent will handle closing the dialog
     toast({
       title: `Cita ${appointmentToEdit ? 'Actualizada' : 'Agendada'}`,
       description: `"${title}" para ${clientUser.name} con ${attorneyUser.name} el ${format(date, "PPP", { locale: es })} a las ${time}.`,
     });
-    setOpen(false);
+    // onOpenChange(false); // Parent now handles closing via onAppointmentScheduled
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {triggerButton ? triggerButton : 
-          <Button disabled={!currentUser}> 
-            <PlusCircle className="mr-2 h-4 w-4" /> Programar Nueva Cita
-          </Button>
-        }
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {/* DialogTrigger is now handled by parent */}
       <DialogContent className="sm:max-w-[525px] font-body">
         <DialogHeader>
           <DialogTitle className="font-headline">{appointmentToEdit ? "Editar Cita" : "Programar Nueva Cita"}</DialogTitle>
@@ -200,10 +195,10 @@ export default function ScheduleAppointmentDialog({
           <form onSubmit={handleSubmit} className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="client" className="text-right">Cliente</Label>
-              <Select 
-                value={selectedClientId} 
-                onValueChange={setSelectedClientId} 
-                required 
+              <Select
+                value={selectedClientId}
+                onValueChange={setSelectedClientId}
+                required
                 disabled={isClientFieldDisabled}
               >
                 <SelectTrigger className="col-span-3">
@@ -217,9 +212,9 @@ export default function ScheduleAppointmentDialog({
 
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="attorney" className="text-right">Abogado/a</Label>
-              <Select 
-                value={selectedAttorneyId} 
-                onValueChange={setSelectedAttorneyId} 
+              <Select
+                value={selectedAttorneyId}
+                onValueChange={setSelectedAttorneyId}
                 required
                 disabled={isAttorneyFieldDisabled}
               >
@@ -231,7 +226,7 @@ export default function ScheduleAppointmentDialog({
                 </SelectContent>
               </Select>
             </div>
-          
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="title" className="text-right">Título</Label>
               <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" required />
@@ -267,7 +262,7 @@ export default function ScheduleAppointmentDialog({
                     selected={date}
                     onSelect={setDate}
                     initialFocus
-                    disabled={(d) => d < new Date(new Date().setDate(new Date().getDate() -1))} 
+                    disabled={(d) => d < new Date(new Date().setDate(new Date().getDate() -1))}
                     locale={es}
                   />
                 </PopoverContent>
@@ -292,8 +287,8 @@ export default function ScheduleAppointmentDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {cases
-                    .filter(c => 
-                      !currentUser || currentUser.role === 'Gerente' || currentUser.role === 'Administrador' || 
+                    .filter(c =>
+                      !currentUser || currentUser.role === 'Gerente' || currentUser.role === 'Administrador' ||
                       (selectedClientId && users.find(u=>u.id === selectedClientId)?.name === c.clientName)
                     )
                     .map(c => <SelectItem key={c.id} value={c.id}>{c.caseNumber} - {c.clientName}</SelectItem>)}
@@ -305,7 +300,7 @@ export default function ScheduleAppointmentDialog({
               <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="col-span-3" placeholder="Detalles específicos o temas para la cita..." />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
               <Button type="submit">{appointmentToEdit ? "Guardar Cambios" : "Agendar Cita"}</Button>
             </DialogFooter>
           </form>
@@ -316,4 +311,3 @@ export default function ScheduleAppointmentDialog({
     </Dialog>
   );
 }
-

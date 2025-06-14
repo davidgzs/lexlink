@@ -9,7 +9,7 @@ import ScheduleAppointmentDialog from '@/components/appointments/ScheduleAppoint
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from '@/components/ui/card';
-import { es } from 'date-fns/locale'; 
+import { es } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 
@@ -18,7 +18,8 @@ export default function AppointmentsPage() {
   const [filteredAppointments, setFilteredAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  
+  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+
   const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function AppointmentsPage() {
     const name = localStorage.getItem('loggedInUserName');
     const email = localStorage.getItem('loggedInUserEmail');
     const avatar = localStorage.getItem('loggedInUserAvatar');
-    const id = localStorage.getItem('loggedInUserId'); 
+    const id = localStorage.getItem('loggedInUserId');
 
     if (role && name && email && id) {
       const userFromMock = mockUsers.find(u => u.id === id);
@@ -67,11 +68,18 @@ export default function AppointmentsPage() {
       }
       return [...prev, appointment];
     });
-    setSelectedAppointment(null); 
+    setSelectedAppointment(null);
+    setIsScheduleDialogOpen(false); // Close dialog after scheduling/updating
   };
 
   const handleEditAppointment = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
+    setIsScheduleDialogOpen(true);
+  };
+
+  const handleOpenNewAppointmentDialog = () => {
+    setSelectedAppointment(null);
+    setIsScheduleDialogOpen(true);
   };
 
   const handleCancelAppointment = (appointmentId: string) => {
@@ -80,7 +88,7 @@ export default function AppointmentsPage() {
 
   const upcomingAppointments = filteredAppointments.filter(a => new Date(a.date) >= new Date() && a.status === 'Programada').sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const pastAppointments = filteredAppointments.filter(a => new Date(a.date) < new Date() || a.status !== 'Programada').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  
+
   const appointmentsForSelectedDate = filteredAppointments.filter(
     (appointment) =>
       selectedDate &&
@@ -92,19 +100,20 @@ export default function AppointmentsPage() {
     <div className="container mx-auto py-2">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-headline font-semibold text-primary">Citas</h1>
-        <ScheduleAppointmentDialog
-          appointmentToEdit={selectedAppointment}
-          onAppointmentScheduled={handleAppointmentScheduled}
-          currentUser={currentUserProfile}
-          users={mockUsers}
-          cases={mockCases}
-          triggerButton={
-             <Button>
-                <PlusCircle className="mr-2 h-4 w-4" /> Programar Nueva Cita
-              </Button>
-          }
-        />
+        <Button onClick={handleOpenNewAppointmentDialog}>
+          <PlusCircle className="mr-2 h-4 w-4" /> Programar Nueva Cita
+        </Button>
       </div>
+
+      <ScheduleAppointmentDialog
+        open={isScheduleDialogOpen}
+        onOpenChange={setIsScheduleDialogOpen}
+        appointmentToEdit={selectedAppointment}
+        onAppointmentScheduled={handleAppointmentScheduled}
+        currentUser={currentUserProfile}
+        users={mockUsers}
+        cases={mockCases}
+      />
 
       <Tabs defaultValue="list" className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:w-1/2">
@@ -154,7 +163,7 @@ export default function AppointmentsPage() {
                 </Card>
                 <div className="mt-6 md:mt-0">
                     <h3 className="text-xl font-headline mb-4 text-foreground">
-                        Citas para {selectedDate ? selectedDate.toLocaleDateString('es-ES') : 'fecha seleccionada'}
+                        Citas para {selectedDate ? selectedDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric'}) : 'fecha seleccionada'}
                     </h3>
                     {appointmentsForSelectedDate.length > 0 ? (
                         <div className="space-y-4">
@@ -169,17 +178,6 @@ export default function AppointmentsPage() {
             </div>
         </TabsContent>
       </Tabs>
-      {/* This ensures the dialog can still be opened for editing even if the main trigger isn't used */}
-      {selectedAppointment && (
-         <ScheduleAppointmentDialog
-            appointmentToEdit={selectedAppointment}
-            onAppointmentScheduled={handleAppointmentScheduled}
-            currentUser={currentUserProfile}
-            users={mockUsers}
-            cases={mockCases}
-            triggerButton={<span style={{display: 'none'}} />} // Hidden trigger for programmatic opening
-        />
-      )}
     </div>
   );
 }
