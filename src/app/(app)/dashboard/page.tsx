@@ -17,8 +17,11 @@ export default function DashboardPage() {
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [filteredAppointments, setFilteredAppointments] = useState<AppointmentType[]>([]);
   const [loading, setLoading] = useState(true);
-  // El estado inicial se ajustará en useEffect
   const [selectedCaseStateFilter, setSelectedCaseStateFilter] = useState<CaseState | 'Todos'>('Abierto');
+
+  const [abiertosCount, setAbiertosCount] = useState(0);
+  const [cerradosCount, setCerradosCount] = useState(0);
+  const [todosCount, setTodosCount] = useState(0);
 
   useEffect(() => {
     const role = localStorage.getItem('loggedInUserRole') as UserAppRole | null;
@@ -26,17 +29,14 @@ export default function DashboardPage() {
     setCurrentUserRole(role);
     setCurrentUserName(name);
 
-    // Establecer el filtro de estado de caso predeterminado según el rol
     if (role === 'Administrador' || role === 'Gerente') {
       setSelectedCaseStateFilter('Todos');
     } else {
-      setSelectedCaseStateFilter('Abierto'); // Valor predeterminado para Cliente, Abogado o si no hay rol
+      setSelectedCaseStateFilter('Abierto');
     }
-  }, []); // Solo se ejecuta una vez al montar el componente
+  }, []);
 
   useEffect(() => {
-    // Este efecto ahora depende de que currentUserRole, currentUserName y selectedCaseStateFilter estén establecidos.
-    // La lógica de carga y filtrado principal reside aquí.
     if (currentUserRole && currentUserName) {
       setLoading(true);
 
@@ -49,6 +49,11 @@ export default function DashboardPage() {
         userRelevantCases = [...mockCases];
       }
 
+      // Calculate counts based on userRelevantCases
+      setAbiertosCount(userRelevantCases.filter(c => c.state === 'Abierto').length);
+      setCerradosCount(userRelevantCases.filter(c => c.state === 'Cerrado').length);
+      setTodosCount(userRelevantCases.length);
+
       let stateFilteredCases: Case[];
       if (selectedCaseStateFilter === 'Abierto') {
         stateFilteredCases = userRelevantCases.filter(c => c.state === 'Abierto');
@@ -59,7 +64,6 @@ export default function DashboardPage() {
       }
       setFilteredCases(stateFilteredCases);
 
-      // Appointments logic remains the same
       let relevantAppointments: AppointmentType[];
       const today = new Date();
       today.setHours(0, 0, 0, 0); 
@@ -69,25 +73,28 @@ export default function DashboardPage() {
           (a) =>
             a.participants.includes(currentUserName) &&
             new Date(a.date) >= today &&
-            a.status === 'Programada' // Usar valor en español
+            a.status === 'Programada'
         );
       } else { // Gerente, Administrador
         relevantAppointments = mockAppointments.filter(
-          (a) => new Date(a.date) >= today && a.status === 'Programada' // Usar valor en español
+          (a) => new Date(a.date) >= today && a.status === 'Programada'
         );
       }
       relevantAppointments.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
       setFilteredAppointments(relevantAppointments.slice(0, 3));
 
       setLoading(false);
-    } else if (!localStorage.getItem('loggedInUserRole')) { // If no user is logged in
+    } else if (!localStorage.getItem('loggedInUserRole')) {
       setLoading(false);
       setFilteredCases([]);
       setFilteredAppointments([]);
+      setAbiertosCount(0);
+      setCerradosCount(0);
+      setTodosCount(0);
     }
-  }, [currentUserRole, currentUserName, selectedCaseStateFilter]); // Dependencias actualizadas
+  }, [currentUserRole, currentUserName, selectedCaseStateFilter]);
 
-  if (loading && !(currentUserRole && currentUserName)) { // Ajuste de condición de carga inicial
+  if (loading && !(currentUserRole && currentUserName)) {
     return (
       <div className="flex justify-center items-center h-full min-h-[calc(100vh-200px)]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -112,14 +119,13 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-headline text-foreground">Expedientes</h2>
         </div>
         <Tabs value={selectedCaseStateFilter} onValueChange={(value) => setSelectedCaseStateFilter(value as CaseState | 'Todos')} className="w-full mb-6">
-          <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
-            <TabsTrigger value="Abierto" className="font-body">Abiertos</TabsTrigger>
-            <TabsTrigger value="Cerrado" className="font-body">Cerrados</TabsTrigger>
-            <TabsTrigger value="Todos" className="font-body">Todos</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 md:w-[450px]">
+            <TabsTrigger value="Abierto" className="font-body">Abiertos ({abiertosCount})</TabsTrigger>
+            <TabsTrigger value="Cerrado" className="font-body">Cerrados ({cerradosCount})</TabsTrigger>
+            <TabsTrigger value="Todos" className="font-body">Todos ({todosCount})</TabsTrigger>
           </TabsList>
-          {/* Asegurarse que TabsContent se renderiza incluso si loading es true pero ya hay datos de usuario */}
           <TabsContent value={selectedCaseStateFilter} className="mt-4">
-            {loading && (currentUserRole && currentUserName) ? ( // Muestra loader dentro del tab si está cargando para ese usuario
+            {loading && (currentUserRole && currentUserName) ? (
                 <div className="flex justify-center items-center py-10">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p className="ml-3 font-body text-muted-foreground">Actualizando expedientes...</p>
@@ -141,7 +147,7 @@ export default function DashboardPage() {
 
       <section>
         <h2 className="text-2xl font-headline mb-4 text-foreground">Próximas Citas</h2>
-        {loading && (currentUserRole && currentUserName) ? ( // Muestra loader si está cargando para ese usuario
+        {loading && (currentUserRole && currentUserName) ? (
             <div className="flex justify-center items-center py-10">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                  <p className="ml-3 font-body text-muted-foreground">Actualizando citas...</p>
