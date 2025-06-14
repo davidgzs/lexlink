@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Scale, Fingerprint, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { UserAppRole } from '@/types'; 
+import { mockUsers } from '@/lib/mockData'; // Import mockUsers
 
 type LoginStep = 'credentials' | 'fingerprint' | 'verifying' | 'error';
 
@@ -29,6 +30,7 @@ export default function LoginPage() {
     localStorage.removeItem('loggedInUserName');
     localStorage.removeItem('loggedInUserEmail');
     localStorage.removeItem('loggedInUserAvatar');
+    localStorage.removeItem('loggedInUserId'); // Clear user ID as well
   }, []);
 
   const handleCredentialSubmit = async (e: FormEvent) => {
@@ -41,38 +43,18 @@ export default function LoginPage() {
     setLoginStep('verifying');
     setErrorMessage('');
 
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
 
-    let loginSuccess = false;
-    let userNameToStore = 'Usuario Desconocido';
-    let emailToStore = email; // Default to entered email
-    let avatarToStore = `https://placehold.co/100x100.png?text=${email.substring(0,1).toUpperCase() || 'U'}`;
+    const userToLogin = mockUsers.find(
+      user => user.email.toLowerCase() === email.toLowerCase() && user.role === selectedRole
+    );
 
-    if (password === 'password123') { // Central password for simulation
-      if (selectedRole === 'Cliente' && email.toLowerCase() === 'user@example.com') {
-        loginSuccess = true;
-        userNameToStore = 'Juan Pérez';
-        avatarToStore = `https://placehold.co/100x100.png?text=JP`;
-      } else if (selectedRole === 'Abogado' && email.toLowerCase() === 'abogado@example.com') {
-        loginSuccess = true;
-        userNameToStore = 'Juana García';
-        avatarToStore = `https://placehold.co/100x100.png?text=JG`;
-      } else if (selectedRole === 'Gerente' && email.toLowerCase() === 'gerente@example.com') {
-        loginSuccess = true;
-        userNameToStore = 'Gerente User';
-        avatarToStore = `https://placehold.co/100x100.png?text=G`;
-      } else if (selectedRole === 'Administrador' && email.toLowerCase() === 'admin@example.com') {
-        loginSuccess = true;
-        userNameToStore = 'Admin User';
-        avatarToStore = `https://placehold.co/100x100.png?text=A`;
-      }
-    }
-
-    if (loginSuccess) {
-      localStorage.setItem('loggedInUserRole', selectedRole);
-      localStorage.setItem('loggedInUserName', userNameToStore);
-      localStorage.setItem('loggedInUserEmail', emailToStore);
-      localStorage.setItem('loggedInUserAvatar', avatarToStore);
+    if (userToLogin && password === 'password123') { // Central password for simulation
+      localStorage.setItem('loggedInUserRole', userToLogin.role);
+      localStorage.setItem('loggedInUserName', userToLogin.name);
+      localStorage.setItem('loggedInUserEmail', userToLogin.email);
+      localStorage.setItem('loggedInUserAvatar', userToLogin.avatarUrl || `https://placehold.co/100x100.png?text=${userToLogin.name.substring(0,1).toUpperCase() || 'U'}`);
+      localStorage.setItem('loggedInUserId', userToLogin.id); // Store user ID
       setLoginStep('fingerprint');
     } else {
       setErrorMessage('Correo electrónico, contraseña o rol incorrectos.');
@@ -83,8 +65,7 @@ export default function LoginPage() {
   const handleFingerprintVerify = async () => {
     setLoginStep('verifying');
     setErrorMessage('');
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate verification
-    // User details already stored in localStorage by handleCredentialSubmit
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
     router.push('/dashboard'); 
   };
 
@@ -211,10 +192,10 @@ export default function LoginPage() {
         Esto es una demostración. La persistencia del rol es simulada con localStorage.
         <br />Contraseña para todos los usuarios: <code className="bg-muted p-1 rounded-sm">password123</code>
         <br />Ejemplos de acceso (usa el rol correspondiente en el desplegable):
-        <br />- Cliente (Juan Pérez): <code className="bg-muted p-1 rounded-sm">user@example.com</code>
-        <br />- Abogado (Juana García): <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>
-        <br />- Gerente: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code>
-        <br />- Administrador: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>
+        <br />- Cliente (Juan Pérez): <code className="bg-muted p-1 rounded-sm">user@example.com</code> (ID: client_juan_perez)
+        <br />- Abogado (Juana García): <code className="bg-muted p-1 rounded-sm">abogado@example.com</code> (ID: attorney_juana_garcia)
+        <br />- Gerente: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code> (ID: manager_user)
+        <br />- Administrador: <code className="bg-muted p-1 rounded-sm">admin@example.com</code> (ID: admin_user)
       </p>
     </div>
   );

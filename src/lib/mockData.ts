@@ -1,5 +1,5 @@
 
-import type { Case, Appointment, Message, Document, Notification, Conversation, UserProfile, CaseState, CaseStatus, AppointmentType, DocumentStatus } from '@/types';
+import type { Case, Appointment, Message, Document, Notification, Conversation, UserProfile, CaseState, CaseStatus, AppointmentType, DocumentStatus, UserAppRole } from '@/types';
 
 export const mockUserProfile: UserProfile = {
   id: 'fallbackUser',
@@ -9,6 +9,17 @@ export const mockUserProfile: UserProfile = {
   avatarUrl: 'https://placehold.co/100x100.png',
 };
 
+export const mockUsers: UserProfile[] = [
+  { id: 'client_juan_perez', name: 'Juan Pérez', email: 'user@example.com', role: 'Cliente', avatarUrl: 'https://placehold.co/100x100.png?text=JP' },
+  { id: 'attorney_juana_garcia', name: 'Juana García', email: 'abogado@example.com', role: 'Abogado', avatarUrl: 'https://placehold.co/100x100.png?text=JG' },
+  { id: 'client_roberto_sanz', name: 'Roberto "Beto" Sanz', email: 'beto.sanz@example.net', role: 'Cliente' },
+  { id: 'attorney_miguel_torres', name: 'Miguel Torres', email: 'miguel.torres@example.net', role: 'Abogado' },
+  { id: 'client_carlos_fernandez', name: 'Carlos Fernández', email: 'carlos.fdz@example.net', role: 'Cliente' },
+  { id: 'client_diana_jimenez', name: 'Diana Jiménez', email: 'diana.jimenez@example.net', role: 'Cliente' },
+  { id: 'manager_user', name: 'Gerente User', email: 'gerente@example.com', role: 'Gerente', avatarUrl: 'https://placehold.co/100x100.png?text=G' },
+  { id: 'admin_user', name: 'Admin User', email: 'admin@example.com', role: 'Administrador', avatarUrl: 'https://placehold.co/100x100.png?text=A' },
+];
+
 export const mockCases: Case[] = [
   { id: 'C001', caseNumber: 'LEX-2024-001', clientName: 'Juan Pérez', status: 'Judicial' as CaseStatus, state: 'Abierto' as CaseState, lastUpdate: '2024-10-26', description: 'Litigio civil sobre disputa de propiedad.', attorneyAssigned: 'Juana García' },
   { id: 'C002', caseNumber: 'LEX-2024-002', clientName: 'Roberto "Beto" Sanz', status: 'Administrativo' as CaseStatus, state: 'Abierto' as CaseState, lastUpdate: '2024-11-05', description: 'Constitución y registro de empresa.', attorneyAssigned: 'Miguel Torres' },
@@ -17,9 +28,9 @@ export const mockCases: Case[] = [
 ];
 
 export const mockAppointments: Appointment[] = [
-  { id: 'A001', title: 'Consulta Inicial', type: 'Videoconferencia' as AppointmentType, date: '2024-11-20', time: '10:00 AM', participants: ['Juan Pérez', 'Juana García'], status: 'Programada', caseId: 'C001' },
-  { id: 'A002', title: 'Revisión de Documentos', type: 'Presencial' as AppointmentType, date: '2024-11-22', time: '02:30 PM', participants: ['Roberto "Beto" Sanz', 'Miguel Torres'], status: 'Programada', caseId: 'C002' },
-  { id: 'A003', title: 'Reunión de Estrategia', type: 'Videoconferencia' as AppointmentType, date: '2024-11-01', time: '11:00 AM', participants: ['Carlos Fernández', 'Juana García'], status: 'Completada', caseId: 'C003' },
+  { id: 'A001', title: 'Consulta Inicial', type: 'Video Conferencia' as AppointmentType, date: '2024-11-20', time: '10:00 AM', participants: ['Juan Pérez', 'Juana García'], status: 'Programada', caseId: 'C001' },
+  { id: 'A002', title: 'Revisión de Documentos', type: 'En-Persona' as AppointmentType, date: '2024-11-22', time: '02:30 PM', participants: ['Roberto "Beto" Sanz', 'Miguel Torres'], status: 'Programada', caseId: 'C002' },
+  { id: 'A003', title: 'Reunión de Estrategia', type: 'Video Conferencia' as AppointmentType, date: '2024-11-01', time: '11:00 AM', participants: ['Carlos Fernández', 'Juana García'], status: 'Completada', caseId: 'C003' },
 ];
 
 export const mockConversations: Conversation[] = [
