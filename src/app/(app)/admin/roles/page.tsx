@@ -66,13 +66,11 @@ export default function AdminRolesPage() {
           <Users className="mr-3 h-8 w-8" />
           Gestión de Roles
         </h1>
-        <Button className="font-body">
-          Añadir Nuevo Rol
-        </Button>
+        {/* Se eliminó el botón "Añadir Nuevo Rol" */}
       </div>
       <p className="font-body text-muted-foreground mb-6">
         Esta sección permite a los administradores definir y gestionar los roles de los usuarios en el sistema.
-        Las acciones de edición son simuladas en este prototipo. La eliminación de roles predefinidos no está permitida.
+        Las acciones de edición son simuladas en este prototipo. La creación o eliminación de roles predefinidos no está permitida.
       </p>
 
       <div className="rounded-md border">
