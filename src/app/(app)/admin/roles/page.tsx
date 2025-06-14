@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, User, Briefcase, UserCog, Shield, Users } from "lucide-react"; // Added Users here
+import { Edit, User, Briefcase, UserCog, Shield, Users } from "lucide-react";
 import type { UserAppRole } from "@/types";
 
 interface RoleDefinition {
@@ -59,10 +59,6 @@ export default function AdminRolesPage() {
     alert(`Simulación: Editar rol "${role.name}". En una aplicación real, esto abriría un formulario de edición.`);
   };
 
-  const handleDeleteRole = (role: RoleDefinition) => {
-    alert(`Simulación: Eliminar rol "${role.name}". Se pediría confirmación antes de eliminar.`);
-  };
-
   return (
     <div className="container mx-auto py-2">
       <div className="flex justify-between items-center mb-6">
@@ -76,7 +72,7 @@ export default function AdminRolesPage() {
       </div>
       <p className="font-body text-muted-foreground mb-6">
         Esta sección permite a los administradores definir y gestionar los roles de los usuarios en el sistema.
-        Las acciones de edición y eliminación son simuladas en este prototipo.
+        Las acciones de edición son simuladas en este prototipo. La eliminación de roles predefinidos no está permitida.
       </p>
 
       <div className="rounded-md border">
@@ -103,9 +99,6 @@ export default function AdminRolesPage() {
                   <TableCell className="text-right space-x-2">
                     <Button variant="outline" size="sm" onClick={() => handleEditRole(roleDef)} className="font-body">
                       <Edit className="mr-1 h-3 w-3" /> Editar
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDeleteRole(roleDef)} className="font-body">
-                      <Trash2 className="mr-1 h-3 w-3" /> Eliminar
                     </Button>
                   </TableCell>
                 </TableRow>
