@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, type FormEvent, useEffect } from 'react';
+import { useState, type FormEvent, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,7 @@ export default function LoginPage() {
   const [loginStep, setLoginStep] = useState<LoginStep>('credentials');
   const [otpCode, setOtpCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const fingerprintTimeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     localStorage.removeItem('loggedInUserRole');
@@ -34,7 +35,41 @@ export default function LoginPage() {
     localStorage.removeItem('loggedInUserId');
   }, []);
 
+  useEffect(() => {
+    // Clear any existing timeout when the component unmounts or loginStep changes
+    return () => {
+      if (fingerprintTimeoutIdRef.current) {
+        clearTimeout(fingerprintTimeoutIdRef.current);
+        fingerprintTimeoutIdRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loginStep === 'fingerprint') {
+      if (fingerprintTimeoutIdRef.current) { // Clear previous timeout if any
+        clearTimeout(fingerprintTimeoutIdRef.current);
+      }
+      fingerprintTimeoutIdRef.current = setTimeout(() => {
+        setErrorMessage('Tiempo de espera agotado para la verificación biométrica. Por favor, inténtalo con un código de verificación.');
+        setLoginStep('otpCodeInput');
+        fingerprintTimeoutIdRef.current = null; // Clear ref after timeout fires
+      }, 15000); // 15 seconds
+    } else {
+      // If not in fingerprint step, ensure timeout is cleared
+      if (fingerprintTimeoutIdRef.current) {
+        clearTimeout(fingerprintTimeoutIdRef.current);
+        fingerprintTimeoutIdRef.current = null;
+      }
+    }
+  }, [loginStep]);
+
+
   const proceedToDashboard = (user: typeof mockUsers[0]) => {
+    if (fingerprintTimeoutIdRef.current) {
+      clearTimeout(fingerprintTimeoutIdRef.current);
+      fingerprintTimeoutIdRef.current = null;
+    }
     localStorage.setItem('loggedInUserRole', user.role);
     localStorage.setItem('loggedInUserName', user.name);
     localStorage.setItem('loggedInUserEmail', user.email);
@@ -47,7 +82,7 @@ export default function LoginPage() {
     e.preventDefault();
     if (!selectedRole) {
       setErrorMessage('Por favor, selecciona un rol.');
-      setLoginStep('error'); // Go to general error step if role not selected
+      setLoginStep('error');
       return;
     }
     setLoginStep('verifying');
@@ -60,34 +95,38 @@ export default function LoginPage() {
     );
 
     if (userToLogin && password === 'password123') {
-      setLoginStep('fingerprint'); // Proceed to fingerprint step
+      setLoginStep('fingerprint');
     } else {
       setErrorMessage('Correo electrónico, contraseña o rol incorrectos.');
-      setLoginStep('error'); // Go to general error step
+      setLoginStep('error');
     }
   };
 
   const handleFingerprintAttempt = async () => {
+    if (fingerprintTimeoutIdRef.current) {
+      clearTimeout(fingerprintTimeoutIdRef.current);
+      fingerprintTimeoutIdRef.current = null;
+    }
+
     setLoginStep('verifying');
     setErrorMessage('');
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate fingerprint scan
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
 
     const userToLogin = mockUsers.find(
       user => user.email.toLowerCase() === email.toLowerCase() && user.role === selectedRole
     );
 
-    if (!userToLogin) { // Should not happen if credentials were correct
+    if (!userToLogin) { 
         setErrorMessage('Error inesperado, usuario no encontrado tras validación inicial.');
         setLoginStep('error');
         return;
     }
 
-    // Simulate 50% chance of fingerprint failure for demonstration
-    if (Math.random() < 0.7) { // Simulate success (70% success rate)
+    if (Math.random() < 0.7) { 
       proceedToDashboard(userToLogin);
-    } else { // Simulate failure
+    } else { 
       setErrorMessage('Verificación biométrica fallida. Por favor, inténtalo con un código de verificación.');
-      setLoginStep('otpCodeInput'); // Go to OTP code input step
+      setLoginStep('otpCodeInput'); 
     }
   };
 
@@ -111,15 +150,28 @@ export default function LoginPage() {
       proceedToDashboard(userToLogin);
     } else {
       setErrorMessage('Código de verificación incorrecto.');
-      setLoginStep('otpCodeInput'); // Stay on OTP input, error will be shown
+      setLoginStep('otpCodeInput'); 
     }
   };
 
   const handleTryAgain = () => {
+    if (fingerprintTimeoutIdRef.current) {
+      clearTimeout(fingerprintTimeoutIdRef.current);
+      fingerprintTimeoutIdRef.current = null;
+    }
     setLoginStep('credentials');
     setPassword('');
     setOtpCode('');
     setErrorMessage('');
+  }
+
+  const switchToOtpInput = () => {
+    if (fingerprintTimeoutIdRef.current) {
+      clearTimeout(fingerprintTimeoutIdRef.current);
+      fingerprintTimeoutIdRef.current = null;
+    }
+    setErrorMessage('');
+    setLoginStep('otpCodeInput');
   }
 
   return (
@@ -142,7 +194,7 @@ export default function LoginPage() {
           )}
           {loginStep === 'fingerprint' && (
             <CardDescription className="text-center font-body">
-              Por favor, utiliza tu huella dactilar para verificar tu identidad.
+              Por favor, utiliza tu huella dactilar para verificar tu identidad. Tienes 15 segundos.
             </CardDescription>
           )}
           {loginStep === 'otpCodeInput' && (
@@ -221,7 +273,7 @@ export default function LoginPage() {
                 <Fingerprint className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
                 <span className="mt-2 font-body text-muted-foreground group-hover:text-primary">Verificar Huella</span>
               </Button>
-              <Button variant="link" onClick={() => { setErrorMessage(''); setLoginStep('otpCodeInput');}} className="font-body w-full">
+              <Button variant="link" onClick={switchToOtpInput} className="font-body w-full">
                 Usar un código de verificación en su lugar
               </Button>
             </div>
@@ -258,7 +310,7 @@ export default function LoginPage() {
             </div>
           )}
         </CardContent>
-        {loginStep === 'error' && ( // This step is for critical errors like initial credential failure
+        {loginStep === 'error' && ( 
             <CardFooter className="flex-col gap-2">
                  <Button onClick={handleTryAgain} className="w-full font-body">
                     Intentar de Nuevo
@@ -269,7 +321,8 @@ export default function LoginPage() {
       <p className="mt-8 text-center text-xs text-muted-foreground font-body max-w-xl">
         Esto es una demostración. La persistencia del rol es simulada con localStorage.
         <br />Contraseña para todos los usuarios: <code className="bg-muted p-1 rounded-sm">password123</code>
-        <br />Código OTP simulado: <code className="bg-muted p-1 rounded-sm">1234</code>. La huella tiene un 30% de probabilidad de fallo simulado.
+        <br />Código OTP simulado: <code className="bg-muted p-1 rounded-sm">1234</code>. 
+        <br />La huella tiene un 70% de probabilidad de éxito si se pulsa antes de 15s; si no, falla por tiempo agotado.
         <br />Ejemplos de acceso (usa el rol correspondiente en el desplegable):
         <br />- Cliente (Juan Pérez): <code className="bg-muted p-1 rounded-sm">user@example.com</code>
         <br />- Abogado (Juana García): <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>
@@ -279,5 +332,6 @@ export default function LoginPage() {
     </div>
   );
 }
+    
 
     
