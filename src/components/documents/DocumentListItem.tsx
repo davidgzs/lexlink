@@ -1,5 +1,5 @@
 
-import type { Document } from "@/types";
+import type { Document, DocumentStatus } from "@/types";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,26 +10,27 @@ interface DocumentListItemProps {
   onSign: (document: Document) => void;
 }
 
-const statusIcons: Record<Document["status"], React.ElementType> = {
-  "Awaiting Signature": AlertTriangle,
-  "Signed": CheckCircle2,
-  "Requires Review": AlertTriangle,
-  "Completed": CheckCircle2,
+const statusIcons: Record<DocumentStatus, React.ElementType> = {
+  "Pendiente de Firma": AlertTriangle,
+  "Firmado": CheckCircle2,
+  "Requiere Revisión": AlertTriangle,
+  "Completado": CheckCircle2,
 };
 
-const statusColors: Record<Document["status"], string> = {
-    "Awaiting Signature": "bg-yellow-500",
-    "Signed": "bg-green-500",
-    "Requires Review": "bg-orange-500",
-    "Completed": "bg-blue-500",
+const statusColors: Record<DocumentStatus, string> = {
+    "Pendiente de Firma": "bg-yellow-500",
+    "Firmado": "bg-green-500",
+    "Requiere Revisión": "bg-orange-500",
+    "Completado": "bg-blue-500",
 };
 
-const documentStatusTranslations: Record<Document["status"], string> = {
-  "Awaiting Signature": "Pendiente de Firma",
-  "Signed": "Firmado",
-  "Requires Review": "Requiere Revisión",
-  "Completed": "Completado",
-};
+// documentStatusTranslations is no longer needed as document.status will be Spanish
+// const documentStatusTranslations: Record<Document["status"], string> = {
+//   "Pendiente de Firma": "Pendiente de Firma",
+//   "Firmado": "Firmado",
+//   "Requiere Revisión": "Requiere Revisión",
+//   "Completado": "Completado",
+// };
 
 export default function DocumentListItem({ document, onSign }: DocumentListItemProps) {
   const Icon = statusIcons[document.status];
@@ -51,7 +52,7 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
           </div>
           <Badge className={`${badgeColor} text-white whitespace-nowrap`}>
             <Icon className="mr-1 h-3 w-3" />
-            {documentStatusTranslations[document.status]}
+            {document.status} {/* Directly use document.status as it's now in Spanish */}
           </Badge>
         </div>
         <CardDescription className="font-body text-sm">ID Caso: {document.caseId} | Versión: {document.version}</CardDescription>
@@ -59,7 +60,7 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
 
       <CardContent className="flex-grow">
         <p className="font-body text-xs text-muted-foreground">Subido: {formattedUploadedDate}</p>
-        {document.status === "Awaiting Signature" && (
+        {document.status === "Pendiente de Firma" && (
           <Button
             size="sm"
             onClick={() => onSign(document)}

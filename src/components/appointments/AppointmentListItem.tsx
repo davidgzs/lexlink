@@ -1,5 +1,5 @@
 
-import type { Appointment } from "@/types";
+import type { Appointment, AppointmentType } from "@/types";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,10 +23,10 @@ interface AppointmentListItemProps {
   onCancel: (appointmentId: string) => void;
 }
 
-const appointmentIcons: Record<Appointment["type"], React.ElementType> = {
-  "In-Person": Users,
-  "Video Conference": Video,
-  "Written Consultation": FilePenLine,
+const appointmentIcons: Record<AppointmentType, React.ElementType> = {
+  "Presencial": Users,
+  "Videoconferencia": Video,
+  "Consulta Escrita": FilePenLine,
 };
 
 const statusColors: Record<Appointment["status"], string> = {
@@ -35,16 +35,11 @@ const statusColors: Record<Appointment["status"], string> = {
     Cancelled: "bg-red-500",
 };
 
+// This map remains as appointment.status uses English literals for now
 const appointmentStatusTranslations: Record<Appointment["status"], string> = {
   Scheduled: "Programada",
   Completed: "Completada",
   Cancelled: "Cancelada",
-};
-
-const appointmentTypeTranslations: Record<Appointment["type"], string> = {
-  "In-Person": "Presencial",
-  "Video Conference": "Videoconferencia",
-  "Written Consultation": "Consulta Escrita",
 };
 
 
@@ -73,7 +68,7 @@ export default function AppointmentListItem({ appointment, onEdit, onCancel }: A
         </div>
         <CardDescription className="font-body text-sm flex items-center gap-2">
           <Icon className="h-4 w-4 text-muted-foreground" />
-          <span>{appointmentTypeTranslations[appointment.type]}</span>
+          <span>{appointment.type}</span> {/* Directly use appointment.type as it's now in Spanish */}
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -1,5 +1,5 @@
 
-import type { Case, Appointment, Message, Document, Notification, Conversation, UserProfile, CaseState, CaseStatus } from '@/types';
+import type { Case, Appointment, Message, Document, Notification, Conversation, UserProfile, CaseState, CaseStatus, AppointmentType, DocumentStatus } from '@/types';
 
 export const mockUserProfile: UserProfile = {
   id: 'fallbackUser',
@@ -11,15 +11,15 @@ export const mockUserProfile: UserProfile = {
 
 export const mockCases: Case[] = [
   { id: 'C001', caseNumber: 'LEX-2024-001', clientName: 'Juan Pérez', status: 'Judicial' as CaseStatus, state: 'Abierto' as CaseState, lastUpdate: '2024-10-26', description: 'Litigio civil sobre disputa de propiedad.', attorneyAssigned: 'Juana García' },
-  { id: 'C002', caseNumber: 'LEX-2024-002', clientName: 'Roberto "Beto" Sanz', status: 'Administrative' as CaseStatus, state: 'Abierto' as CaseState, lastUpdate: '2024-11-05', description: 'Constitución y registro de empresa.', attorneyAssigned: 'Miguel Torres' },
-  { id: 'C003', caseNumber: 'LEX-2024-003', clientName: 'Carlos Fernández', status: 'Administrative' as CaseStatus, state: 'Abierto' as CaseState, lastUpdate: '2024-11-15', description: 'Recurso sobre una sentencia anterior relativa a obligaciones contractuales.', attorneyAssigned: 'Juana García' },
+  { id: 'C002', caseNumber: 'LEX-2024-002', clientName: 'Roberto "Beto" Sanz', status: 'Administrativo' as CaseStatus, state: 'Abierto' as CaseState, lastUpdate: '2024-11-05', description: 'Constitución y registro de empresa.', attorneyAssigned: 'Miguel Torres' },
+  { id: 'C003', caseNumber: 'LEX-2024-003', clientName: 'Carlos Fernández', status: 'Administrativo' as CaseStatus, state: 'Abierto' as CaseState, lastUpdate: '2024-11-15', description: 'Recurso sobre una sentencia anterior relativa a obligaciones contractuales.', attorneyAssigned: 'Juana García' },
   { id: 'C004', caseNumber: 'LEX-2024-004', clientName: 'Diana Jiménez', status: 'Judicial' as CaseStatus, state: 'Cerrado' as CaseState, lastUpdate: '2024-09-30', description: 'Reclamación de propiedad intelectual resuelta con éxito.', attorneyAssigned: 'Miguel Torres' },
 ];
 
 export const mockAppointments: Appointment[] = [
-  { id: 'A001', title: 'Consulta Inicial', type: 'Video Conference', date: '2024-11-20', time: '10:00 AM', participants: ['Juan Pérez', 'Juana García'], status: 'Scheduled', caseId: 'C001' },
-  { id: 'A002', title: 'Revisión de Documentos', type: 'In-Person', date: '2024-11-22', time: '02:30 PM', participants: ['Roberto "Beto" Sanz', 'Miguel Torres'], status: 'Scheduled', caseId: 'C002' },
-  { id: 'A003', title: 'Reunión de Estrategia', type: 'Video Conference', date: '2024-11-01', time: '11:00 AM', participants: ['Carlos Fernández', 'Juana García'], status: 'Completed', caseId: 'C003' },
+  { id: 'A001', title: 'Consulta Inicial', type: 'Videoconferencia' as AppointmentType, date: '2024-11-20', time: '10:00 AM', participants: ['Juan Pérez', 'Juana García'], status: 'Programada', caseId: 'C001' },
+  { id: 'A002', title: 'Revisión de Documentos', type: 'Presencial' as AppointmentType, date: '2024-11-22', time: '02:30 PM', participants: ['Roberto "Beto" Sanz', 'Miguel Torres'], status: 'Programada', caseId: 'C002' },
+  { id: 'A003', title: 'Reunión de Estrategia', type: 'Videoconferencia' as AppointmentType, date: '2024-11-01', time: '11:00 AM', participants: ['Carlos Fernández', 'Juana García'], status: 'Completada', caseId: 'C003' },
 ];
 
 export const mockConversations: Conversation[] = [
@@ -40,10 +40,10 @@ export const mockMessages: Message[] = [
 
 
 export const mockDocuments: Document[] = [
-  { id: 'D001', name: 'Borrador Escritura Propiedad.pdf', caseId: 'C001', status: 'Requires Review', uploadedDate: '2024-11-10', version: 'v1.2' },
-  { id: 'D002', name: 'Plan de Negocio.docx', caseId: 'C002', status: 'Awaiting Signature', uploadedDate: '2024-11-12', version: 'v2.0' },
-  { id: 'D003', name: 'Escrito de Apelación_Final.pdf', caseId: 'C003', status: 'Signed', uploadedDate: '2024-10-20', version: 'v3.1' },
-  { id: 'D004', name: 'Acuerdo Transaccional.pdf', caseId: 'C004', status: 'Completed', uploadedDate: '2024-09-25', version: 'v1.0' },
+  { id: 'D001', name: 'Borrador Escritura Propiedad.pdf', caseId: 'C001', status: 'Requiere Revisión' as DocumentStatus, uploadedDate: '2024-11-10', version: 'v1.2' },
+  { id: 'D002', name: 'Plan de Negocio.docx', caseId: 'C002', status: 'Pendiente de Firma' as DocumentStatus, uploadedDate: '2024-11-12', version: 'v2.0' },
+  { id: 'D003', name: 'Escrito de Apelación_Final.pdf', caseId: 'C003', status: 'Firmado' as DocumentStatus, uploadedDate: '2024-10-20', version: 'v3.1' },
+  { id: 'D004', name: 'Acuerdo Transaccional.pdf', caseId: 'C004', status: 'Completado' as DocumentStatus, uploadedDate: '2024-09-25', version: 'v1.0' },
 ];
 
 export const mockNotifications: Notification[] = [

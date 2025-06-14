@@ -1,19 +1,19 @@
 
-export type CaseStatus = "Administrative" | "Judicial"; // Represents the TYPE of case
+export type CaseStatus = "Administrativo" | "Judicial"; // Represents the TYPE of case
 export type CaseState = "Abierto" | "Cerrado"; // Represents if the case is Open or Closed
 
 export interface Case {
   id: string;
   caseNumber: string;
   clientName: string;
-  status: CaseStatus; // This field stores "Administrative" or "Judicial"
+  status: CaseStatus; // This field stores "Administrativo" or "Judicial"
   state: CaseState;   // This new field stores "Abierto" or "Cerrado"
   lastUpdate: string;
   description: string;
   attorneyAssigned?: string;
 }
 
-export type AppointmentType = "In-Person" | "Video Conference" | "Written Consultation";
+export type AppointmentType = "Presencial" | "Videoconferencia" | "Consulta Escrita";
 
 export interface Appointment {
   id: string;
@@ -22,7 +22,7 @@ export interface Appointment {
   date: string;
   time: string;
   participants: string[];
-  status: "Scheduled" | "Completed" | "Cancelled";
+  status: "Programada" | "Completada" | "Cancelada";
   caseId?: string;
 }
 
@@ -46,7 +46,7 @@ export interface Conversation {
   avatarUrl?: string;
 }
 
-export type DocumentStatus = "Awaiting Signature" | "Signed" | "Requires Review" | "Completed";
+export type DocumentStatus = "Pendiente de Firma" | "Firmado" | "Requiere Revisión" | "Completado";
 
 export interface Document {
   id: string;
@@ -76,3 +76,4 @@ export interface UserProfile {
   role: UserAppRole;
   avatarUrl?: string;
 }
+

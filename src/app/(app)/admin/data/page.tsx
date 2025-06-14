@@ -29,13 +29,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from '@/components/ui/badge';
 
 // Mapeo de tipos de caso a traducciones y colores para la columna "Tipo"
-const caseTypeTranslations: Record<CaseStatus, string> = {
-  Administrative: "Administrativo",
-  Judicial: "Judicial",
-};
+// caseTypeTranslations is no longer needed as CaseStatus values are already Spanish
+// const caseTypeTranslations: Record<CaseStatus, string> = {
+//   Administrative: "Administrativo",
+//   Judicial: "Judicial",
+// };
 
 const typeColors: Record<CaseStatus, string> = {
-    Administrative: "bg-blue-500",
+    Administrativo: "bg-blue-500",
     Judicial: "bg-orange-500",
 };
 
@@ -104,7 +105,7 @@ export default function AdminDataPage() {
                 <TableCell className="font-body">{caseItem.clientName}</TableCell>
                 <TableCell>
                   <Badge className={`${typeColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
-                    {caseTypeTranslations[caseItem.status]}
+                    {caseItem.status} {/* Directly use caseItem.status */}
                   </Badge>
                 </TableCell>
                 <TableCell className="font-body">{caseItem.attorneyAssigned || 'N/A'}</TableCell>

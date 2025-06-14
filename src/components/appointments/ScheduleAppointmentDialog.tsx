@@ -43,11 +43,12 @@ const timeSlots = [
   "04:00 PM", "04:30 PM",
 ];
 
-const appointmentTypeDisplay: Record<AppointmentType, string> = {
-  "In-Person": "Presencial",
-  "Video Conference": "Videoconferencia",
-  "Written Consultation": "Consulta Escrita",
-};
+// appointmentTypeDisplay is no longer needed as values are directly Spanish
+// const appointmentTypeDisplay: Record<AppointmentType, string> = {
+//   "Presencial": "Presencial",
+//   "Videoconferencia": "Videoconferencia",
+//   "Consulta Escrita": "Consulta Escrita",
+// };
 
 export default function ScheduleAppointmentDialog({
   appointmentToEdit,
@@ -101,7 +102,7 @@ export default function ScheduleAppointmentDialog({
       date: format(date, "yyyy-MM-dd"),
       time,
       participants: [mockUserProfile.name, caseId ? mockCases.find(c=>c.id === caseId)?.attorneyAssigned || 'Abogado/a' : 'Abogado/a'],
-      status: "Scheduled",
+      status: "Programada",
       caseId,
     };
     onAppointmentScheduled(newAppointment);
@@ -140,9 +141,9 @@ export default function ScheduleAppointmentDialog({
                 <SelectValue placeholder="Selecciona tipo de cita" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="In-Person">{appointmentTypeDisplay["In-Person"]}</SelectItem>
-                <SelectItem value="Video Conference">{appointmentTypeDisplay["Video Conference"]}</SelectItem>
-                <SelectItem value="Written Consultation">{appointmentTypeDisplay["Written Consultation"]}</SelectItem>
+                <SelectItem value="Presencial">Presencial</SelectItem>
+                <SelectItem value="Videoconferencia">Videoconferencia</SelectItem>
+                <SelectItem value="Consulta Escrita">Consulta Escrita</SelectItem>
               </SelectContent>
             </Select>
           </div>
