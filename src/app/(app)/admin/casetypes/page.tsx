@@ -101,6 +101,33 @@ const initialCaseTypes: CaseTypeDefinition[] = [
     badgeColor: "bg-blue-500",
     isMaster: true,
   },
+  {
+    id: "AD-001",
+    name: "Multas",
+    description: "Subtipo para expedientes relacionados con multas y sanciones administrativas.",
+    icon: ListTree,
+    badgeColor: "bg-blue-400",
+    isMaster: false,
+    parentMasterId: "administrativo",
+  },
+  {
+    id: "AD-002",
+    name: "Comisiones",
+    description: "Subtipo para expedientes relacionados con comisiones y organismos reguladores.",
+    icon: ListTree,
+    badgeColor: "bg-blue-400",
+    isMaster: false,
+    parentMasterId: "administrativo",
+  },
+  {
+    id: "AD-003",
+    name: "Nacionalidad",
+    description: "Subtipo para expedientes relacionados con trámites de nacionalidad.",
+    icon: ListTree,
+    badgeColor: "bg-blue-400",
+    isMaster: false,
+    parentMasterId: "administrativo",
+  },
 ];
 
 export default function AdminCaseTypesPage() {
@@ -403,5 +430,7 @@ export default function AdminCaseTypesPage() {
   );
 }
 
+
+    
 
     
