@@ -8,12 +8,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Scale, Fingerprint, Loader2 } from "lucide-react";
+import { Scale, KeyRound, Loader2 } from "lucide-react"; // Changed Fingerprint to KeyRound
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { UserAppRole } from '@/types'; 
-import { mockUsers } from '@/lib/mockData'; // Import mockUsers
+import { mockUsers } from '@/lib/mockData';
 
-type LoginStep = 'credentials' | 'fingerprint' | 'verifying' | 'error';
+type LoginStep = 'credentials' | 'otp' | 'verifying' | 'error';
 
 const availableRoles: UserAppRole[] = ["Cliente", "Abogado", "Gerente", "Administrador"];
 
@@ -23,6 +23,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserAppRole | undefined>(undefined);
   const [loginStep, setLoginStep] = useState<LoginStep>('credentials');
+  const [otpCode, setOtpCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export default function LoginPage() {
     localStorage.removeItem('loggedInUserName');
     localStorage.removeItem('loggedInUserEmail');
     localStorage.removeItem('loggedInUserAvatar');
-    localStorage.removeItem('loggedInUserId'); // Clear user ID as well
+    localStorage.removeItem('loggedInUserId');
   }, []);
 
   const handleCredentialSubmit = async (e: FormEvent) => {
@@ -49,29 +50,36 @@ export default function LoginPage() {
       user => user.email.toLowerCase() === email.toLowerCase() && user.role === selectedRole
     );
 
-    if (userToLogin && password === 'password123') { // Central password for simulation
+    if (userToLogin && password === 'password123') {
       localStorage.setItem('loggedInUserRole', userToLogin.role);
       localStorage.setItem('loggedInUserName', userToLogin.name);
       localStorage.setItem('loggedInUserEmail', userToLogin.email);
       localStorage.setItem('loggedInUserAvatar', userToLogin.avatarUrl || `https://placehold.co/100x100.png?text=${userToLogin.name.substring(0,1).toUpperCase() || 'U'}`);
-      localStorage.setItem('loggedInUserId', userToLogin.id); // Store user ID
-      setLoginStep('fingerprint');
+      localStorage.setItem('loggedInUserId', userToLogin.id);
+      setLoginStep('otp'); // Change to OTP step
     } else {
       setErrorMessage('Correo electrónico, contraseña o rol incorrectos.');
       setLoginStep('error');
     }
   };
 
-  const handleFingerprintVerify = async () => {
+  const handleOtpSubmit = async (e: FormEvent) => {
+    e.preventDefault();
     setLoginStep('verifying');
     setErrorMessage('');
     await new Promise(resolve => setTimeout(resolve, 1500)); 
-    router.push('/dashboard'); 
+    if (otpCode === '1234') {
+      router.push('/dashboard'); 
+    } else {
+      setErrorMessage('Código de verificación incorrecto.');
+      setLoginStep('error');
+    }
   };
 
   const handleTryAgain = () => {
     setLoginStep('credentials');
     setPassword(''); 
+    setOtpCode('');
     setErrorMessage('');
   }
 
@@ -83,15 +91,17 @@ export default function LoginPage() {
       </div>
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline text-center">Acceso Seguro al Portal</CardTitle>
+          <CardTitle className="text-2xl font-headline text-center">
+            {loginStep === 'otp' ? "Verificación por Código" : "Acceso Seguro al Portal"}
+          </CardTitle>
           {loginStep === 'credentials' && (
             <CardDescription className="text-center font-body">
               Introduce tus credenciales y selecciona tu rol para acceder.
             </CardDescription>
           )}
-          {loginStep === 'fingerprint' && (
+          {loginStep === 'otp' && (
             <CardDescription className="text-center font-body">
-              Verifica tu identidad usando tu huella dactilar (simulado).
+              Introduce el código de verificación (simulado: 1234).
             </CardDescription>
           )}
            {loginStep === 'verifying' && (
@@ -103,7 +113,7 @@ export default function LoginPage() {
         <CardContent>
           {loginStep === 'error' && (
             <Alert variant="destructive" className="mb-4">
-              <AlertTitle className="font-headline">Fallo de Inicio de Sesión</AlertTitle>
+              <AlertTitle className="font-headline">Fallo de Autenticación</AlertTitle>
               <AlertDescription className="font-body">{errorMessage}</AlertDescription>
             </Alert>
           )}
@@ -153,30 +163,36 @@ export default function LoginPage() {
             </form>
           )}
 
-          {loginStep === 'fingerprint' && (
-            <div className="flex flex-col items-center space-y-6">
-              <p className="text-center text-muted-foreground font-body">
-                Toca el icono de huella dactilar para verificar (simulado).
-              </p>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-24 w-24 rounded-full border-4 border-primary hover:bg-primary/10"
-                onClick={handleFingerprintVerify}
-                aria-label="Verificar con huella dactilar (simulado)"
-              >
-                <Fingerprint className="h-12 w-12 text-primary" />
+          {loginStep === 'otp' && (
+            <form onSubmit={handleOtpSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="otp" className="font-body">Código de Verificación</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="Introduce el código"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  required
+                  className="font-body text-center tracking-widest"
+                  maxLength={6} 
+                />
+              </div>
+              <Button type="submit" className="w-full font-body">
+                Verificar Código
               </Button>
-              <Button variant="link" onClick={handleTryAgain} className="font-body">
-                Usar credenciales en su lugar
-              </Button>
-            </div>
+              <Button variant="link" onClick={handleTryAgain} className="font-body w-full">
+                Usar un código de verificación en su lugar 
+              </Button> 
+              {/* Text changed as per user request, even if contextually a bit odd.
+                  It functionally takes the user back to the credential input step. */}
+            </form>
           )}
 
           {loginStep === 'verifying' && (
             <div className="flex flex-col items-center justify-center space-y-4 py-8">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
-              <p className="font-body text-muted-foreground">Verificando tu identidad...</p>
+              <p className="font-body text-muted-foreground">Verificando...</p>
             </div>
           )}
         </CardContent>
@@ -191,6 +207,7 @@ export default function LoginPage() {
       <p className="mt-8 text-center text-xs text-muted-foreground font-body max-w-xl">
         Esto es una demostración. La persistencia del rol es simulada con localStorage.
         <br />Contraseña para todos los usuarios: <code className="bg-muted p-1 rounded-sm">password123</code>
+        <br />Código OTP simulado: <code className="bg-muted p-1 rounded-sm">1234</code>
         <br />Ejemplos de acceso (usa el rol correspondiente en el desplegable):
         <br />- Cliente (Juan Pérez): <code className="bg-muted p-1 rounded-sm">user@example.com</code> (ID: client_juan_perez)
         <br />- Abogado (Juana García): <code className="bg-muted p-1 rounded-sm">abogado@example.com</code> (ID: attorney_juana_garcia)
