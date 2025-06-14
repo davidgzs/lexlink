@@ -24,7 +24,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import type { Appointment, AppointmentType, Case, UserProfile, UserAppRole } from "@/types";
+import type { Appointment, AppointmentType, Case, UserProfile } from "@/types";
 // mockCases is removed from here, will be passed as prop
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { format } from "date-fns";
@@ -59,7 +59,7 @@ export default function ScheduleAppointmentDialog({
   const [type, setType] = useState<AppointmentType | undefined>(undefined);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState<string | undefined>(undefined);
-  const [caseId, setCaseId] = useState<string | undefined>(undefined); // For linking to a case
+  const [caseId, setCaseId] = useState<string | undefined>(undefined);
   const [notes, setNotes] = useState('');
   const { toast } = useToast();
 
@@ -67,16 +67,17 @@ export default function ScheduleAppointmentDialog({
   const [selectedAttorneyId, setSelectedAttorneyId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!open) { // Reset form when dialog is closed
+    if (!open) { 
         setTitle('');
         setType(undefined);
         setDate(undefined);
         setTime(undefined);
         setCaseId(undefined);
         setNotes('');
+        // Reset selections based on current user when dialog closes or currentUser changes
         setSelectedClientId(currentUser?.role === 'Cliente' ? currentUser.id : undefined);
         setSelectedAttorneyId(currentUser?.role === 'Abogado' ? currentUser.id : undefined);
-    } else if (appointmentToEdit) { // Populate form if editing
+    } else if (appointmentToEdit) { 
         setTitle(appointmentToEdit.title);
         setType(appointmentToEdit.type);
         setDate(new Date(appointmentToEdit.date));
@@ -84,12 +85,14 @@ export default function ScheduleAppointmentDialog({
         setCaseId(appointmentToEdit.caseId);
         setNotes(''); 
 
+        // Attempt to find participants by name from the 'users' prop
         const clientParticipant = users.find(u => u.name === appointmentToEdit.participants[0] && u.role === 'Cliente');
         const attorneyParticipant = users.find(u => u.name === appointmentToEdit.participants[1] && u.role === 'Abogado');
+        
         setSelectedClientId(clientParticipant?.id);
         setSelectedAttorneyId(attorneyParticipant?.id);
         
-    } else { // Reset for new appointment, considering current user role
+    } else { // Dialog is open for a new appointment
         setSelectedClientId(currentUser?.role === 'Cliente' ? currentUser.id : undefined);
         setSelectedAttorneyId(currentUser?.role === 'Abogado' ? currentUser.id : undefined);
     }
@@ -162,7 +165,7 @@ export default function ScheduleAppointmentDialog({
       time,
       participants: [clientUser.name, attorneyUser.name],
       status: "Programada",
-      caseId, // Optional case linking
+      caseId,
     };
     onAppointmentScheduled(newAppointment);
     toast({
@@ -176,7 +179,6 @@ export default function ScheduleAppointmentDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {triggerButton ? triggerButton : 
-          // Default trigger button if none is provided
           <Button disabled={!currentUser}> 
             <PlusCircle className="mr-2 h-4 w-4" /> Programar Nueva Cita
           </Button>
@@ -284,7 +286,7 @@ export default function ScheduleAppointmentDialog({
               </SelectTrigger>
               <SelectContent>
                 {cases
-                  .filter(c => // Only show cases relevant to selected client or if admin/manager
+                  .filter(c => 
                     currentUser?.role === 'Gerente' || currentUser?.role === 'Administrador' || 
                     (selectedClientId && users.find(u=>u.id === selectedClientId)?.name === c.clientName)
                   )
