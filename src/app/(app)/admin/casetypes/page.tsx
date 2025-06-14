@@ -58,6 +58,42 @@ const initialCaseTypes: CaseTypeDefinition[] = [
     isMaster: true,
   },
   {
+    id: "JU-001",
+    name: "Civil",
+    description: "Subtipo para asuntos civiles dentro de la categoría Judicial.",
+    icon: ListTree,
+    badgeColor: "bg-orange-400",
+    isMaster: false,
+    parentMasterId: "judicial",
+  },
+  {
+    id: "JU-002",
+    name: "Laboral",
+    description: "Subtipo para asuntos laborales dentro de la categoría Judicial.",
+    icon: ListTree,
+    badgeColor: "bg-orange-400",
+    isMaster: false,
+    parentMasterId: "judicial",
+  },
+  {
+    id: "JU-003",
+    name: "Contencioso",
+    description: "Subtipo para asuntos contencioso-administrativos dentro de la categoría Judicial.",
+    icon: ListTree,
+    badgeColor: "bg-orange-400",
+    isMaster: false,
+    parentMasterId: "judicial",
+  },
+  {
+    id: "JU-004",
+    name: "Penal",
+    description: "Subtipo para asuntos penales dentro de la categoría Judicial.",
+    icon: ListTree,
+    badgeColor: "bg-orange-400",
+    isMaster: false,
+    parentMasterId: "judicial",
+  },
+  {
     id: "administrativo",
     name: "Administrativo",
     description: "Expedientes relacionados con trámites y procedimientos ante organismos de la administración pública.",
@@ -91,8 +127,12 @@ export default function AdminCaseTypesPage() {
       return `${prefix}-001`;
     }
     const maxNum = subtypesOfParent.reduce((max, ct) => {
-      const numPart = parseInt(ct.id.split('-')[1], 10);
-      return numPart > max ? numPart : max;
+      const numPartString = ct.id.split('-')[1];
+      if (numPartString && /^\d+$/.test(numPartString)) {
+        const numPart = parseInt(numPartString, 10);
+        return numPart > max ? numPart : max;
+      }
+      return max;
     }, 0);
     return `${prefix}-${String(maxNum + 1).padStart(3, '0')}`;
   };
@@ -118,7 +158,7 @@ export default function AdminCaseTypesPage() {
     } else {
       setSubtypeDialogMode('edit');
       setFormSubtypeName(caseType.name);
-      setFormParentMasterId(caseType.parentMasterId); // Should not be editable, but good to have
+      setFormParentMasterId(caseType.parentMasterId); 
       setIsSubtypeDialogOpen(true);
     }
   };
@@ -151,8 +191,8 @@ export default function AdminCaseTypesPage() {
         id: newId,
         name: formSubtypeName,
         description: formDescription,
-        icon: ListTree, // Generic icon for subtypes
-        badgeColor: formParentMasterId === 'judicial' ? "bg-orange-400" : "bg-blue-400", // Slightly different color
+        icon: ListTree,
+        badgeColor: formParentMasterId === 'judicial' ? "bg-orange-400" : "bg-blue-400",
         isMaster: false,
         parentMasterId: formParentMasterId,
       };
@@ -173,7 +213,7 @@ export default function AdminCaseTypesPage() {
   };
   
   const handleDeleteSubtype = (caseType: CaseTypeDefinition) => {
-    if (caseType.isMaster) return; // Should not happen as button won't be there
+    if (caseType.isMaster) return;
     setDeletingCaseType(caseType);
   };
 
@@ -223,7 +263,7 @@ export default function AdminCaseTypesPage() {
                   <TableCell className="font-medium font-body">
                     <Badge className={`${typeDef.badgeColor} text-white whitespace-nowrap mr-2`}>
                       <IconToRender className="mr-1 h-3 w-3" />
-                      {displayName}
+                      {typeDef.isMaster ? typeDef.name : displayName}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{typeDef.description}</TableCell>
@@ -362,3 +402,6 @@ export default function AdminCaseTypesPage() {
     </div>
   );
 }
+
+
+    
