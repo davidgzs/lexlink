@@ -75,5 +75,6 @@ export interface UserProfile {
   email: string;
   role: UserAppRole;
   avatarUrl?: string;
+  isActive?: boolean; // Added for logical deletion
 }
 

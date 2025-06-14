@@ -7,17 +7,18 @@ export const mockUserProfile: UserProfile = {
   email: 'juan.perez@example.com',
   role: 'Cliente',
   avatarUrl: 'https://placehold.co/100x100.png',
+  isActive: true,
 };
 
 export const mockUsers: UserProfile[] = [
-  { id: 'client_juan_perez', name: 'Juan Pérez', email: 'user@example.com', role: 'Cliente', avatarUrl: 'https://placehold.co/100x100.png?text=JP' },
-  { id: 'attorney_juana_garcia', name: 'Juana García', email: 'abogado@example.com', role: 'Abogado', avatarUrl: 'https://placehold.co/100x100.png?text=JG' },
-  { id: 'client_roberto_sanz', name: 'Roberto "Beto" Sanz', email: 'beto.sanz@example.net', role: 'Cliente' },
-  { id: 'attorney_miguel_torres', name: 'Miguel Torres', email: 'miguel.torres@example.net', role: 'Abogado' },
-  { id: 'client_carlos_fernandez', name: 'Carlos Fernández', email: 'carlos.fdz@example.net', role: 'Cliente' },
-  { id: 'client_diana_jimenez', name: 'Diana Jiménez', email: 'diana.jimenez@example.net', role: 'Cliente' },
-  { id: 'manager_user', name: 'Gerente User', email: 'gerente@example.com', role: 'Gerente', avatarUrl: 'https://placehold.co/100x100.png?text=G' },
-  { id: 'admin_user', name: 'Admin User', email: 'admin@example.com', role: 'Administrador', avatarUrl: 'https://placehold.co/100x100.png?text=A' },
+  { id: 'client_juan_perez', name: 'Juan Pérez', email: 'user@example.com', role: 'Cliente', avatarUrl: 'https://placehold.co/100x100.png?text=JP', isActive: true },
+  { id: 'attorney_juana_garcia', name: 'Juana García', email: 'abogado@example.com', role: 'Abogado', avatarUrl: 'https://placehold.co/100x100.png?text=JG', isActive: true },
+  { id: 'client_roberto_sanz', name: 'Roberto "Beto" Sanz', email: 'beto.sanz@example.net', role: 'Cliente', isActive: true },
+  { id: 'attorney_miguel_torres', name: 'Miguel Torres', email: 'miguel.torres@example.net', role: 'Abogado', isActive: true },
+  { id: 'client_carlos_fernandez', name: 'Carlos Fernández', email: 'carlos.fdz@example.net', role: 'Cliente', isActive: true },
+  { id: 'client_diana_jimenez', name: 'Diana Jiménez', email: 'diana.jimenez@example.net', role: 'Cliente', isActive: true },
+  { id: 'manager_user', name: 'Gerente User', email: 'gerente@example.com', role: 'Gerente', avatarUrl: 'https://placehold.co/100x100.png?text=G', isActive: true },
+  { id: 'admin_user', name: 'Admin User', email: 'admin@example.com', role: 'Administrador', avatarUrl: 'https://placehold.co/100x100.png?text=A', isActive: true },
 ];
 
 export const mockCases: Case[] = [
@@ -63,3 +64,4 @@ export const mockNotifications: Notification[] = [
   { id: 'N003', title: 'Documento Firmado', description: 'Escrito de Apelación_Final.pdf ha sido firmado correctamente.', timestamp: '2024-10-20T14:00:00Z', read: true, link: '/documents?docId=D003' },
   { id: 'N004', title: 'Actualización Estado del Caso', description: 'El estado del caso LEX-2024-003 cambió a "Apelación".', timestamp: '2024-11-15T08:00:00Z', read: true, link: '/dashboard' },
 ];
+

@@ -25,16 +25,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Edit, Trash2, User, Briefcase, UserCog, Shield, Users as UsersIcon, Filter } from "lucide-react";
-import type { UserAppRole } from "@/types";
+import type { UserAppRole, UserProfile } from "@/types"; // Import UserProfile
 import { useToast } from "@/hooks/use-toast";
 
-interface UserForAdminPage {
-  id: string;
-  name: string;
-  email: string;
-  role: UserAppRole;
-  avatarUrl?: string;
-}
+// UserForAdminPage now includes isActive, inheriting from UserProfile
+interface UserForAdminPage extends UserProfile {}
 
 const roleDisplayInfo: Record<UserAppRole, { icon: React.ElementType, badgeColor: string, translation: string }> = {
   Cliente: { icon: User, badgeColor: "bg-blue-500", translation: "Cliente" },
@@ -46,19 +41,19 @@ const roleDisplayInfo: Record<UserAppRole, { icon: React.ElementType, badgeColor
 const availableRolesForFilter: UserAppRole[] = ["Cliente", "Abogado", "Gerente", "Administrador"];
 
 const initialDemoUsers: UserForAdminPage[] = [
-  { id: 'user_juan_perez', name: 'Juan Pérez', email: 'user@example.com', role: 'Cliente', avatarUrl: 'https://placehold.co/100x100.png?text=JP' },
-  { id: 'attorney_juana_garcia', name: 'Juana García', email: 'abogado@example.com', role: 'Abogado', avatarUrl: 'https://placehold.co/100x100.png?text=JG' },
-  { id: 'client_roberto_sanz', name: 'Roberto "Beto" Sanz', email: 'beto.sanz@example.net', role: 'Cliente' },
-  { id: 'attorney_miguel_torres', name: 'Miguel Torres', email: 'miguel.torres@example.net', role: 'Abogado' },
-  { id: 'client_carlos_fernandez', name: 'Carlos Fernández', email: 'carlos.fdz@example.net', role: 'Cliente' },
-  { id: 'client_diana_jimenez', name: 'Diana Jiménez', email: 'diana.jimenez@example.net', role: 'Cliente' },
-  { id: 'manager_user', name: 'Gerente User', email: 'gerente@example.com', role: 'Gerente', avatarUrl: 'https://placehold.co/100x100.png?text=G' },
-  { id: 'admin_user', name: 'Admin User', email: 'admin@example.com', role: 'Administrador', avatarUrl: 'https://placehold.co/100x100.png?text=A' },
+  { id: 'user_juan_perez', name: 'Juan Pérez', email: 'user@example.com', role: 'Cliente', avatarUrl: 'https://placehold.co/100x100.png?text=JP', isActive: true },
+  { id: 'attorney_juana_garcia', name: 'Juana García', email: 'abogado@example.com', role: 'Abogado', avatarUrl: 'https://placehold.co/100x100.png?text=JG', isActive: true },
+  { id: 'client_roberto_sanz', name: 'Roberto "Beto" Sanz', email: 'beto.sanz@example.net', role: 'Cliente', isActive: true },
+  { id: 'attorney_miguel_torres', name: 'Miguel Torres', email: 'miguel.torres@example.net', role: 'Abogado', isActive: true },
+  { id: 'client_carlos_fernandez', name: 'Carlos Fernández', email: 'carlos.fdz@example.net', role: 'Cliente', isActive: true },
+  { id: 'client_diana_jimenez', name: 'Diana Jiménez', email: 'diana.jimenez@example.net', role: 'Cliente', isActive: true },
+  { id: 'manager_user', name: 'Gerente User', email: 'gerente@example.com', role: 'Gerente', avatarUrl: 'https://placehold.co/100x100.png?text=G', isActive: true },
+  { id: 'admin_user', name: 'Admin User', email: 'admin@example.com', role: 'Administrador', avatarUrl: 'https://placehold.co/100x100.png?text=A', isActive: true },
 ];
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserForAdminPage[]>(initialDemoUsers);
-  const [userToDelete, setUserToDelete] = useState<UserForAdminPage | null>(null);
+  const [userToDeactivate, setUserToDeactivate] = useState<UserForAdminPage | null>(null);
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<UserAppRole | 'Todos'>('Todos');
   const { toast } = useToast();
 
@@ -66,24 +61,28 @@ export default function AdminUsersPage() {
     alert(`Simulación: Editar usuario "${user.name}". En una aplicación real, esto abriría un formulario de edición.`);
   };
 
-  const handleDeleteUser = (user: UserForAdminPage) => {
-    setUserToDelete(user);
+  const handleDeactivateUser = (user: UserForAdminPage) => {
+    setUserToDeactivate(user);
   };
 
-  const confirmDeleteUser = () => {
-    if (!userToDelete) return;
-    setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
+  const confirmDeactivateUser = () => {
+    if (!userToDeactivate) return;
+    setUsers(prevUsers => 
+      prevUsers.map(u => 
+        u.id === userToDeactivate.id ? { ...u, isActive: false } : u
+      )
+    );
     toast({
-      title: "Usuario Eliminado (Simulación)",
-      description: `El usuario "${userToDelete.name}" ha sido eliminado (simulación).`,
-      variant: "destructive"
+      title: "Usuario Dado de Baja (Simulación)",
+      description: `El usuario "${userToDeactivate.name}" ha sido marcado como inactivo (simulación).`,
+      variant: "destructive" // Or a more neutral variant if preferred
     });
-    setUserToDelete(null);
+    setUserToDeactivate(null);
   };
 
-  const filteredUsers = selectedRoleFilter === 'Todos'
-    ? users
-    : users.filter(user => user.role === selectedRoleFilter);
+  const filteredUsers = users
+    .filter(user => user.isActive !== false) // Only show active users
+    .filter(user => selectedRoleFilter === 'Todos' || user.role === selectedRoleFilter);
 
   return (
     <div className="container mx-auto py-2">
@@ -114,7 +113,7 @@ export default function AdminUsersPage() {
       </div>
       <p className="font-body text-muted-foreground mb-6">
         Esta sección permite a los administradores gestionar las cuentas de los usuarios del sistema.
-        Las acciones de edición y eliminación son simuladas en este prototipo.
+        Las acciones de edición y baja son simuladas en este prototipo.
       </p>
 
       <div className="rounded-md border">
@@ -148,21 +147,22 @@ export default function AdminUsersPage() {
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" onClick={() => handleDeleteUser(user)} className="font-body">
-                          <Trash2 className="mr-1 h-3 w-3" /> Eliminar
+                        <Button variant="destructive" size="sm" onClick={() => handleDeactivateUser(user)} className="font-body">
+                          <Trash2 className="mr-1 h-3 w-3" /> Dar de Baja
                         </Button>
                       </AlertDialogTrigger>
-                      {userToDelete && userToDelete.id === user.id && (
+                      {userToDeactivate && userToDeactivate.id === user.id && (
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="font-headline">¿Confirmar Eliminación?</AlertDialogTitle>
+                            <AlertDialogTitle className="font-headline">¿Confirmar Baja de Usuario?</AlertDialogTitle>
                             <AlertDialogDescription className="font-body">
-                              Esta acción es simulada. ¿Estás seguro/a de que quieres eliminar al usuario "{userToDelete?.name}"?
+                              Esta acción marcará al usuario "{userToDeactivate?.name}" como inactivo. No se eliminará permanentemente.
+                              ¿Estás seguro/a?
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setUserToDelete(null)} className="font-body">Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={confirmDeleteUser} className="font-body bg-destructive hover:bg-destructive/90">Confirmar Eliminación</AlertDialogAction>
+                            <AlertDialogCancel onClick={() => setUserToDeactivate(null)} className="font-body">Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={confirmDeactivateUser} className="font-body bg-destructive hover:bg-destructive/90">Confirmar Baja</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       )}
@@ -175,7 +175,7 @@ export default function AdminUsersPage() {
         </Table>
       </div>
       {filteredUsers.length === 0 && (
-        <p className="text-center font-body text-muted-foreground mt-6">No hay usuarios que coincidan con el filtro seleccionado.</p>
+        <p className="text-center font-body text-muted-foreground mt-6">No hay usuarios activos que coincidan con el filtro seleccionado.</p>
       )}
     </div>
   );
