@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+/download
 download.zip
 *.zip
 
