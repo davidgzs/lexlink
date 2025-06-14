@@ -3,12 +3,8 @@
 # dependencies
 /node_modules
 /.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+.pnp.js
+.yarn/install-state.gz
 
 # testing
 /coverage
@@ -33,6 +29,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
 # vercel
 .vercel
 
@@ -40,9 +42,18 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.genkit/*
-.env*
+# ui - Local settings, UI library cache files
+.stylelintcache
+.eslintcache
 
-# firebase
-firebase-debug.log
-firestore-debug.log
+# IDE specific
+.idea/
+.vscode/*
+!.vscode/settings.json
+
+# Large files / Archives
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
