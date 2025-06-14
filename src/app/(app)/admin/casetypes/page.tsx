@@ -48,16 +48,6 @@ interface CaseTypeDefinition {
   parentMasterId?: 'judicial' | 'administrativo';
 }
 
-const masterTypeIcons = {
-  judicial: Gavel,
-  administrativo: FileText,
-};
-
-const masterTypeBadgeColors = {
-  judicial: "bg-orange-500",
-  administrativo: "bg-blue-500",
-};
-
 const initialCaseTypes: CaseTypeDefinition[] = [
   {
     id: "judicial",
@@ -216,6 +206,7 @@ export default function AdminCaseTypesPage() {
             <TableRow>
               <TableHead className="font-body">Nombre del Tipo/Subtipo</TableHead>
               <TableHead className="font-body">Descripción</TableHead>
+              <TableHead className="font-body">Tipo</TableHead>
               <TableHead className="text-right font-body">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -234,9 +225,11 @@ export default function AdminCaseTypesPage() {
                       <IconToRender className="mr-1 h-3 w-3" />
                       {displayName}
                     </Badge>
-                    {typeDef.isMaster && <Badge variant="outline" className="ml-2">Maestro</Badge>}
                   </TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{typeDef.description}</TableCell>
+                  <TableCell className="font-body">
+                    {typeDef.isMaster ? "Maestro" : "Subtipo"}
+                  </TableCell>
                   <TableCell className="text-right space-x-2">
                     <Button variant="outline" size="sm" onClick={() => handleOpenEditDialog(typeDef)} className="font-body">
                       <Edit className="mr-1 h-3 w-3" /> Editar
@@ -369,5 +362,3 @@ export default function AdminCaseTypesPage() {
     </div>
   );
 }
-
-    
