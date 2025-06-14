@@ -24,14 +24,6 @@ const statusColors: Record<DocumentStatus, string> = {
     "Completado": "bg-blue-500",
 };
 
-// documentStatusTranslations is no longer needed as document.status will be Spanish
-// const documentStatusTranslations: Record<Document["status"], string> = {
-//   "Pendiente de Firma": "Pendiente de Firma",
-//   "Firmado": "Firmado",
-//   "Requiere Revisión": "Requiere Revisión",
-//   "Completado": "Completado",
-// };
-
 export default function DocumentListItem({ document, onSign }: DocumentListItemProps) {
   const Icon = statusIcons[document.status];
   const badgeColor = statusColors[document.status];
@@ -41,6 +33,14 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
     month: '2-digit',
     year: 'numeric'
   });
+
+  const handleViewDocument = () => {
+    alert(`Esto es una demostración y simulación. En una aplicación real, aquí se podría ver el documento: ${document.name}`);
+  };
+
+  const handleDownloadDocument = () => {
+    alert(`Esto es una demostración y simulación. En una aplicación real, aquí se podría descargar el documento: ${document.name}`);
+  };
 
   return (
     <Card className="shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
@@ -52,7 +52,7 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
           </div>
           <Badge className={`${badgeColor} text-white whitespace-nowrap`}>
             <Icon className="mr-1 h-3 w-3" />
-            {document.status} {/* Directly use document.status as it's now in Spanish */}
+            {document.status}
           </Badge>
         </div>
         <CardDescription className="font-body text-sm">ID Caso: {document.caseId} | Versión: {document.version}</CardDescription>
@@ -72,10 +72,10 @@ export default function DocumentListItem({ document, onSign }: DocumentListItemP
       </CardContent>
 
       <CardFooter className="flex justify-center gap-2">
-        <Button variant="outline" size="sm" className="font-body" onClick={() => alert('Ver documento: ' + document.name)}>
+        <Button variant="outline" size="sm" className="font-body" onClick={handleViewDocument}>
           <Eye className="mr-2 h-4 w-4" /> Ver
         </Button>
-        <Button variant="outline" size="sm" className="font-body" onClick={() => alert('Descargar documento: ' + document.name)}>
+        <Button variant="outline" size="sm" className="font-body" onClick={handleDownloadDocument}>
           <Download className="mr-2 h-4 w-4" /> Descargar
         </Button>
       </CardFooter>
