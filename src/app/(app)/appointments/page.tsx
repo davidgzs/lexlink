@@ -26,16 +26,21 @@ export default function AppointmentsPage() {
     const name = localStorage.getItem('loggedInUserName');
     const email = localStorage.getItem('loggedInUserEmail');
     const avatar = localStorage.getItem('loggedInUserAvatar');
-    const id = localStorage.getItem('loggedInUserId'); // Assuming ID is stored
+    const id = localStorage.getItem('loggedInUserId'); 
 
     if (role && name && email && id) {
-      setCurrentUserProfile({
-        id: id,
-        name: name,
-        email: email,
-        role: role,
-        avatarUrl: avatar || `https://placehold.co/100x100.png?text=${name.substring(0,1)}`,
-      });
+      const userFromMock = mockUsers.find(u => u.id === id);
+      if (userFromMock) {
+        setCurrentUserProfile(userFromMock);
+      } else {
+         setCurrentUserProfile({
+            id: id,
+            name: name,
+            email: email,
+            role: role,
+            avatarUrl: avatar || `https://placehold.co/100x100.png?text=${name.substring(0,1)}`,
+          });
+      }
     }
   }, []);
 
