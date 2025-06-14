@@ -126,7 +126,7 @@ export default function AdminUsersPage() {
                 </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Todos">Todos (Activos e Inactivos)</SelectItem>
+              <SelectItem value="Todos">Todos</SelectItem>
               <SelectItem value="Activos">Solo Activos</SelectItem>
               <SelectItem value="Inactivos">Solo Inactivos</SelectItem>
             </SelectContent>
