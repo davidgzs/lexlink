@@ -8,12 +8,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Scale, KeyRound, Loader2 } from "lucide-react"; // Changed Fingerprint to KeyRound
+import { Scale, Fingerprint, Loader2, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { UserAppRole } from '@/types'; 
+import type { UserAppRole } from '@/types';
 import { mockUsers } from '@/lib/mockData';
 
-type LoginStep = 'credentials' | 'otp' | 'verifying' | 'error';
+type LoginStep = 'credentials' | 'fingerprint' | 'otpCodeInput' | 'verifying' | 'error';
 
 const availableRoles: UserAppRole[] = ["Cliente", "Abogado", "Gerente", "Administrador"];
 
@@ -34,32 +34,60 @@ export default function LoginPage() {
     localStorage.removeItem('loggedInUserId');
   }, []);
 
+  const proceedToDashboard = (user: typeof mockUsers[0]) => {
+    localStorage.setItem('loggedInUserRole', user.role);
+    localStorage.setItem('loggedInUserName', user.name);
+    localStorage.setItem('loggedInUserEmail', user.email);
+    localStorage.setItem('loggedInUserAvatar', user.avatarUrl || `https://placehold.co/100x100.png?text=${user.name.substring(0,1).toUpperCase() || 'U'}`);
+    localStorage.setItem('loggedInUserId', user.id);
+    router.push('/dashboard');
+  };
+
   const handleCredentialSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!selectedRole) {
       setErrorMessage('Por favor, selecciona un rol.');
-      setLoginStep('error');
+      setLoginStep('error'); // Go to general error step if role not selected
       return;
     }
     setLoginStep('verifying');
     setErrorMessage('');
 
-    await new Promise(resolve => setTimeout(resolve, 1000)); 
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     const userToLogin = mockUsers.find(
       user => user.email.toLowerCase() === email.toLowerCase() && user.role === selectedRole
     );
 
     if (userToLogin && password === 'password123') {
-      localStorage.setItem('loggedInUserRole', userToLogin.role);
-      localStorage.setItem('loggedInUserName', userToLogin.name);
-      localStorage.setItem('loggedInUserEmail', userToLogin.email);
-      localStorage.setItem('loggedInUserAvatar', userToLogin.avatarUrl || `https://placehold.co/100x100.png?text=${userToLogin.name.substring(0,1).toUpperCase() || 'U'}`);
-      localStorage.setItem('loggedInUserId', userToLogin.id);
-      setLoginStep('otp'); // Change to OTP step
+      setLoginStep('fingerprint'); // Proceed to fingerprint step
     } else {
       setErrorMessage('Correo electrónico, contraseña o rol incorrectos.');
-      setLoginStep('error');
+      setLoginStep('error'); // Go to general error step
+    }
+  };
+
+  const handleFingerprintAttempt = async () => {
+    setLoginStep('verifying');
+    setErrorMessage('');
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate fingerprint scan
+
+    const userToLogin = mockUsers.find(
+      user => user.email.toLowerCase() === email.toLowerCase() && user.role === selectedRole
+    );
+
+    if (!userToLogin) { // Should not happen if credentials were correct
+        setErrorMessage('Error inesperado, usuario no encontrado tras validación inicial.');
+        setLoginStep('error');
+        return;
+    }
+
+    // Simulate 50% chance of fingerprint failure for demonstration
+    if (Math.random() < 0.7) { // Simulate success (70% success rate)
+      proceedToDashboard(userToLogin);
+    } else { // Simulate failure
+      setErrorMessage('Verificación biométrica fallida. Por favor, inténtalo con un código de verificación.');
+      setLoginStep('otpCodeInput'); // Go to OTP code input step
     }
   };
 
@@ -67,18 +95,29 @@ export default function LoginPage() {
     e.preventDefault();
     setLoginStep('verifying');
     setErrorMessage('');
-    await new Promise(resolve => setTimeout(resolve, 1500)); 
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const userToLogin = mockUsers.find(
+      user => user.email.toLowerCase() === email.toLowerCase() && user.role === selectedRole
+    );
+    
+    if (!userToLogin) {
+        setErrorMessage('Error inesperado, usuario no encontrado.');
+        setLoginStep('error');
+        return;
+    }
+
     if (otpCode === '1234') {
-      router.push('/dashboard'); 
+      proceedToDashboard(userToLogin);
     } else {
       setErrorMessage('Código de verificación incorrecto.');
-      setLoginStep('error');
+      setLoginStep('otpCodeInput'); // Stay on OTP input, error will be shown
     }
   };
 
   const handleTryAgain = () => {
     setLoginStep('credentials');
-    setPassword(''); 
+    setPassword('');
     setOtpCode('');
     setErrorMessage('');
   }
@@ -92,14 +131,21 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-headline text-center">
-            {loginStep === 'otp' ? "Verificación por Código" : "Acceso Seguro al Portal"}
+            {loginStep === 'fingerprint' ? "Autenticación Biométrica" :
+             loginStep === 'otpCodeInput' ? "Verificación por Código" :
+             "Acceso Seguro al Portal"}
           </CardTitle>
           {loginStep === 'credentials' && (
             <CardDescription className="text-center font-body">
               Introduce tus credenciales y selecciona tu rol para acceder.
             </CardDescription>
           )}
-          {loginStep === 'otp' && (
+          {loginStep === 'fingerprint' && (
+            <CardDescription className="text-center font-body">
+              Por favor, utiliza tu huella dactilar para verificar tu identidad.
+            </CardDescription>
+          )}
+          {loginStep === 'otpCodeInput' && (
             <CardDescription className="text-center font-body">
               Introduce el código de verificación (simulado: 1234).
             </CardDescription>
@@ -111,9 +157,10 @@ export default function LoginPage() {
           )}
         </CardHeader>
         <CardContent>
-          {loginStep === 'error' && (
+          {errorMessage && (loginStep === 'otpCodeInput' || loginStep === 'credentials' || loginStep === 'error' || loginStep === 'fingerprint') && (
             <Alert variant="destructive" className="mb-4">
-              <AlertTitle className="font-headline">Fallo de Autenticación</AlertTitle>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle className="font-headline">Aviso de Autenticación</AlertTitle>
               <AlertDescription className="font-body">{errorMessage}</AlertDescription>
             </Alert>
           )}
@@ -163,7 +210,24 @@ export default function LoginPage() {
             </form>
           )}
 
-          {loginStep === 'otp' && (
+          {loginStep === 'fingerprint' && (
+            <div className="space-y-6 text-center">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full h-32 flex flex-col items-center justify-center border-dashed border-2 hover:border-primary group"
+                onClick={handleFingerprintAttempt}
+              >
+                <Fingerprint className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="mt-2 font-body text-muted-foreground group-hover:text-primary">Verificar Huella</span>
+              </Button>
+              <Button variant="link" onClick={() => { setErrorMessage(''); setLoginStep('otpCodeInput');}} className="font-body w-full">
+                Usar un código de verificación en su lugar
+              </Button>
+            </div>
+          )}
+
+          {loginStep === 'otpCodeInput' && (
             <form onSubmit={handleOtpSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="otp" className="font-body">Código de Verificación</Label>
@@ -175,17 +239,15 @@ export default function LoginPage() {
                   onChange={(e) => setOtpCode(e.target.value)}
                   required
                   className="font-body text-center tracking-widest"
-                  maxLength={6} 
+                  maxLength={6}
                 />
               </div>
               <Button type="submit" className="w-full font-body">
                 Verificar Código
               </Button>
-              <Button variant="link" onClick={handleTryAgain} className="font-body w-full">
-                Usar un código de verificación en su lugar 
-              </Button> 
-              {/* Text changed as per user request, even if contextually a bit odd.
-                  It functionally takes the user back to the credential input step. */}
+              <Button variant="link" onClick={() => {setErrorMessage(''); setLoginStep('fingerprint');}} className="font-body w-full">
+                 Volver a verificación biométrica
+              </Button>
             </form>
           )}
 
@@ -196,7 +258,7 @@ export default function LoginPage() {
             </div>
           )}
         </CardContent>
-        {loginStep === 'error' && (
+        {loginStep === 'error' && ( // This step is for critical errors like initial credential failure
             <CardFooter className="flex-col gap-2">
                  <Button onClick={handleTryAgain} className="w-full font-body">
                     Intentar de Nuevo
@@ -207,13 +269,15 @@ export default function LoginPage() {
       <p className="mt-8 text-center text-xs text-muted-foreground font-body max-w-xl">
         Esto es una demostración. La persistencia del rol es simulada con localStorage.
         <br />Contraseña para todos los usuarios: <code className="bg-muted p-1 rounded-sm">password123</code>
-        <br />Código OTP simulado: <code className="bg-muted p-1 rounded-sm">1234</code>
+        <br />Código OTP simulado: <code className="bg-muted p-1 rounded-sm">1234</code>. La huella tiene un 30% de probabilidad de fallo simulado.
         <br />Ejemplos de acceso (usa el rol correspondiente en el desplegable):
-        <br />- Cliente (Juan Pérez): <code className="bg-muted p-1 rounded-sm">user@example.com</code> (ID: client_juan_perez)
-        <br />- Abogado (Juana García): <code className="bg-muted p-1 rounded-sm">abogado@example.com</code> (ID: attorney_juana_garcia)
-        <br />- Gerente: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code> (ID: manager_user)
-        <br />- Administrador: <code className="bg-muted p-1 rounded-sm">admin@example.com</code> (ID: admin_user)
+        <br />- Cliente (Juan Pérez): <code className="bg-muted p-1 rounded-sm">user@example.com</code>
+        <br />- Abogado (Juana García): <code className="bg-muted p-1 rounded-sm">abogado@example.com</code>
+        <br />- Gerente: <code className="bg-muted p-1 rounded-sm">gerente@example.com</code>
+        <br />- Administrador: <code className="bg-muted p-1 rounded-sm">admin@example.com</code>
       </p>
     </div>
   );
 }
+
+    
