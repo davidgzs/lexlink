@@ -25,7 +25,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import type { Appointment, AppointmentType, Case, UserProfile } from "@/types";
-// mockCases is removed from here, will be passed as prop
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -66,47 +65,53 @@ export default function ScheduleAppointmentDialog({
   const [selectedClientId, setSelectedClientId] = useState<string | undefined>(undefined);
   const [selectedAttorneyId, setSelectedAttorneyId] = useState<string | undefined>(undefined);
 
+  // Effect to open dialog when appointmentToEdit changes (for editing)
   useEffect(() => {
-    if (!open) { 
+    if (appointmentToEdit) {
+      setOpen(true);
+    }
+  }, [appointmentToEdit]);
+
+  // Effect to reset/populate form when dialog opens or appointmentToEdit changes
+  useEffect(() => {
+    if (!open) {
         setTitle('');
         setType(undefined);
         setDate(undefined);
         setTime(undefined);
         setCaseId(undefined);
         setNotes('');
-        // Reset selections based on current user when dialog closes or currentUser changes
         setSelectedClientId(currentUser?.role === 'Cliente' ? currentUser.id : undefined);
         setSelectedAttorneyId(currentUser?.role === 'Abogado' ? currentUser.id : undefined);
-    } else if (appointmentToEdit) { 
+    } else if (appointmentToEdit && currentUser) { // Ensure currentUser is available for edit logic
         setTitle(appointmentToEdit.title);
         setType(appointmentToEdit.type);
         setDate(new Date(appointmentToEdit.date));
         setTime(appointmentToEdit.time);
         setCaseId(appointmentToEdit.caseId);
-        setNotes(''); 
+        setNotes('');
 
-        // Attempt to find participants by name from the 'users' prop
         const clientParticipant = users.find(u => u.name === appointmentToEdit.participants[0] && u.role === 'Cliente');
         const attorneyParticipant = users.find(u => u.name === appointmentToEdit.participants[1] && u.role === 'Abogado');
         
         setSelectedClientId(clientParticipant?.id);
         setSelectedAttorneyId(attorneyParticipant?.id);
         
-    } else { // Dialog is open for a new appointment
-        setSelectedClientId(currentUser?.role === 'Cliente' ? currentUser.id : undefined);
-        setSelectedAttorneyId(currentUser?.role === 'Abogado' ? currentUser.id : undefined);
+    } else if (open && !appointmentToEdit && currentUser) { // Dialog is open for a new appointment
+        setSelectedClientId(currentUser.role === 'Cliente' ? currentUser.id : undefined);
+        setSelectedAttorneyId(currentUser.role === 'Abogado' ? currentUser.id : undefined);
     }
   }, [appointmentToEdit, open, currentUser, users]);
 
 
   const clientOptions = useMemo(() => {
-    if (!currentUser) return [];
+    if (!currentUser || !users || users.length === 0) return [];
     switch (currentUser.role) {
       case 'Cliente':
         return users.filter(u => u.id === currentUser.id).map(u => ({ value: u.id, label: u.name }));
       case 'Abogado':
         const attorneyClientNames = new Set(
-          cases.filter(c => c.attorneyAssigned === currentUser.name).map(c => c.clientName)
+          (cases || []).filter(c => c.attorneyAssigned === currentUser.name).map(c => c.clientName)
         );
         return users.filter(u => u.role === 'Cliente' && attorneyClientNames.has(u.name)).map(u => ({ value: u.id, label: u.name }));
       case 'Gerente':
@@ -118,7 +123,7 @@ export default function ScheduleAppointmentDialog({
   }, [currentUser, users, cases]);
 
   const attorneyOptions = useMemo(() => {
-    if (!currentUser) return [];
+    if (!currentUser || !users || users.length === 0) return [];
     switch (currentUser.role) {
       case 'Abogado':
         return users.filter(u => u.id === currentUser.id).map(u => ({ value: u.id, label: u.name }));
@@ -191,119 +196,124 @@ export default function ScheduleAppointmentDialog({
             Completa los detalles para {appointmentToEdit ? "actualizar tu" : "programar una nueva"} cita.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="client" className="text-right">Cliente</Label>
-            <Select 
-              value={selectedClientId} 
-              onValueChange={setSelectedClientId} 
-              required 
-              disabled={isClientFieldDisabled}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Selecciona un cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {clientOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+        {currentUser ? (
+          <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="client" className="text-right">Cliente</Label>
+              <Select 
+                value={selectedClientId} 
+                onValueChange={setSelectedClientId} 
+                required 
+                disabled={isClientFieldDisabled}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Selecciona un cliente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clientOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="attorney" className="text-right">Abogado/a</Label>
-            <Select 
-              value={selectedAttorneyId} 
-              onValueChange={setSelectedAttorneyId} 
-              required
-              disabled={isAttorneyFieldDisabled}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Selecciona un abogado/a" />
-              </SelectTrigger>
-              <SelectContent>
-                {attorneyOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-        
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="title" className="text-right">Título</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" required />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="type" className="text-right">Tipo</Label>
-            <Select value={type} onValueChange={(value) => setType(value as AppointmentType)} required>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Selecciona tipo de cita" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="En-Persona">En Persona</SelectItem>
-                <SelectItem value="Video Conferencia">Video Conferencia</SelectItem>
-                <SelectItem value="Consulta Escrita">Consulta Escrita</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="date" className="text-right">Fecha</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className={`col-span-3 justify-start text-left font-normal ${!date && "text-muted-foreground"}`}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP", { locale: es }) : <span>Elige una fecha</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                  disabled={(d) => d < new Date(new Date().setDate(new Date().getDate() -1))} 
-                  locale={es}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="time" className="text-right">Hora</Label>
-            <Select value={time} onValueChange={setTime} required>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Selecciona un horario" />
-              </SelectTrigger>
-              <SelectContent>
-                {timeSlots.map(slot => <SelectItem key={slot} value={slot}>{slot}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="caseIdLink" className="text-right">Caso (Opcional)</Label>
-            <Select value={caseId} onValueChange={setCaseId}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Vincular a un caso" />
-              </SelectTrigger>
-              <SelectContent>
-                {cases
-                  .filter(c => 
-                    currentUser?.role === 'Gerente' || currentUser?.role === 'Administrador' || 
-                    (selectedClientId && users.find(u=>u.id === selectedClientId)?.name === c.clientName)
-                  )
-                  .map(c => <SelectItem key={c.id} value={c.id}>{c.caseNumber} - {c.clientName}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="notes" className="text-right">Notas (Opcionales)</Label>
-            <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="col-span-3" placeholder="Detalles específicos o temas para la cita..." />
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button type="submit">{appointmentToEdit ? "Guardar Cambios" : "Agendar Cita"}</Button>
-          </DialogFooter>
-        </form>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="attorney" className="text-right">Abogado/a</Label>
+              <Select 
+                value={selectedAttorneyId} 
+                onValueChange={setSelectedAttorneyId} 
+                required
+                disabled={isAttorneyFieldDisabled}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Selecciona un abogado/a" />
+                </SelectTrigger>
+                <SelectContent>
+                  {attorneyOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">Título</Label>
+              <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="col-span-3" required />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="type" className="text-right">Tipo</Label>
+              <Select value={type} onValueChange={(value) => setType(value as AppointmentType)} required>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Selecciona tipo de cita" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="En-Persona">En Persona</SelectItem>
+                  <SelectItem value="Video Conferencia">Video Conferencia</SelectItem>
+                  <SelectItem value="Consulta Escrita">Consulta Escrita</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="date" className="text-right">Fecha</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={`col-span-3 justify-start text-left font-normal ${!date && "text-muted-foreground"}`}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP", { locale: es }) : <span>Elige una fecha</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                    disabled={(d) => d < new Date(new Date().setDate(new Date().getDate() -1))} 
+                    locale={es}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="time" className="text-right">Hora</Label>
+              <Select value={time} onValueChange={setTime} required>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Selecciona un horario" />
+                </SelectTrigger>
+                <SelectContent>
+                  {timeSlots.map(slot => <SelectItem key={slot} value={slot}>{slot}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="caseIdLink" className="text-right">Caso (Opcional)</Label>
+              <Select value={caseId} onValueChange={setCaseId}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Vincular a un caso" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cases
+                    .filter(c => 
+                      !currentUser || currentUser.role === 'Gerente' || currentUser.role === 'Administrador' || 
+                      (selectedClientId && users.find(u=>u.id === selectedClientId)?.name === c.clientName)
+                    )
+                    .map(c => <SelectItem key={c.id} value={c.id}>{c.caseNumber} - {c.clientName}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="notes" className="text-right">Notas (Opcionales)</Label>
+              <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="col-span-3" placeholder="Detalles específicos o temas para la cita..." />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+              <Button type="submit">{appointmentToEdit ? "Guardar Cambios" : "Agendar Cita"}</Button>
+            </DialogFooter>
+          </form>
+        ) : (
+          <div className="py-4 text-center text-muted-foreground">Cargando información del usuario...</div>
+        )}
       </DialogContent>
     </Dialog>
   );
 }
+
