@@ -204,9 +204,9 @@ export default function AdminCaseTypesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="font-body">Nombre del Tipo/Subtipo</TableHead>
+              <TableHead className="font-body">Nombre</TableHead>
               <TableHead className="font-body">Descripción</TableHead>
-              <TableHead className="font-body">Tipo</TableHead>
+              <TableHead className="font-body">Tipo/Subtipo</TableHead>
               <TableHead className="text-right font-body">Acciones</TableHead>
             </TableRow>
           </TableHeader>
@@ -228,7 +228,7 @@ export default function AdminCaseTypesPage() {
                   </TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{typeDef.description}</TableCell>
                   <TableCell className="font-body">
-                    {typeDef.isMaster ? "Maestro" : "Subtipo"}
+                    {typeDef.isMaster ? "Tipo" : "Subtipo"}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
                     <Button variant="outline" size="sm" onClick={() => handleOpenEditDialog(typeDef)} className="font-body">
