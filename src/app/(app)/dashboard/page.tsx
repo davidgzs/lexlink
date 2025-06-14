@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [filteredAppointments, setFilteredAppointments] = useState<AppointmentType[]>([]);
   const [loading, setLoading] = useState(true);
+  // El estado inicial se ajustará en useEffect
   const [selectedCaseStateFilter, setSelectedCaseStateFilter] = useState<CaseState | 'Todos'>('Abierto');
 
   useEffect(() => {
@@ -24,9 +25,18 @@ export default function DashboardPage() {
     const name = localStorage.getItem('loggedInUserName');
     setCurrentUserRole(role);
     setCurrentUserName(name);
-  }, []);
+
+    // Establecer el filtro de estado de caso predeterminado según el rol
+    if (role === 'Administrador' || role === 'Gerente') {
+      setSelectedCaseStateFilter('Todos');
+    } else {
+      setSelectedCaseStateFilter('Abierto'); // Valor predeterminado para Cliente, Abogado o si no hay rol
+    }
+  }, []); // Solo se ejecuta una vez al montar el componente
 
   useEffect(() => {
+    // Este efecto ahora depende de que currentUserRole, currentUserName y selectedCaseStateFilter estén establecidos.
+    // La lógica de carga y filtrado principal reside aquí.
     if (currentUserRole && currentUserName) {
       setLoading(true);
 
@@ -59,11 +69,11 @@ export default function DashboardPage() {
           (a) =>
             a.participants.includes(currentUserName) &&
             new Date(a.date) >= today &&
-            a.status === 'Scheduled'
+            a.status === 'Programada' // Usar valor en español
         );
       } else { // Gerente, Administrador
         relevantAppointments = mockAppointments.filter(
-          (a) => new Date(a.date) >= today && a.status === 'Scheduled'
+          (a) => new Date(a.date) >= today && a.status === 'Programada' // Usar valor en español
         );
       }
       relevantAppointments.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -75,9 +85,9 @@ export default function DashboardPage() {
       setFilteredCases([]);
       setFilteredAppointments([]);
     }
-  }, [currentUserRole, currentUserName, selectedCaseStateFilter]);
+  }, [currentUserRole, currentUserName, selectedCaseStateFilter]); // Dependencias actualizadas
 
-  if (loading) {
+  if (loading && !(currentUserRole && currentUserName)) { // Ajuste de condición de carga inicial
     return (
       <div className="flex justify-center items-center h-full min-h-[calc(100vh-200px)]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -107,8 +117,14 @@ export default function DashboardPage() {
             <TabsTrigger value="Cerrado" className="font-body">Cerrados</TabsTrigger>
             <TabsTrigger value="Todos" className="font-body">Todos</TabsTrigger>
           </TabsList>
+          {/* Asegurarse que TabsContent se renderiza incluso si loading es true pero ya hay datos de usuario */}
           <TabsContent value={selectedCaseStateFilter} className="mt-4">
-            {filteredCases.length > 0 ? (
+            {loading && (currentUserRole && currentUserName) ? ( // Muestra loader dentro del tab si está cargando para ese usuario
+                <div className="flex justify-center items-center py-10">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="ml-3 font-body text-muted-foreground">Actualizando expedientes...</p>
+                </div>
+            ) : filteredCases.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCases.map((caseItem) => (
                   <CaseCard key={caseItem.id} caseItem={caseItem} />
@@ -125,7 +141,12 @@ export default function DashboardPage() {
 
       <section>
         <h2 className="text-2xl font-headline mb-4 text-foreground">Próximas Citas</h2>
-        {filteredAppointments.length > 0 ? (
+        {loading && (currentUserRole && currentUserName) ? ( // Muestra loader si está cargando para ese usuario
+            <div className="flex justify-center items-center py-10">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                 <p className="ml-3 font-body text-muted-foreground">Actualizando citas...</p>
+            </div>
+        ) : filteredAppointments.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAppointments.map((appointment) => (
               <UpcomingAppointmentCard key={appointment.id} appointment={appointment} />
@@ -138,3 +159,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
