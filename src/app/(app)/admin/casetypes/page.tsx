@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -35,7 +35,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Trash2, Type as PageIcon, Gavel, FileText, ListTree, PlusCircle } from "lucide-react";
+import { Edit, Trash2, Type as PageIcon, Gavel, FileText, ListTree, PlusCircle, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface CaseTypeDefinition {
@@ -142,8 +142,20 @@ export default function AdminCaseTypesPage() {
   const [formParentMasterId, setFormParentMasterId] = useState<'judicial' | 'administrativo' | undefined>(undefined);
   const [formSubtypeName, setFormSubtypeName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [filterDisplayMode, setFilterDisplayMode] = useState<'types' | 'subtypes' | 'all'>('types');
+
 
   const { toast } = useToast();
+
+  const displayedCaseTypes = useMemo(() => {
+    if (filterDisplayMode === 'types') {
+      return caseTypes.filter(ct => ct.isMaster);
+    }
+    if (filterDisplayMode === 'subtypes') {
+      return caseTypes.filter(ct => !ct.isMaster);
+    }
+    return caseTypes; // 'all'
+  }, [caseTypes, filterDisplayMode]);
 
   const getNextSubtypeId = (parentId: 'judicial' | 'administrativo'): string => {
     const prefix = parentId === 'judicial' ? 'JU' : 'AD';
@@ -253,14 +265,29 @@ export default function AdminCaseTypesPage() {
 
   return (
     <div className="container mx-auto py-2">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h1 className="text-3xl font-headline font-semibold text-primary flex items-center">
           <PageIcon className="mr-3 h-8 w-8" />
           Gestión de Tipos y Subtipos de Expedientes
         </h1>
-        <Button className="font-body" onClick={handleOpenAddSubtypeDialog}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Añadir Nuevo Subtipo
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            <Select value={filterDisplayMode} onValueChange={(value) => setFilterDisplayMode(value as 'all' | 'types' | 'subtypes')}>
+                <SelectTrigger className="w-full sm:w-[230px] font-body">
+                    <div className="flex items-center">
+                        <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                        <SelectValue placeholder="Filtrar por..." />
+                    </div>
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="types">Mostrar Solo Tipos Maestros</SelectItem>
+                    <SelectItem value="subtypes">Mostrar Solo Subtipos</SelectItem>
+                    <SelectItem value="all">Mostrar Todos</SelectItem>
+                </SelectContent>
+            </Select>
+            <Button className="font-body w-full sm:w-auto" onClick={handleOpenAddSubtypeDialog}>
+                <PlusCircle className="mr-2 h-4 w-4" /> Añadir Nuevo Subtipo
+            </Button>
+        </div>
       </div>
       <p className="font-body text-muted-foreground mb-6">
         Esta sección permite definir y gestionar los tipos maestros (Judicial, Administrativo) y sus subtipos.
@@ -278,7 +305,7 @@ export default function AdminCaseTypesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {caseTypes.map((typeDef) => {
+            {displayedCaseTypes.map((typeDef) => {
               const IconToRender = typeDef.icon;
               const parentName = typeDef.parentMasterId 
                 ? caseTypes.find(ct => ct.id === typeDef.parentMasterId)?.name 
@@ -313,8 +340,13 @@ export default function AdminCaseTypesPage() {
           </TableBody>
         </Table>
       </div>
-      {caseTypes.length === 0 && (
-        <p className="text-center font-body text-muted-foreground mt-6">No hay tipos/subtipos de expedientes definidos.</p>
+      {displayedCaseTypes.length === 0 && (
+        <p className="text-center font-body text-muted-foreground mt-6">
+            {filterDisplayMode === 'all' ? 'No hay tipos o subtipos de expedientes definidos.' : 
+             filterDisplayMode === 'types' ? 'No hay tipos maestros definidos.' :
+             'No hay subtipos que coincidan con el filtro actual.'
+            }
+        </p>
       )}
 
       {/* Dialog for Adding/Editing Subtype */}
@@ -429,8 +461,3 @@ export default function AdminCaseTypesPage() {
     </div>
   );
 }
-
-
-    
-
-    
