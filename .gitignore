@@ -27,33 +27,33 @@ download.zip
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# ui - Local settings, UI library cache files
-.stylelintcache
-.eslintcache
-
-# IDE specific
-.idea/
+# IDE / Editor specific
 .vscode/*
 !.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
 
-# Large files / Archives
-*.zip
-*.tar
-*.gz
-*.rar
-*.7z
+# macOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Optional: Moles
+# node_modules/.bin
+# .idea
+# .cache
+# *.bak
+# *.swp
+
+# Custom folder to ignore
+download/
