@@ -1,7 +1,6 @@
 
 "use client";
 
-<<<<<<< HEAD
 import { useState } from 'react';
 import { mockCases } from '@/lib/mockData';
 import type { Case, CaseStatus, CaseState } from '@/types';
@@ -64,17 +63,10 @@ export default function AdminDataPage() {
     setCaseToDelete(null);
   };
 
-=======
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Briefcase } from "lucide-react";
-
-export default function AdminDataPage() {
->>>>>>> d5b19a1 (I see this error with the app, reported by NextJS, please fix it. The er)
   return (
     <div className="container mx-auto py-2">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-headline font-semibold text-primary flex items-center">
-<<<<<<< HEAD
           <ShieldAlert className="mr-3 h-8 w-8" />
           Gestión de Datos (Administrador)
         </h1>
@@ -151,28 +143,6 @@ export default function AdminDataPage() {
       {cases.length === 0 && (
         <p className="text-center font-body text-muted-foreground mt-6">No hay expedientes para mostrar.</p>
       )}
-=======
-          <Briefcase className="mr-3 h-8 w-8" />
-          Gestión de Datos de Expedientes
-        </h1>
-      </div>
-      <p className="font-body text-muted-foreground mb-6">
-        Esta sección está destinada a la visualización y gestión de los datos de los expedientes.
-        Actualmente, esta página es un marcador de posición.
-      </p>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline">Expedientes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="font-body text-muted-foreground">
-            Aquí se mostraría una tabla o lista de expedientes con opciones para ver detalles, editar o archivar.
-            La funcionalidad completa para la gestión de expedientes se implementará en futuras iteraciones.
-          </p>
-        </CardContent>
-      </Card>
->>>>>>> d5b19a1 (I see this error with the app, reported by NextJS, please fix it. The er)
     </div>
   );
 }
