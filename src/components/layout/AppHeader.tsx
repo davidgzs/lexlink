@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Bell, Menu, Scale, Settings, LogOut } from 'lucide-react';
+import { Bell, Menu, Scale, Settings, LogOut, Sun, Moon } from 'lucide-react';
 import type { UserProfile } from '@/types';
 import NotificationDropdown from '@/components/notifications/NotificationDropdown'; 
 
@@ -34,6 +34,36 @@ interface AppHeaderProps {
 
 export default function AppHeader({ user, sidebarNavItems }: AppHeaderProps) {
   const [showSettingsDemoAlert, setShowSettingsDemoAlert] = useState(false);
+  const [theme, setTheme] = useState<string>('light'); // Default to light
+
+  useEffect(() => {
+    // Check localStorage for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      setTheme(savedTheme);
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } else {
+      // If no saved theme, check system preference (optional, for a more advanced setup)
+      // For simplicity, we default to 'light' if nothing is saved.
+      localStorage.setItem('theme', 'light');
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
 
   return (
     <>
@@ -60,6 +90,9 @@ export default function AppHeader({ user, sidebarNavItems }: AppHeaderProps) {
 
         <div className="relative ml-auto flex flex-1 md:grow-0 items-center gap-2">
           <NotificationDropdown />
+          <Button variant="outline" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
