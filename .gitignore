@@ -3,12 +3,8 @@
 # dependencies
 /node_modules
 /.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+.pnp.js
+.yarn/install-state.gz
 
 # testing
 /coverage
@@ -31,18 +27,33 @@ download.zip
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# vercel
-.vercel
+# IDE / Editor specific
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# macOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
 
-.genkit/*
-.env*
+# Windows specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# firebase
-firebase-debug.log
-firestore-debug.log
+# Optional: Moles
+# node_modules/.bin
+# .idea
+# .cache
+# *.bak
+# *.swp
+
+# Custom folder to ignore
+download/
