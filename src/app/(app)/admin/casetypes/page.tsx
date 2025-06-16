@@ -63,19 +63,19 @@ type CaseTypeOrSubtype = BaseCaseType | SubCaseType;
 
 const initialBaseTypes: BaseCaseType[] = [
   {
-    id: "judicial",
-    name: "Judicial",
-    description: "Expedientes que involucran procesos y litigios ante tribunales de justicia.",
-    icon: Gavel,
-    badgeColor: "bg-orange-500",
-    isBaseType: true,
-  },
-  {
     id: "administrativo",
     name: "Administrativo",
     description: "Expedientes relacionados con trámites y procedimientos ante organismos de la administración pública.",
     icon: FileText,
     badgeColor: "bg-blue-500",
+    isBaseType: true,
+  },
+  {
+    id: "judicial",
+    name: "Judicial",
+    description: "Expedientes que involucran procesos y litigios ante tribunales de justicia.",
+    icon: Gavel,
+    badgeColor: "bg-orange-500",
     isBaseType: true,
   },
 ];
@@ -87,8 +87,38 @@ const initialSubtypes: SubCaseType[] = [
   { id: "AD-002", baseTypeId: "administrativo", name: "Contratos", description: "Subtipo para la gestión y litigiosidad de contratos con el sector público.", icon: FileText, badgeColor: "bg-blue-500", isBaseType: false },
 ];
 
+function compareCaseDefinitions(a: CaseTypeOrSubtype, b: CaseTypeOrSubtype): number {
+  const getSortOrderKey = (item: CaseTypeOrSubtype): number => {
+    if (item.id === 'administrativo' && item.isBaseType) return 1; // Administrativo Base
+    if (!item.isBaseType && (item as SubCaseType).baseTypeId === 'administrativo') return 2; // Administrativo Subtypes
+    if (item.id === 'judicial' && item.isBaseType) return 3; // Judicial Base
+    if (!item.isBaseType && (item as SubCaseType).baseTypeId === 'judicial') return 4; // Judicial Subtypes
+    return 5; // Should not happen
+  };
+
+  const orderA = getSortOrderKey(a);
+  const orderB = getSortOrderKey(b);
+
+  if (orderA !== orderB) {
+    return orderA - orderB;
+  }
+
+  // If in the same primary group (e.g., both are Administrativo subtypes, or both are base types though this won't happen with current keys)
+  // and they are not base types, sort by name.
+  // Base types are already sorted by their key (1 vs 3).
+  if (!a.isBaseType && !b.isBaseType) {
+    return a.name.localeCompare(b.name);
+  }
+  // If one is base and other is subtype within the same sortOrderKey (not possible with current distinct keys for base/sub)
+  // or if comparing base types (already handled by orderA vs orderB), or any other unhandled case.
+  return a.name.localeCompare(b.name); // Fallback for base types or general sort by name
+}
+
+
 export default function AdminCaseTypesPage() {
-  const [caseDefinitions, setCaseDefinitions] = useState<CaseTypeOrSubtype[]>([...initialBaseTypes, ...initialSubtypes]);
+  const [caseDefinitions, setCaseDefinitions] = useState<CaseTypeOrSubtype[]>(
+    [...initialBaseTypes, ...initialSubtypes].sort(compareCaseDefinitions)
+  );
   const [isAddSubtypeDialogOpen, setIsAddSubtypeDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingDefinition, setEditingDefinition] = useState<CaseTypeOrSubtype | null>(null);
@@ -100,8 +130,8 @@ export default function AdminCaseTypesPage() {
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
 
-  const [nextJudicialSubtypeNum, setNextJudicialSubtypeNum] = useState(3); // Start after JU-002
-  const [nextAdminSubtypeNum, setNextAdminSubtypeNum] = useState(3); // Start after AD-002
+  const [nextJudicialSubtypeNum, setNextJudicialSubtypeNum] = useState(3); 
+  const [nextAdminSubtypeNum, setNextAdminSubtypeNum] = useState(3); 
 
   const [definitionToDelete, setDefinitionToDelete] = useState<SubCaseType | null>(null);
 
@@ -120,7 +150,7 @@ export default function AdminCaseTypesPage() {
 
   const handleSaveNewSubtype = () => {
     if (!selectedBaseTypeForNewSubtype || !newSubtypeName.trim()) {
-      toast({ title: "Error", description: "Selecciona un tipo base y un nombre para el subtipo.", variant: "destructive" });
+      toast({ title: "Error", description: "Selecciona un tipo y un nombre para el subtipo.", variant: "destructive" });
       return;
     }
 
@@ -147,15 +177,7 @@ export default function AdminCaseTypesPage() {
       isBaseType: false,
     };
 
-    setCaseDefinitions(prev => [...prev, newSubtype].sort((a,b) => {
-        if (a.isBaseType && !b.isBaseType) return -1;
-        if (!a.isBaseType && b.isBaseType) return 1;
-        if (!a.isBaseType && !b.isBaseType) {
-            if ((a as SubCaseType).baseTypeId < (b as SubCaseType).baseTypeId) return -1;
-            if ((a as SubCaseType).baseTypeId > (b as SubCaseType).baseTypeId) return 1;
-        }
-        return a.id.localeCompare(b.id);
-    }));
+    setCaseDefinitions(prev => [...prev, newSubtype].sort(compareCaseDefinitions));
     toast({ title: "Subtipo Creado", description: `El subtipo "${newSubtype.name}" ha sido añadido.` });
     setIsAddSubtypeDialogOpen(false);
   };
@@ -184,7 +206,7 @@ export default function AdminCaseTypesPage() {
         };
       }
       return def;
-    }));
+    }).sort(compareCaseDefinitions)); // Re-sort after edit might change name
 
     toast({ title: "Definición Actualizada", description: `Los cambios en "${editingDefinition.name}" han sido guardados.` });
     setIsEditDialogOpen(false);
@@ -197,13 +219,13 @@ export default function AdminCaseTypesPage() {
 
   const confirmDeleteSubtype = () => {
     if (!definitionToDelete) return;
-    setCaseDefinitions(prevDefs => prevDefs.filter(def => def.id !== definitionToDelete.id));
+    setCaseDefinitions(prevDefs => prevDefs.filter(def => def.id !== definitionToDelete.id).sort(compareCaseDefinitions)); // No need to re-sort if only filtering
     toast({ title: "Subtipo Eliminado", description: `El subtipo "${definitionToDelete.name}" ha sido eliminado.`, variant: "destructive" });
     setDefinitionToDelete(null);
   };
 
   const filteredDefinitions = useMemo(() => {
-    return caseDefinitions
+    return caseDefinitions // caseDefinitions is already sorted
       .filter(def => {
         if (baseTypeFilter === 'todos') return true;
         return def.isBaseType ? def.id === baseTypeFilter : (def as SubCaseType).baseTypeId === baseTypeFilter;
@@ -243,7 +265,7 @@ export default function AdminCaseTypesPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todos los Tipos</SelectItem>
-            {initialBaseTypes.map(bt => (
+            {initialBaseTypes.map(bt => ( // initialBaseTypes is now Administrativo, then Judicial
               <SelectItem key={bt.id} value={bt.id}>{bt.name}</SelectItem>
             ))}
           </SelectContent>
@@ -337,7 +359,7 @@ export default function AdminCaseTypesPage() {
                   <SelectValue placeholder="Selecciona un tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {initialBaseTypes.map(bt => (
+                  {initialBaseTypes.map(bt => ( // initialBaseTypes is now Administrativo, then Judicial
                     <SelectItem key={bt.id} value={bt.id}>{bt.name}</SelectItem>
                   ))}
                 </SelectContent>
