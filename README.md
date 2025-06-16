@@ -1,3 +1,4 @@
+
 # lexlink
 lexlink github repository
 
@@ -64,12 +65,22 @@ Esta sección describe la arquitectura y los componentes clave de la aplicación
 
 *   `src/app/`: Contiene las rutas y páginas de la aplicación usando el App Router de Next.js.
     *   `(app)/`: Rutas protegidas que requieren autenticación (simulada).
+        *   `dashboard/`: Panel de control principal.
+        *   `messages/`: Interfaz de mensajería.
+        *   `appointments/`: Gestión de citas.
+        *   `documents/`: Gestión de documentos y firma electrónica.
+        *   `admin/`: Sección de administración con subrutas para:
+            *   `data/`: Gestión de datos de expedientes.
+            *   `roles/`: Gestión de roles de usuario.
+            *   `users/`: Gestión de usuarios.
+            *   `casetypes/`: Gestión de tipos y subtipos de expedientes.
+            *   `states/`: Visualización de estados de expedientes.
     *   `login/`: Página de inicio de sesión.
     *   `page.tsx`: Página de aterrizaje (landing page).
     *   `layout.tsx`: Layouts principales para la aplicación.
 *   `src/components/`: Componentes React reutilizables.
     *   `ui/`: Componentes de ShadCN UI.
-    *   Subdirectorios para componentes específicos de cada funcionalidad (ej. `dashboard/`, `messages/`).
+    *   Subdirectorios para componentes específicos de cada funcionalidad (ej. `dashboard/`, `messages/`, `appointments/`, `documents/`, `landing/`, `layout/`, `notifications/`).
 *   `src/lib/`: Utilidades y lógica de negocio.
     *   `mockData.ts`: Datos simulados para la aplicación.
     *   `firebase.ts`: Configuración inicial de Firebase SDK.
@@ -78,6 +89,7 @@ Esta sección describe la arquitectura y los componentes clave de la aplicación
     *   `genkit.ts`: Inicialización de Genkit.
 *   `src/types/`: Definiciones de tipos TypeScript para la aplicación.
 *   `public/`: Archivos estáticos (imágenes, etc.).
+    *   `images/`: Contiene las imágenes utilizadas en la landing page.
 
 ## Frontend (Next.js / React)
 
@@ -92,7 +104,7 @@ Esta sección describe la arquitectura y los componentes clave de la aplicación
     *   La tipografía utiliza 'Alegreya' para titulares y 'PT Sans' para el cuerpo del texto.
 *   **Manejo de Estado:**
     *   Principalmente mediante React Hooks (`useState`, `useEffect`, `useMemo`).
-    *   `localStorage` se utiliza para simular la persistencia de la sesión del usuario (rol, nombre, etc.) después del login.
+    *   `localStorage` se utiliza para simular la persistencia de la sesión del usuario (rol, nombre, email, avatar, ID de usuario) después del login.
 *   **Navegación:**
     *   Se utiliza `next/link` para la navegación entre páginas del lado del cliente.
     *   `next/navigation` (hook `useRouter`) para la navegación programática.
@@ -103,20 +115,125 @@ Esta sección describe la arquitectura y los componentes clave de la aplicación
 *   **Tipos:** Todas las estructuras de datos importantes están tipadas mediante interfaces en `src/types/index.ts`.
 *   **Firebase:** El SDK de Firebase está configurado en `src/lib/firebase.ts`, pero la aplicación aún no interactúa activamente con servicios de Firebase como Firestore para la persistencia de datos. Está preparada para una futura integración.
 
-## Funcionalidades Principales Implementadas (Simuladas)
+## Funcionalidades Principales Implementadas (Simuladas) y Descripción de Pantallas
 
-*   **Autenticación:** Una página de login (`/login`) simula el proceso de autenticación con roles de usuario, utilizando `localStorage` para mantener el estado de la sesión. Incluye una simulación de verificación biométrica y por OTP.
-*   **Página de Aterrizaje (`/`):** Presenta la aplicación, sus características y un carrusel de frases.
-*   **Dashboard (`/dashboard`):** Muestra un resumen de expedientes y próximas citas relevantes para el usuario logueado. Permite filtrar expedientes por estado (Abierto, Cerrado, Todos).
-*   **Mensajería (`/messages`):** Interfaz de chat para la comunicación entre clientes y abogados, basada en conversaciones simuladas. Los Gerentes/Administradores solo pueden ver.
-*   **Citas (`/appointments`):** Permite ver, programar y cancelar citas (presenciales, videoconferencia, consulta escrita). Incluye vista de lista y calendario.
-*   **Documentos y Firma (`/documents`):** Lista documentos asociados a casos, permite filtrarlos y simula un proceso de firma electrónica para documentos "Pendientes de Firma".
-*   **Sección de Administración (`/admin/...`):** Accesible principalmente por el rol "Administrador".
-    *   **Gestión de Datos (`/admin/data`):** Tabla para ver y editar (simuladamente) todos los expedientes. Incluye filtros.
-    *   **Gestión de Roles (`/admin/roles`):** Permite ver y editar las descripciones de los roles de usuario predefinidos.
-    *   **Gestión de Usuarios (`/admin/users`):** Permite ver, filtrar, y simular la edición y activación/inactivación de usuarios.
-    *   **Gestión de Tipos/Subtipos de Expedientes (`/admin/casetypes`):** Permite gestionar tipos base fijos (Judicial, Administrativo) y crear/editar/eliminar subtipos asociados. Incluye filtros y lógica para prevenir la eliminación de subtipos en uso.
-    *   **Gestión de Estados (`/admin/states`):** Muestra los estados posibles de los expedientes (Abierto, Cerrado).
+*   **Página de Aterrizaje (`/`):**
+    *   **Propósito:** Es la primera impresión de la aplicación para usuarios no autenticados.
+    *   **Funcionalidades:**
+        *   Presenta la marca LexLINK y su propuesta de valor.
+        *   Muestra un carrusel con frases publicitarias destacando las ventajas sobre soluciones genéricas como WordPress.
+        *   Lista las características clave de la plataforma con imágenes descriptivas (mensajería segura, portal de autoservicio, programación de citas, notificaciones, firma electrónica, seguimiento de casos).
+        *   Proporciona un botón para acceder a la página de login ("Acceder a Panel").
+        *   Incluye un enlace externo a "LexNET".
+        *   Muestra la versión de la DEMO en el pie de página.
+
+*   **Login (`/login`):**
+    *   **Propósito:** Autenticar a los usuarios para acceder a las funcionalidades internas de la aplicación.
+    *   **Funcionalidades:**
+        *   Formulario para introducir correo electrónico y contraseña.
+        *   Selector de rol (Cliente, Abogado, Gerente, Administrador).
+        *   Proceso de autenticación multi-paso simulado:
+            *   Verificación de credenciales.
+            *   Simulación de autenticación biométrica (huella dactilar) con un 70% de probabilidad de éxito y un tiempo límite de 15 segundos.
+            *   Opción de usar un código OTP (simulado: "1234") si la verificación biométrica falla o se agota el tiempo.
+        *   Manejo de errores y mensajes informativos durante el proceso.
+        *   Almacenamiento simulado de la sesión del usuario en `localStorage` tras un login exitoso.
+        *   Redirección al `/dashboard` tras el login.
+        *   Instrucciones y credenciales de ejemplo para la demostración.
+
+*   **Panel de Control / Dashboard (`/dashboard`):**
+    *   **Propósito:** Vista principal después del login, ofreciendo un resumen de la información más relevante para el usuario.
+    *   **Funcionalidades:**
+        *   Muestra expedientes relevantes para el usuario (filtrados por cliente, abogado o todos para roles administrativos).
+        *   Permite filtrar expedientes por estado: "Abiertos", "Cerrados" y "Todos", mostrando el recuento en cada pestaña.
+        *   Muestra las próximas citas (hasta 3) relevantes para el usuario.
+        *   Botón de acceso rápido para programar una nueva cita.
+        *   Interfaz adaptable al rol del usuario (ej. los administradores/gerentes ven todos los casos por defecto).
+
+*   **Mensajería Segura (`/messages`):**
+    *   **Propósito:** Facilitar la comunicación directa y segura entre clientes y abogados.
+    *   **Funcionalidades:**
+        *   Lista de conversaciones, filtradas según el rol del usuario (los clientes ven sus conversaciones, los abogados las suyas, gerentes/administradores ven todas).
+        *   Visualización de mensajes dentro de una conversación seleccionada.
+        *   Envío de nuevos mensajes (simulado, los gerentes/administradores tienen restringido el envío y se les muestra una alerta).
+        *   Indicador de mensajes no leídos.
+        *   Scroll automático al último mensaje.
+        *   Avatares y nombres de los participantes en la conversación.
+
+*   **Citas (`/appointments`):**
+    *   **Propósito:** Gestionar y programar citas entre clientes y abogados.
+    *   **Funcionalidades:**
+        *   Botón para programar nuevas citas.
+        *   Diálogo para crear/editar citas, permitiendo seleccionar cliente, abogado, título, tipo de cita (Presencial, Videoconferencia, Consulta Escrita), fecha, hora, caso asociado (opcional) y notas.
+        *   Vista de Lista:
+            *   Sección de "Próximas Citas" y "Citas Anteriores".
+            *   Cada cita muestra título, tipo, fecha, hora, participantes, estado (Programada, Completada, Cancelada) y caso asociado.
+            *   Opciones para reprogramar (editar) o cancelar citas programadas (con confirmación).
+        *   Vista de Calendario:
+            *   Calendario interactivo para seleccionar fechas.
+            *   Muestra las citas programadas para la fecha seleccionada.
+            *   Los días con citas programadas se resaltan en el calendario.
+        *   Las citas se filtran según el perfil del usuario.
+
+*   **Documentos y Firma Electrónica (`/documents`):**
+    *   **Propósito:** Gestionar documentos asociados a los casos y facilitar un proceso de firma electrónica simulado.
+    *   **Funcionalidades:**
+        *   Lista de documentos filtrados según el usuario y el caso.
+        *   Filtros por término de búsqueda y por ID de caso.
+        *   Pestañas para filtrar documentos por estado: "Todos", "Pendientes de Firma", "Firmados", "Otros".
+        *   Cada documento muestra nombre, ID de caso, versión, fecha de subida y estado (Pendiente de Firma, Firmado, Requiere Revisión, Completado).
+        *   Botones para simular "Ver" y "Descargar" documentos (muestran alerta de demostración).
+        *   Botón "Firmar Documento" para los que están "Pendientes de Firma".
+        *   Diálogo de Firma:
+            *   Muestra una vista previa simulada del documento.
+            *   Requiere que el usuario acepte los términos para habilitar el botón de firma.
+            *   Al intentar firmar, se muestra una alerta informativa indicando que es una simulación y no se realiza una firma real.
+
+*   **Sección de Administración (`/admin/...`):**
+    *   **Propósito:** Área restringida para usuarios con rol "Administrador" para gestionar aspectos clave del sistema.
+    *   **Sub-Secciones:**
+        *   **Gestión de Datos (`/admin/data`):**
+            *   Tabla de todos los expedientes del sistema.
+            *   Filtros por Tipo Base de expediente, Subtipo y Estado del expediente.
+            *   Permite editar detalles de un expediente (Nº Expediente, Cliente, Abogado/a, Tipo Base, Subtipo, Estado, Descripción) mediante un diálogo. La eliminación no está permitida.
+            *   La columna "Tipo/Subtipo" muestra un indicador "JU" o "AD" en un círculo coloreado con tooltip, seguido de una etiqueta con el nombre del subtipo o "Sin Subtipo".
+        *   **Gestión de Roles (`/admin/roles`):**
+            *   Tabla que lista los roles predefinidos del sistema (Cliente, Abogado, Gerente, Administrador).
+            *   Muestra el nombre del rol, su descripción y un icono representativo.
+            *   Permite editar la descripción de cada rol mediante un diálogo. La creación o eliminación de roles no está permitida.
+        *   **Gestión de Usuarios (`/admin/users`):**
+            *   Tabla de todos los usuarios registrados.
+            *   Filtros por Rol de usuario y por Estado de actividad (Activos, Inactivos, Todos).
+            *   Muestra nombre, correo, rol y estado de actividad (Activo/Inactivo).
+            *   Permite simular la edición de usuarios (muestra alerta).
+            *   Permite simular la activación/inactivación de usuarios con un diálogo de confirmación.
+            *   Ordena los usuarios por rol (Administrador > Gerente > Abogado > Cliente) y luego por nombre.
+        *   **Gestión de Tipos y Subtipos de Expedientes (`/admin/casetypes`):**
+            *   Tabla para gestionar los tipos base (Judicial, Administrativo - fijos) y sus subtipos.
+            *   Los tipos base solo permiten editar su descripción.
+            *   Permite añadir nuevos subtipos asociados a un tipo base, con campos para nombre y descripción. Los IDs de subtipos se generan automáticamente (ej. `JU-003`, `AD-003`).
+            *   Los subtipos pueden ser editados (nombre, descripción) o eliminados (con confirmación), pero solo si no están siendo utilizados por ningún expediente en `mockData`.
+            *   Muestra una columna "Categoría" (Tipo o Subtipo).
+            *   Filtros por Tipo (Judicial, Administrativo, Todos) y por Categoría (Tipo, Subtipo, Todos).
+            *   Ordena la tabla mostrando primero "Administrativo" y sus subtipos, luego "Judicial" y sus subtipos. Los subtipos se ordenan alfabéticamente.
+        *   **Gestión de Estados (`/admin/states`):**
+            *   Página informativa que muestra los estados fijos posibles para los expedientes (Abierto, Cerrado) y su descripción. No permite modificaciones.
+
+*   **Layout de Aplicación Protegida (`src/app/(app)/layout.tsx`):**
+    *   **Propósito:** Proporciona la estructura visual común (cabecera y barra lateral) para todas las pantallas internas de la aplicación.
+    *   **Funcionalidades:**
+        *   Recupera la información del usuario logueado desde `localStorage`.
+        *   Muestra una cabecera (`AppHeader`) con:
+            *   Menú hamburguesa para la barra lateral en móviles.
+            *   Logo/Título de la aplicación.
+            *   Icono de notificaciones con un desplegable (`NotificationDropdown`).
+            *   Botón para cambiar entre tema claro y oscuro.
+            *   Menú de usuario (avatar) con opciones para "Configuración" (simulada) y "Cerrar Sesión".
+        *   Muestra una barra lateral (`AppSidebar`) con:
+            *   Logo/Título.
+            *   Navegación principal adaptada al rol del usuario (ej. la sección de Administración solo es visible para "Administrador").
+            *   Uso de acordeones para agrupar submenús (ej. en "Gestión de Datos").
+            *   Opción de "Cerrar Sesión".
 
 ## Funcionalidades de IA (Genkit)
 
@@ -131,6 +248,4 @@ Esta sección describe la arquitectura y los componentes clave de la aplicación
 *   El archivo `DEPLOYMENT.md` contiene instrucciones detalladas para un despliegue manual si fuera necesario.
 
 Esta documentación proporciona una visión general del estado actual de la implementación de LexLink.
-```
-
-Esta nueva sección en tu `README.md` debería dar una buena idea de cómo está construida la aplicación.
+    
