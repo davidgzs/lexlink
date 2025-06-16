@@ -24,22 +24,16 @@ interface AppointmentListItemProps {
 }
 
 const appointmentIcons: Record<AppointmentType, React.ElementType> = {
-  "En-Persona": Users,
-  "Video Conferencia": Video,
+  "Presencial": Users,
+  "Videoconferencia": Video,
   "Consulta Escrita": FilePenLine,
 };
 
 const statusColors: Record<Appointment["status"], string> = {
-    Programada: "bg-blue-500", // Changed from Scheduled
-    Completada: "bg-green-500", // Changed from Completed
-    Cancelada: "bg-red-500",   // Changed from Cancelled
+    Programada: "bg-blue-500",
+    Completada: "bg-green-500",
+    Cancelada: "bg-red-500",
 };
-
-// This map remains as appointment.status uses English literals for now
-// No, appointment.status was also changed to Spanish in a previous step.
-// Let's verify src/types/index.ts:
-// status: "Programada" | "Completada" | "Cancelada"; -- Yes, it's Spanish.
-// So appointmentStatusTranslations is no longer needed.
 
 export default function AppointmentListItem({ appointment, onEdit, onCancel }: AppointmentListItemProps) {
   const Icon = appointmentIcons[appointment.type];
@@ -61,12 +55,12 @@ export default function AppointmentListItem({ appointment, onEdit, onCancel }: A
           <CardTitle className="font-headline text-lg">{appointment.title}</CardTitle>
           <Badge className={`${badgeColor} text-white whitespace-nowrap`}>
             <Clock className="mr-1 h-3 w-3" />
-            {appointment.status} {/* Directly use appointment.status as it's now in Spanish */}
+            {appointment.status}
           </Badge>
         </div>
         <CardDescription className="font-body text-sm flex items-center gap-2">
           <Icon className="h-4 w-4 text-muted-foreground" />
-          <span>{appointment.type}</span> {/* Directly use appointment.type as it's now in Spanish */}
+          <span>{appointment.type}</span>
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -80,7 +74,7 @@ export default function AppointmentListItem({ appointment, onEdit, onCancel }: A
             <p className="font-body text-xs text-muted-foreground">Caso: {appointment.caseId}</p>
         )}
       </CardContent>
-      {appointment.status === "Programada" && ( // Check against Spanish value
+      {appointment.status === "Programada" && (
         <CardFooter className="flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={() => onEdit(appointment)} className="font-body">
             <Edit className="mr-2 h-4 w-4" /> Reprogramar
