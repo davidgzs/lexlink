@@ -106,7 +106,7 @@ export default function AdminCaseTypesPage() {
   const [definitionToDelete, setDefinitionToDelete] = useState<SubCaseType | null>(null);
 
   const [baseTypeFilter, setBaseTypeFilter] = useState<BaseTypeIdentifier | 'todos'>('todos');
-  const [categoryFilter, setCategoryFilter] = useState<'todos' | 'base' | 'subtipo'>('todos');
+  const [categoryFilter, setCategoryFilter] = useState<'todos' | 'tipo' | 'subtipo'>('todos');
 
 
   const { toast } = useToast();
@@ -210,7 +210,7 @@ export default function AdminCaseTypesPage() {
       })
       .filter(def => {
         if (categoryFilter === 'todos') return true;
-        if (categoryFilter === 'base') return def.isBaseType;
+        if (categoryFilter === 'tipo') return def.isBaseType;
         if (categoryFilter === 'subtipo') return !def.isBaseType;
         return true;
       });
@@ -229,8 +229,8 @@ export default function AdminCaseTypesPage() {
         </Button>
       </div>
       <p className="font-body text-muted-foreground mb-6">
-        Define y gestiona los tipos base (Judicial, Administrativo) y sus subtipos.
-        Los tipos base solo permiten modificar su descripción. Los subtipos pueden ser editados y eliminados.
+        Define y gestiona los tipos (Judicial, Administrativo) y sus subtipos.
+        Los tipos solo permiten modificar su descripción. Los subtipos pueden ser editados y eliminados.
       </p>
 
       <div className="flex gap-4 mb-4">
@@ -238,17 +238,17 @@ export default function AdminCaseTypesPage() {
           <SelectTrigger className="w-[200px] font-body">
             <div className="flex items-center">
                 <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
-                <SelectValue placeholder="Filtrar por Tipo Base" />
+                <SelectValue placeholder="Filtrar por Tipo" />
             </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="todos">Todos los Tipos Base</SelectItem>
+            <SelectItem value="todos">Todos los Tipos</SelectItem>
             {initialBaseTypes.map(bt => (
               <SelectItem key={bt.id} value={bt.id}>{bt.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as 'todos' | 'base' | 'subtipo')}>
+        <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as 'todos' | 'tipo' | 'subtipo')}>
           <SelectTrigger className="w-[200px] font-body">
             <div className="flex items-center">
                  <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -257,7 +257,7 @@ export default function AdminCaseTypesPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todas las Categorías</SelectItem>
-            <SelectItem value="base">Solo Tipos Base</SelectItem>
+            <SelectItem value="tipo">Solo Tipos</SelectItem>
             <SelectItem value="subtipo">Solo Subtipos</SelectItem>
           </SelectContent>
         </Select>
@@ -292,7 +292,7 @@ export default function AdminCaseTypesPage() {
                     </div>
                   </TableCell>
                   <TableCell className="font-body">
-                    {def.isBaseType ? "Tipo Base" : "Subtipo"}
+                    {def.isBaseType ? "Tipo" : "Subtipo"}
                   </TableCell>
                   <TableCell className="font-body text-sm text-muted-foreground">{def.description}</TableCell>
                   <TableCell className="text-right space-x-2">
@@ -326,15 +326,15 @@ export default function AdminCaseTypesPage() {
           <DialogHeader>
             <DialogTitle className="font-headline">Añadir Nuevo Subtipo de Expediente</DialogTitle>
             <DialogDescription>
-              Selecciona el tipo base y proporciona un nombre y descripción para el nuevo subtipo.
+              Selecciona el tipo al que pertenece y proporciona un nombre y descripción para el nuevo subtipo.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="baseType" className="text-right">Tipo Base</Label>
+              <Label htmlFor="baseType" className="text-right">Tipo</Label>
               <Select value={selectedBaseTypeForNewSubtype} onValueChange={(value) => setSelectedBaseTypeForNewSubtype(value as BaseTypeIdentifier)}>
                 <SelectTrigger id="baseType" className="col-span-3">
-                  <SelectValue placeholder="Selecciona un tipo base" />
+                  <SelectValue placeholder="Selecciona un tipo" />
                 </SelectTrigger>
                 <SelectContent>
                   {initialBaseTypes.map(bt => (
@@ -379,11 +379,11 @@ export default function AdminCaseTypesPage() {
           <DialogContent className="sm:max-w-[525px] font-body">
             <DialogHeader>
               <DialogTitle className="font-headline">
-                Editar {editingDefinition.isBaseType ? "Tipo Base" : "Subtipo"}: {editingDefinition.name}
+                Editar {editingDefinition.isBaseType ? "Tipo" : "Subtipo"}: {editingDefinition.name}
               </DialogTitle>
               <DialogDescription>
                 {editingDefinition.isBaseType 
-                  ? "Solo puedes modificar la descripción del tipo base."
+                  ? "Solo puedes modificar la descripción del tipo."
                   : "Modifica el nombre y/o la descripción del subtipo."
                 }
               </DialogDescription>
@@ -441,3 +441,5 @@ export default function AdminCaseTypesPage() {
     </div>
   );
 }
+
+    
