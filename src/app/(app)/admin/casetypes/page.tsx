@@ -35,8 +35,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Trash2, Type, FileText, Gavel, PlusCircle, CornerDownRight, Filter } from "lucide-react";
+import { Edit, Trash2, Type, FileText, Gavel, PlusCircle, CornerDownRight, Filter, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { mockCases } from "@/lib/mockData";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { Case } from "@/types";
 
 type BaseTypeIdentifier = 'judicial' | 'administrativo';
 
@@ -89,11 +92,11 @@ const initialSubtypes: SubCaseType[] = [
 
 function compareCaseDefinitions(a: CaseTypeOrSubtype, b: CaseTypeOrSubtype): number {
   const getSortOrderKey = (item: CaseTypeOrSubtype): number => {
-    if (item.id === 'administrativo' && item.isBaseType) return 1; // Administrativo Base
-    if (!item.isBaseType && (item as SubCaseType).baseTypeId === 'administrativo') return 2; // Administrativo Subtypes
-    if (item.id === 'judicial' && item.isBaseType) return 3; // Judicial Base
-    if (!item.isBaseType && (item as SubCaseType).baseTypeId === 'judicial') return 4; // Judicial Subtypes
-    return 5; // Should not happen
+    if (item.id === 'administrativo' && item.isBaseType) return 1; 
+    if (!item.isBaseType && (item as SubCaseType).baseTypeId === 'administrativo') return 2; 
+    if (item.id === 'judicial' && item.isBaseType) return 3; 
+    if (!item.isBaseType && (item as SubCaseType).baseTypeId === 'judicial') return 4; 
+    return 5; 
   };
 
   const orderA = getSortOrderKey(a);
@@ -103,15 +106,10 @@ function compareCaseDefinitions(a: CaseTypeOrSubtype, b: CaseTypeOrSubtype): num
     return orderA - orderB;
   }
 
-  // If in the same primary group (e.g., both are Administrativo subtypes, or both are base types though this won't happen with current keys)
-  // and they are not base types, sort by name.
-  // Base types are already sorted by their key (1 vs 3).
   if (!a.isBaseType && !b.isBaseType) {
     return a.name.localeCompare(b.name);
   }
-  // If one is base and other is subtype within the same sortOrderKey (not possible with current distinct keys for base/sub)
-  // or if comparing base types (already handled by orderA vs orderB), or any other unhandled case.
-  return a.name.localeCompare(b.name); // Fallback for base types or general sort by name
+  return a.name.localeCompare(b.name); 
 }
 
 
@@ -206,7 +204,7 @@ export default function AdminCaseTypesPage() {
         };
       }
       return def;
-    }).sort(compareCaseDefinitions)); // Re-sort after edit might change name
+    }).sort(compareCaseDefinitions)); 
 
     toast({ title: "Definición Actualizada", description: `Los cambios en "${editingDefinition.name}" han sido guardados.` });
     setIsEditDialogOpen(false);
@@ -219,13 +217,13 @@ export default function AdminCaseTypesPage() {
 
   const confirmDeleteSubtype = () => {
     if (!definitionToDelete) return;
-    setCaseDefinitions(prevDefs => prevDefs.filter(def => def.id !== definitionToDelete.id).sort(compareCaseDefinitions)); // No need to re-sort if only filtering
+    setCaseDefinitions(prevDefs => prevDefs.filter(def => def.id !== definitionToDelete.id).sort(compareCaseDefinitions)); 
     toast({ title: "Subtipo Eliminado", description: `El subtipo "${definitionToDelete.name}" ha sido eliminado.`, variant: "destructive" });
     setDefinitionToDelete(null);
   };
 
   const filteredDefinitions = useMemo(() => {
-    return caseDefinitions // caseDefinitions is already sorted
+    return caseDefinitions 
       .filter(def => {
         if (baseTypeFilter === 'todos') return true;
         return def.isBaseType ? def.id === baseTypeFilter : (def as SubCaseType).baseTypeId === baseTypeFilter;
@@ -237,6 +235,14 @@ export default function AdminCaseTypesPage() {
         return true;
       });
   }, [caseDefinitions, baseTypeFilter, categoryFilter]);
+
+  const isSubtypeInUse = (subtype: SubCaseType): boolean => {
+    return mockCases.some(
+      (caseItem: Case) =>
+        caseItem.status.toLowerCase() === subtype.baseTypeId &&
+        caseItem.subtype === subtype.name
+    );
+  };
 
 
   return (
@@ -252,7 +258,7 @@ export default function AdminCaseTypesPage() {
       </div>
       <p className="font-body text-muted-foreground mb-6">
         Define y gestiona los tipos (Judicial, Administrativo) y sus subtipos.
-        Los tipos solo permiten modificar su descripción. Los subtipos pueden ser editados y eliminados.
+        Los tipos solo permiten modificar su descripción. Los subtipos pueden ser editados y eliminados (si no están en uso).
       </p>
 
       <div className="flex gap-4 mb-4">
@@ -265,7 +271,7 @@ export default function AdminCaseTypesPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todos los Tipos</SelectItem>
-            {initialBaseTypes.map(bt => ( // initialBaseTypes is now Administrativo, then Judicial
+            {initialBaseTypes.map(bt => ( 
               <SelectItem key={bt.id} value={bt.id}>{bt.name}</SelectItem>
             ))}
           </SelectContent>
@@ -300,6 +306,7 @@ export default function AdminCaseTypesPage() {
               const Icon = def.icon;
               const isSubtype = !def.isBaseType;
               const baseTypeName = isSubtype ? initialBaseTypes.find(bt => bt.id === (def as SubCaseType).baseTypeId)?.name : '';
+              const subtypeInUse = !def.isBaseType && isSubtypeInUse(def as SubCaseType);
               
               return (
                 <TableRow key={def.id} className={isSubtype ? "bg-muted/30" : ""}>
@@ -322,9 +329,32 @@ export default function AdminCaseTypesPage() {
                       <Edit className="mr-1 h-3 w-3" /> {def.isBaseType ? 'Editar Descripción' : 'Editar'}
                     </Button>
                     {!def.isBaseType && (
-                      <Button variant="destructive" size="sm" onClick={() => openDeleteConfirmDialog(def as SubCaseType)} className="font-body">
-                        <Trash2 className="mr-1 h-3 w-3" /> Eliminar
-                      </Button>
+                       <TooltipProvider>
+                        <Tooltip delayDuration={100}>
+                          <TooltipTrigger asChild>
+                            {/* Div needed for Tooltip to work on disabled button */}
+                            <div className="inline-block"> 
+                              <Button 
+                                variant="destructive" 
+                                size="sm" 
+                                onClick={() => !subtypeInUse && openDeleteConfirmDialog(def as SubCaseType)} 
+                                className="font-body"
+                                disabled={subtypeInUse}
+                              >
+                                <Trash2 className="mr-1 h-3 w-3" /> Eliminar
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+                          {subtypeInUse && (
+                            <TooltipContent side="top" className="bg-destructive text-destructive-foreground">
+                              <div className="flex items-center">
+                                <Info className="mr-2 h-4 w-4" />
+                                <p>Este subtipo no se puede eliminar porque está en uso.</p>
+                              </div>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
                   </TableCell>
                 </TableRow>
@@ -359,7 +389,7 @@ export default function AdminCaseTypesPage() {
                   <SelectValue placeholder="Selecciona un tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  {initialBaseTypes.map(bt => ( // initialBaseTypes is now Administrativo, then Judicial
+                  {initialBaseTypes.map(bt => ( 
                     <SelectItem key={bt.id} value={bt.id}>{bt.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -463,5 +493,7 @@ export default function AdminCaseTypesPage() {
     </div>
   );
 }
+
+    
 
     
