@@ -37,7 +37,6 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
 
-// Definición de los colores para los tipos base de expedientes
 const typeColors: Record<CaseStatus, string> = {
   Administrativo: "bg-blue-500",
   Judicial: "bg-orange-500",
@@ -46,11 +45,12 @@ const typeColors: Record<CaseStatus, string> = {
 const availableStates: CaseState[] = ["Abierto", "Cerrado"];
 const availableBaseTypes: CaseStatus[] = ["Judicial", "Administrativo"];
 
-// Subtipos disponibles para los filtros, podrían obtenerse de forma más dinámica en una app real
 const availableSubtypesForFilter: Record<CaseStatus, string[]> = {
   Judicial: ["Civil", "Laboral"],
   Administrativo: ["Sanciones", "Contratos"],
 };
+
+const NO_SUBTYPE_VALUE = "_NONE_";
 
 
 export default function AdminDataPage() {
@@ -67,7 +67,6 @@ export default function AdminDataPage() {
 
   const handleEditCase = (caseItem: Case) => {
     setEditingCase(caseItem);
-    // Asegúrate de copiar todos los campos, incluyendo subtype
     setEditedCaseData({ ...caseItem });
     setIsEditDialogOpen(true);
   };
@@ -75,13 +74,18 @@ export default function AdminDataPage() {
   const handleSaveEdit = () => {
     if (!editingCase || !editedCaseData) return;
 
+    const finalPayload = { ...editedCaseData };
+    if (finalPayload.subtype === NO_SUBTYPE_VALUE) {
+      finalPayload.subtype = undefined;
+    }
+
     const updatedCases = cases.map((c) =>
-      c.id === editingCase.id ? { ...c, ...editedCaseData, lastUpdate: format(new Date(), 'yyyy-MM-dd') } : c
+      c.id === editingCase.id ? { ...c, ...finalPayload, lastUpdate: format(new Date(), 'yyyy-MM-dd') } : c
     );
-    setCases(updatedCases as Case[]);
+    setCases(updatedCases as Case[]); // Ensure type consistency
     toast({
       title: "Expediente Actualizado",
-      description: `El expediente "${editedCaseData.caseNumber || editingCase.caseNumber}" ha sido actualizado.`,
+      description: `El expediente "${finalPayload.caseNumber || editingCase.caseNumber}" ha sido actualizado.`,
     });
     setIsEditDialogOpen(false);
     setEditingCase(null);
@@ -93,17 +97,15 @@ export default function AdminDataPage() {
   
   const handleBaseTypeFilterChange = (value: CaseStatus | 'todos') => {
     setBaseTypeFilter(value);
-    setSubtypeFilter('todos'); // Reset subtype filter when base type changes
+    setSubtypeFilter('todos'); 
   };
 
   const currentSubtypeOptions = useMemo(() => {
     if (baseTypeFilter === 'todos' || !availableSubtypesForFilter[baseTypeFilter]) {
-      // Potentially show all subtypes from all base types if 'todos' is selected for base, or none
-      // For simplicity, let's show none if base is 'todos', or only specific ones.
       let allSubs: string[] = [];
       if (baseTypeFilter === 'todos') {
          Object.values(availableSubtypesForFilter).forEach(subs => allSubs.push(...subs));
-         return ['todos', ...new Set(allSubs)]; // Unique subtypes
+         return ['todos', ...new Set(allSubs)];
       }
       return ['todos'];
     }
@@ -115,8 +117,6 @@ export default function AdminDataPage() {
       .filter(c => baseTypeFilter === 'todos' || c.status === baseTypeFilter)
       .filter(c => {
         if (subtypeFilter === 'todos') return true;
-        // If baseTypeFilter is 'todos', we need to check against all possible subtypes.
-        // Otherwise, c.subtype must match subtypeFilter only if c.status matches baseTypeFilter.
         if (baseTypeFilter === 'todos') return c.subtype === subtypeFilter;
         return c.status === baseTypeFilter && c.subtype === subtypeFilter;
       })
@@ -289,7 +289,7 @@ export default function AdminDataPage() {
                <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="subtype" className="text-right">Subtipo</Label>
                 <Select
-                  value={editedCaseData.subtype || ''}
+                  value={editedCaseData.subtype || NO_SUBTYPE_VALUE}
                   onValueChange={(value) => handleEditInputChange('subtype', value)}
                   disabled={!editedCaseData.status || !availableSubtypesForFilter[editedCaseData.status!]?.length}
                 >
@@ -297,7 +297,7 @@ export default function AdminDataPage() {
                     <SelectValue placeholder="Selecciona un subtipo (opcional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Ninguno</SelectItem>
+                    <SelectItem value={NO_SUBTYPE_VALUE}>Ninguno</SelectItem>
                     {editedCaseData.status && availableSubtypesForFilter[editedCaseData.status!]?.map(sub => (
                       <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                     ))}
