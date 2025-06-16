@@ -82,7 +82,7 @@ export default function AdminDataPage() {
     const updatedCases = cases.map((c) =>
       c.id === editingCase.id ? { ...c, ...finalPayload, lastUpdate: format(new Date(), 'yyyy-MM-dd') } : c
     );
-    setCases(updatedCases as Case[]); // Ensure type consistency
+    setCases(updatedCases as Case[]);
     toast({
       title: "Expediente Actualizado",
       description: `El expediente "${finalPayload.caseNumber || editingCase.caseNumber}" ha sido actualizado.`,
@@ -209,9 +209,14 @@ export default function AdminDataPage() {
                 </TableCell>
                 <TableCell className="font-medium font-body">{caseItem.caseNumber}</TableCell>
                 <TableCell>
-                  <Badge className={`${typeColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
-                    {caseItem.subtype || caseItem.status}
-                  </Badge>
+                  <div className="flex items-center">
+                    <span className="mr-2 font-semibold">
+                      {caseItem.status === 'Judicial' ? 'JU' : 'AD'}
+                    </span>
+                    <Badge className={`${typeColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
+                      {caseItem.subtype || "Sin Subtipo"}
+                    </Badge>
+                  </div>
                 </TableCell>
                 <TableCell className="font-body">{caseItem.clientName}</TableCell>
                 <TableCell className="font-body">{caseItem.attorneyAssigned || 'N/A'}</TableCell>
@@ -274,7 +279,13 @@ export default function AdminDataPage() {
                 <Label htmlFor="status" className="text-right">Tipo Base</Label>
                 <Select
                   value={editedCaseData.status}
-                  onValueChange={(value) => handleEditInputChange('status', value as CaseStatus)}
+                  onValueChange={(value) => {
+                    handleEditInputChange('status', value as CaseStatus);
+                    // If base type changes, reset subtype as available subtypes will change
+                    if (editedCaseData.status !== value) {
+                        handleEditInputChange('subtype', NO_SUBTYPE_VALUE);
+                    }
+                  }}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Selecciona tipo base" />
@@ -343,3 +354,4 @@ export default function AdminDataPage() {
     </div>
   );
 }
+
