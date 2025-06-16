@@ -36,6 +36,8 @@ import { Edit, ShieldAlert, Filter } from "lucide-react";
 import { Badge } from '@/components/ui/badge';
 import { useToast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const typeColors: Record<CaseStatus, string> = {
   Administrativo: "bg-blue-500",
@@ -209,11 +211,30 @@ export default function AdminDataPage() {
                 </TableCell>
                 <TableCell className="font-medium font-body">{caseItem.caseNumber}</TableCell>
                 <TableCell>
-                  <div className="flex items-center">
-                    <span className="mr-2 font-semibold">
-                      {caseItem.status === 'Judicial' ? 'JU' : 'AD'}
-                    </span>
-                    <Badge className={`${typeColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
+                  <div className="flex items-center gap-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={cn(
+                              "flex items-center justify-center w-7 h-7 rounded-full text-white font-semibold text-xs",
+                              typeColors[caseItem.status]
+                            )}
+                          >
+                            {caseItem.status === 'Judicial' ? 'JU' : 'AD'}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{caseItem.status}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <Badge 
+                      className={cn(
+                        "text-white whitespace-nowrap font-body",
+                        typeColors[caseItem.status]
+                      )}
+                    >
                       {caseItem.subtype || "Sin Subtipo"}
                     </Badge>
                   </div>
