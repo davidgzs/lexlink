@@ -18,38 +18,21 @@ import { Badge } from '@/components/ui/badge';
 
 // Mapeo de tipos de caso a traducciones y colores para la columna "Tipo"
 const caseTypeTranslations: Record<CaseStatus, string> = {
-  Administrative: "Administrativo",
+  Administrativo: "Administrativo",
   Judicial: "Judicial",
 };
 
 const typeColors: Record<CaseStatus, string> = {
-    Administrative: "bg-blue-500",
-    Judicial: "bg-orange-500",
+    Administrativo: "bg-blue-500", // Color para Administrativo
+    Judicial: "bg-orange-500",    // Color para Judicial
 };
 
 export default function AdminDataPage() {
   const [cases, setCases] = useState<Case[]>(mockCases);
-  // const [caseToDelete, setCaseToDelete] = useState<Case | null>(null); // Removido
-  // const { toast } = useToast(); // Removido si solo se usaba para eliminar
 
   const handleEditCase = (caseItem: Case) => {
     alert(`Simulación: Editar caso "${caseItem.caseNumber}". En una aplicación real, esto abriría un formulario de edición.`);
   };
-
-  // const handleDeleteCase = (caseItem: Case) => { // Removido
-  //   setCaseToDelete(caseItem);
-  // };
-
-  // const confirmDeleteCase = () => { // Removido
-  //   if (!caseToDelete) return;
-  //   setCases(prevCases => prevCases.filter(c => c.id !== caseToDelete.id));
-  //   toast({
-  //     title: "Caso Eliminado (Simulación)",
-  //     description: `El caso "${caseToDelete.caseNumber}" ha sido eliminado (simulación).`,
-  //     variant: "destructive"
-  //   });
-  //   setCaseToDelete(null);
-  // };
 
   return (
     <div className="container mx-auto py-2">
@@ -72,8 +55,8 @@ export default function AdminDataPage() {
             <TableRow>
               <TableHead className="font-body text-center">Estado</TableHead>
               <TableHead className="font-body">Nº Expediente</TableHead>
-              <TableHead className="font-body">Cliente</TableHead>
               <TableHead className="font-body">Tipo</TableHead>
+              <TableHead className="font-body">Cliente</TableHead>
               <TableHead className="font-body">Abogado/a</TableHead>
               <TableHead className="text-right font-body">Acciones</TableHead>
             </TableRow>
@@ -89,18 +72,17 @@ export default function AdminDataPage() {
                   )}
                 </TableCell>
                 <TableCell className="font-medium font-body">{caseItem.caseNumber}</TableCell>
-                <TableCell className="font-body">{caseItem.clientName}</TableCell>
                 <TableCell>
                   <Badge className={`${typeColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
                     {caseTypeTranslations[caseItem.status]}
                   </Badge>
                 </TableCell>
+                <TableCell className="font-body">{caseItem.clientName}</TableCell>
                 <TableCell className="font-body">{caseItem.attorneyAssigned || 'N/A'}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button variant="outline" size="sm" onClick={() => handleEditCase(caseItem)} className="font-body">
                     <Edit className="mr-1 h-3 w-3" /> Editar
                   </Button>
-                  {/* Botón y AlertDialog de eliminar removidos */}
                 </TableCell>
               </TableRow>
             ))}
