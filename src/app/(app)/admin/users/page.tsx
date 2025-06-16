@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react'; // Added useMemo
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -37,7 +37,14 @@ const roleDisplayInfo: Record<UserAppRole, { icon: React.ElementType, badgeColor
   Administrador: { icon: Shield, badgeColor: "bg-red-500", translation: "Administrador" },
 };
 
-const availableRolesForFilter: UserAppRole[] = ["Cliente", "Abogado", "Gerente", "Administrador"];
+const roleSortOrder: Record<UserAppRole, number> = {
+  Administrador: 1,
+  Gerente: 2,
+  Abogado: 3,
+  Cliente: 4,
+};
+
+const availableRolesForFilter: UserAppRole[] = ["Administrador", "Gerente", "Abogado", "Cliente"];
 type ActivityFilterStatus = 'Todos' | 'Activos' | 'Inactivos';
 
 const initialDemoUsers: UserForAdminPage[] = [
@@ -87,13 +94,25 @@ export default function AdminUsersPage() {
     setUserToToggleActiveState(null);
   };
 
-  const filteredUsers = users
-    .filter(user => selectedRoleFilter === 'Todos' || user.role === selectedRoleFilter)
-    .filter(user => {
-      if (selectedActivityFilter === 'Activos') return user.isActive === true;
-      if (selectedActivityFilter === 'Inactivos') return user.isActive === false;
-      return true; // 'Todos'
-    });
+  const filteredUsers = useMemo(() => {
+    return users
+      .filter(user => selectedRoleFilter === 'Todos' || user.role === selectedRoleFilter)
+      .filter(user => {
+        if (selectedActivityFilter === 'Activos') return user.isActive === true;
+        if (selectedActivityFilter === 'Inactivos') return user.isActive === false;
+        return true; // 'Todos'
+      })
+      .sort((a, b) => {
+        const roleOrderA = roleSortOrder[a.role];
+        const roleOrderB = roleSortOrder[b.role];
+        if (roleOrderA !== roleOrderB) {
+          return roleOrderA - roleOrderB;
+        }
+        // Optional: secondary sort by name if roles are the same
+        return a.name.localeCompare(b.name);
+      });
+  }, [users, selectedRoleFilter, selectedActivityFilter]);
+
 
   return (
     <div className="container mx-auto py-2">
@@ -236,6 +255,6 @@ export default function AdminUsersPage() {
     </div>
   );
 }
-
+    
 
     
