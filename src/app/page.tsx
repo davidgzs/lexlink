@@ -16,7 +16,7 @@ export default function LandingPage() {
     { title: "Seguimiento Transparente de los Casos y Expedientes", description: "Sigue tu caso en cada fase: Administrativa, Judicial, Recurso y Cierre.", image: "/images/seguimiento-casos.png", hint: "progress chart" },
   ];
 
-  const demoVersion = "1.0";
+  const demoVersion = "1.5";
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -83,3 +83,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
