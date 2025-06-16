@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { mockCases } from '@/lib/mockData';
 import type { Case, CaseStatus, CaseState } from '@/types';
 import { Button } from "@/components/ui/button";
@@ -32,33 +32,42 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Edit, ShieldAlert } from "lucide-react";
+import { Edit, ShieldAlert, Filter } from "lucide-react";
 import { Badge } from '@/components/ui/badge';
 import { useToast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
 
-const caseTypeTranslations: Record<CaseStatus, string> = {
-  Administrativo: "Administrativo",
-  Judicial: "Judicial",
-};
-
+// Definición de los colores para los tipos base de expedientes
 const typeColors: Record<CaseStatus, string> = {
   Administrativo: "bg-blue-500",
   Judicial: "bg-orange-500",
 };
 
 const availableStates: CaseState[] = ["Abierto", "Cerrado"];
-const availableTypes: CaseStatus[] = ["Administrativo", "Judicial"];
+const availableBaseTypes: CaseStatus[] = ["Judicial", "Administrativo"];
+
+// Subtipos disponibles para los filtros, podrían obtenerse de forma más dinámica en una app real
+const availableSubtypesForFilter: Record<CaseStatus, string[]> = {
+  Judicial: ["Civil", "Laboral"],
+  Administrativo: ["Sanciones", "Contratos"],
+};
+
 
 export default function AdminDataPage() {
   const [cases, setCases] = useState<Case[]>(mockCases);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingCase, setEditingCase] = useState<Case | null>(null);
   const [editedCaseData, setEditedCaseData] = useState<Partial<Case>>({});
+  
+  const [baseTypeFilter, setBaseTypeFilter] = useState<CaseStatus | 'todos'>('todos');
+  const [subtypeFilter, setSubtypeFilter] = useState<string>('todos');
+  const [stateFilter, setStateFilter] = useState<CaseState | 'todos'>('todos');
+
   const { toast } = useToast();
 
   const handleEditCase = (caseItem: Case) => {
     setEditingCase(caseItem);
+    // Asegúrate de copiar todos los campos, incluyendo subtype
     setEditedCaseData({ ...caseItem });
     setIsEditDialogOpen(true);
   };
@@ -69,7 +78,7 @@ export default function AdminDataPage() {
     const updatedCases = cases.map((c) =>
       c.id === editingCase.id ? { ...c, ...editedCaseData, lastUpdate: format(new Date(), 'yyyy-MM-dd') } : c
     );
-    setCases(updatedCases as Case[]); // Cast to Case[] as editedCaseData is Partial<Case> but merged with full Case
+    setCases(updatedCases as Case[]);
     toast({
       title: "Expediente Actualizado",
       description: `El expediente "${editedCaseData.caseNumber || editingCase.caseNumber}" ha sido actualizado.`,
@@ -81,6 +90,38 @@ export default function AdminDataPage() {
   const handleEditInputChange = (field: keyof Case, value: string | CaseStatus | CaseState) => {
     setEditedCaseData((prev) => ({ ...prev, [field]: value }));
   };
+  
+  const handleBaseTypeFilterChange = (value: CaseStatus | 'todos') => {
+    setBaseTypeFilter(value);
+    setSubtypeFilter('todos'); // Reset subtype filter when base type changes
+  };
+
+  const currentSubtypeOptions = useMemo(() => {
+    if (baseTypeFilter === 'todos' || !availableSubtypesForFilter[baseTypeFilter]) {
+      // Potentially show all subtypes from all base types if 'todos' is selected for base, or none
+      // For simplicity, let's show none if base is 'todos', or only specific ones.
+      let allSubs: string[] = [];
+      if (baseTypeFilter === 'todos') {
+         Object.values(availableSubtypesForFilter).forEach(subs => allSubs.push(...subs));
+         return ['todos', ...new Set(allSubs)]; // Unique subtypes
+      }
+      return ['todos'];
+    }
+    return ['todos', ...availableSubtypesForFilter[baseTypeFilter]];
+  }, [baseTypeFilter]);
+
+  const filteredCases = useMemo(() => {
+    return cases
+      .filter(c => baseTypeFilter === 'todos' || c.status === baseTypeFilter)
+      .filter(c => {
+        if (subtypeFilter === 'todos') return true;
+        // If baseTypeFilter is 'todos', we need to check against all possible subtypes.
+        // Otherwise, c.subtype must match subtypeFilter only if c.status matches baseTypeFilter.
+        if (baseTypeFilter === 'todos') return c.subtype === subtypeFilter;
+        return c.status === baseTypeFilter && c.subtype === subtypeFilter;
+      })
+      .filter(c => stateFilter === 'todos' || c.state === stateFilter);
+  }, [cases, baseTypeFilter, subtypeFilter, stateFilter]);
 
 
   return (
@@ -94,8 +135,54 @@ export default function AdminDataPage() {
 
       <p className="font-body text-muted-foreground mb-6">
         Esta sección permite a los administradores ver y gestionar los datos del sistema.
-        La eliminación de expedientes no está permitida en este prototipo.
+        La eliminación de expedientes no está permitida.
       </p>
+
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <Select value={baseTypeFilter} onValueChange={handleBaseTypeFilterChange}>
+          <SelectTrigger className="w-full sm:w-[200px] font-body">
+            <div className="flex items-center">
+                <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Filtrar por Tipo Base" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos los Tipos Base</SelectItem>
+            {availableBaseTypes.map(type => (
+              <SelectItem key={type} value={type}>{type}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={subtypeFilter} onValueChange={(value) => setSubtypeFilter(value)} disabled={baseTypeFilter !== 'todos' && !availableSubtypesForFilter[baseTypeFilter]?.length}>
+          <SelectTrigger className="w-full sm:w-[200px] font-body">
+             <div className="flex items-center">
+                <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Filtrar por Subtipo" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            {currentSubtypeOptions.map(sub => (
+              <SelectItem key={sub} value={sub}>{sub === 'todos' ? `Todos los Subtipos${baseTypeFilter !== 'todos' ? ` de ${baseTypeFilter}` : ''}` : sub}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        <Select value={stateFilter} onValueChange={(value) => setStateFilter(value as CaseState | 'todos')}>
+          <SelectTrigger className="w-full sm:w-[200px] font-body">
+            <div className="flex items-center">
+                 <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Filtrar por Estado" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos los Estados</SelectItem>
+            {availableStates.map(state => (
+              <SelectItem key={state} value={state}>{state}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       <h2 className="text-2xl font-headline mb-4 text-foreground">Tabla de Expedientes</h2>
       <div className="rounded-md border">
@@ -104,14 +191,14 @@ export default function AdminDataPage() {
             <TableRow>
               <TableHead className="font-body text-center">Estado</TableHead>
               <TableHead className="font-body">Nº Expediente</TableHead>
-              <TableHead className="font-body">Tipo</TableHead>
+              <TableHead className="font-body">Tipo / Subtipo</TableHead>
               <TableHead className="font-body">Cliente</TableHead>
               <TableHead className="font-body">Abogado/a</TableHead>
               <TableHead className="text-right font-body">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {cases.map((caseItem) => (
+            {filteredCases.map((caseItem) => (
               <TableRow key={caseItem.id}>
                 <TableCell className="text-center">
                   {caseItem.state === 'Abierto' ? (
@@ -123,7 +210,7 @@ export default function AdminDataPage() {
                 <TableCell className="font-medium font-body">{caseItem.caseNumber}</TableCell>
                 <TableCell>
                   <Badge className={`${typeColors[caseItem.status]} text-white whitespace-nowrap font-body`}>
-                    {caseTypeTranslations[caseItem.status]}
+                    {caseItem.subtype || caseItem.status}
                   </Badge>
                 </TableCell>
                 <TableCell className="font-body">{caseItem.clientName}</TableCell>
@@ -135,20 +222,24 @@ export default function AdminDataPage() {
                 </TableCell>
               </TableRow>
             ))}
+             {filteredCases.length === 0 && (
+                <TableRow>
+                    <TableCell colSpan={6} className="text-center font-body text-muted-foreground py-6">
+                        No hay expedientes que coincidan con los filtros seleccionados.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
-      {cases.length === 0 && (
-        <p className="text-center font-body text-muted-foreground mt-6">No hay expedientes para mostrar.</p>
-      )}
-
+      
       {editingCase && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-[625px] font-body">
             <DialogHeader>
               <DialogTitle className="font-headline">Editar Expediente: {editingCase.caseNumber}</DialogTitle>
               <DialogDescription>
-                Modifica los detalles del expediente. Los cambios se guardarán localmente en esta demo.
+                Modifica los detalles del expediente. Los cambios se guardarán localmente.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
@@ -180,17 +271,35 @@ export default function AdminDataPage() {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="status" className="text-right">Tipo</Label>
+                <Label htmlFor="status" className="text-right">Tipo Base</Label>
                 <Select
                   value={editedCaseData.status}
                   onValueChange={(value) => handleEditInputChange('status', value as CaseStatus)}
                 >
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Selecciona un tipo" />
+                    <SelectValue placeholder="Selecciona tipo base" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableTypes.map(type => (
-                      <SelectItem key={type} value={type}>{caseTypeTranslations[type]}</SelectItem>
+                    {availableBaseTypes.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="subtype" className="text-right">Subtipo</Label>
+                <Select
+                  value={editedCaseData.subtype || ''}
+                  onValueChange={(value) => handleEditInputChange('subtype', value)}
+                  disabled={!editedCaseData.status || !availableSubtypesForFilter[editedCaseData.status!]?.length}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Selecciona un subtipo (opcional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Ninguno</SelectItem>
+                    {editedCaseData.status && availableSubtypesForFilter[editedCaseData.status!]?.map(sub => (
+                      <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

@@ -1,13 +1,14 @@
 
-export type CaseStatus = "Administrativo" | "Judicial"; // Represents the TYPE of case
+export type CaseStatus = "Administrativo" | "Judicial"; // Represents the BASE TYPE of case
 export type CaseState = "Abierto" | "Cerrado"; // Represents if the case is Open or Closed
 
 export interface Case {
   id: string;
   caseNumber: string;
   clientName: string;
-  status: CaseStatus; // This field stores "Administrativo" or "Judicial"
-  state: CaseState;   // This new field stores "Abierto" or "Cerrado"
+  status: CaseStatus; // This field stores the base type: "Administrativo" or "Judicial"
+  subtype?: string;   // This new optional field will hold names like "Civil", "Laboral", "Sanciones", etc.
+  state: CaseState;
   lastUpdate: string;
   description: string;
   attorneyAssigned?: string;

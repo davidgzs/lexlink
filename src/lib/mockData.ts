@@ -105,7 +105,8 @@ export const mockCases: Case[] = [
     id: 'CASO001',
     caseNumber: 'LEX-2023-001',
     clientName: 'Juan Pérez',
-    status: 'Judicial',
+    status: 'Judicial', // Base type
+    subtype: 'Civil',    // Subtype
     state: 'Abierto',
     lastUpdate: '2023-10-26',
     description: 'Caso de divorcio con litigio, actualmente en fase de presentación de pruebas. Se espera la vista oral en los próximos meses. Requiere seguimiento cercano de documentación aportada por la parte contraria.',
@@ -115,7 +116,8 @@ export const mockCases: Case[] = [
     id: 'CASO002',
     caseNumber: 'LEX-2023-002',
     clientName: 'Roberto "Beto" Sanz',
-    status: 'Administrativo',
+    status: 'Administrativo', // Base type
+    subtype: 'Sanciones',      // Subtype
     state: 'Abierto',
     lastUpdate: '2023-11-15',
     description: 'Reclamación administrativa por multa de tráfico indebida. Se han presentado alegaciones y se está a la espera de resolución por parte del organismo competente.',
@@ -125,7 +127,8 @@ export const mockCases: Case[] = [
     id: 'CASO003',
     caseNumber: 'LEX-2023-003',
     clientName: 'Juan Pérez',
-    status: 'Judicial',
+    status: 'Judicial', // Base type
+    // No subtype specified for this one, will show as "Judicial"
     state: 'Cerrado',
     lastUpdate: '2023-09-01',
     description: 'Demanda por incumplimiento contractual. Sentencia favorable obtenida y ejecución completada. Caso archivado.',
@@ -135,7 +138,8 @@ export const mockCases: Case[] = [
     id: 'CASO004',
     caseNumber: 'LEX-2024-001',
     clientName: 'Carlos Fernández',
-    status: 'Judicial',
+    status: 'Judicial', // Base type
+    subtype: 'Laboral',   // Subtype
     state: 'Abierto',
     lastUpdate: '2024-03-10',
     description: 'Procedimiento de desahucio por impago de alquiler. Se ha notificado la demanda al inquilino y se está a la espera de la fecha para el lanzamiento.',
@@ -145,7 +149,8 @@ export const mockCases: Case[] = [
     id: 'CASO005',
     caseNumber: 'LEX-2024-002',
     clientName: 'Diana Jiménez',
-    status: 'Administrativo',
+    status: 'Administrativo', // Base type
+    subtype: 'Contratos',     // Subtype
     state: 'Cerrado',
     lastUpdate: '2024-02-20',
     description: 'Solicitud de licencia de apertura para local comercial. Licencia concedida y documentación finalizada.',

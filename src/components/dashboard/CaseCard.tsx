@@ -9,20 +9,14 @@ interface CaseCardProps {
   caseItem: Case;
 }
 
-// Icons for CaseStatus (Type: Judicial/Administrative)
-const caseTypeIcons: Record<CaseStatus, React.ElementType> = {
+const caseBaseTypeIcons: Record<CaseStatus, React.ElementType> = {
   Administrativo: FileText,
   Judicial: Gavel,
 };
 
-// caseTypeTranslations is no longer needed as caseItem.status will be Spanish
-// const caseTypeTranslations: Record<CaseStatus, string> = {
-//   Administrativo: "Administrativo",
-//   Judicial: "Judicial",
-// };
-
 export default function CaseCard({ caseItem }: CaseCardProps) {
-  const TypeIcon = caseTypeIcons[caseItem.status];
+  const TypeIcon = caseBaseTypeIcons[caseItem.status]; // Icon based on base type
+  const displayType = caseItem.subtype ? `${caseItem.status} - ${caseItem.subtype}` : caseItem.status;
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow flex flex-col h-full">
@@ -40,7 +34,7 @@ export default function CaseCard({ caseItem }: CaseCardProps) {
       <CardContent className="flex-grow">
         <div className="flex items-center text-sm text-muted-foreground mb-2">
           <TypeIcon className="mr-1 h-4 w-4" />
-          <span>Tipo: {caseItem.status}</span> {/* Directly use caseItem.status */}
+          <span>Tipo: {displayType}</span>
         </div>
         <p className="font-body text-sm text-muted-foreground mb-2 line-clamp-3">{caseItem.description}</p>
         <p className="font-body text-xs text-muted-foreground">Última Actualización: {new Date(caseItem.lastUpdate).toLocaleDateString('es-ES')}</p>
