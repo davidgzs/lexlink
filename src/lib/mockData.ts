@@ -108,7 +108,7 @@ export const mockCases: Case[] = [
     status: 'Judicial',
     state: 'Abierto',
     lastUpdate: '2023-10-26',
-    description: 'Caso de divorcio contencioso, actualmente en fase de presentación de pruebas. Se espera la vista oral en los próximos meses. Requiere seguimiento cercano de documentación aportada por la parte contraria.',
+    description: 'Caso de divorcio con litigio, actualmente en fase de presentación de pruebas. Se espera la vista oral en los próximos meses. Requiere seguimiento cercano de documentación aportada por la parte contraria.',
     attorneyAssigned: 'Juana García',
   },
   {
@@ -242,7 +242,7 @@ export const mockMessages: Message[] = [
     conversationId: 'CONV001',
     senderId: mockUsers.find(u => u.name === 'Juana García')?.id || 'attorney_juana_garcia',
     senderName: 'Juana García',
-    content: 'Hola Juan, te confirmo nuestra cita para el próximo martes a las 10:00 para revisar la documentación.',
+    content: 'Hola Juan, te confirmo que nuestra cita para el próximo martes es a las 10:00 para revisar toda la documentación.',
     timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // 10 minutes ago
   },
   {
@@ -274,7 +274,7 @@ export const mockMessages: Message[] = [
     conversationId: 'CONV003',
     senderId: mockUsers.find(u => u.name === 'Juana García')?.id || 'attorney_juana_garcia',
     senderName: 'Juana García',
-    content: 'Estimado Carlos, le informo que hemos recibido respuesta del juzgado.',
+    content: 'Estimado Carlos, le informo que ya hemos recibido respuesta del juzgado.',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 25).toISOString(), // 25 hours ago
   },
   {
@@ -308,7 +308,7 @@ export const mockDocuments: Document[] = [
   },
   {
     id: 'DOC003',
-    name: 'Alegaciones Multa.pdf',
+    name: 'Alegaciones a Multa.pdf',
     caseId: 'CASO002',
     status: 'Completado',
     uploadedDate: '2023-11-01',
@@ -317,7 +317,7 @@ export const mockDocuments: Document[] = [
   },
   {
     id: 'DOC004',
-    name: 'Sentencia Divorcio.pdf',
+    name: 'Sentencia de Divorcio.pdf',
     caseId: 'CASO003',
     status: 'Completado',
     uploadedDate: '2023-08-20',
@@ -326,7 +326,7 @@ export const mockDocuments: Document[] = [
   },
   {
     id: 'DOC005',
-    name: 'Escrito de Demanda Desahucio.pdf',
+    name: 'Escrito de Demanda de Desahucio.pdf',
     caseId: 'CASO004',
     status: 'Requiere Revisión',
     uploadedDate: '2024-03-05',
